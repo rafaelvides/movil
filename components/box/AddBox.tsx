@@ -8,7 +8,6 @@ import {
   ToastAndroid,
   View,
   StyleSheet,
-  Button,
 } from "react-native";
 import { get_point_sale_Id, save_employee_id } from "@/plugins/async_storage";
 import React, { useContext, useEffect, useState } from "react";
@@ -20,6 +19,10 @@ import { useFocusEffect } from "expo-router";
 import { IEmployee } from "@/types/employee/employee.types";
 import { useAuthStore } from "@/store/auth.store";
 import { ThemeContext } from "@/hooks/useTheme";
+import Input from "../Global/components_app/Input";
+import Button from "../Global/components_app/Button";
+import Card from "../Global/components_app/Card";
+import stylesGlobals from "../Global/styles/StylesAppComponents";
 
 const AddBox = ({ closeModal }: { closeModal: () => void }) => {
   const [isFocus, setIsFocus] = useState(false);
@@ -60,132 +63,143 @@ const AddBox = ({ closeModal }: { closeModal: () => void }) => {
 
   return (
     <>
-      <View
+      <Card
         style={{
-          width: 300,
-          height: 260,
+          width: stylesGlobals.styleCard.width,
+          height: 350,
+          justifyContent: "center",
+          alignItems: "center",
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
+        <Text style={{ fontSize: 18, marginBottom: 5, textAlign: "center" }}>
+          Abrir una caja
+        </Text>
+        <Formik
+          initialValues={{
+            start: 0,
           }}
+          validationSchema={validationSchema}
+          onSubmit={handleSubmit}
         >
-          <Text style={{ fontSize: 18, marginBottom: 5 }}>Abrir una caja</Text>
-          <Formik
-            initialValues={{
-              start: 0,
-            }}
-            validationSchema={validationSchema}
-            onSubmit={handleSubmit}
-          >
-            {({ values, errors, touched, handleChange, handleSubmit }) => (
-              <>
-                <View
-                  style={{
-                    justifyContent: "center",
-                    width: "100%",
-                    marginTop: 20,
-                  }}
-                >
-                  <View style={{ width: "100%" }}>
-                    <Text>
-                      Monto inicial
-                      <Text
-                        style={{
-                          fontSize: 18,
-                          color: "#EF4444",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        *
-                      </Text>
-                    </Text>
-                    <View
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleSubmit,
+            handleBlur,
+          }) => (
+            <>
+              <View
+                style={{
+                  justifyContent: "center",
+                  width: "100%",
+                  marginTop: 20,
+                }}
+              >
+                <View style={{ width: "100%" }}>
+                  <Text>
+                    Monto inicial
+                    <Text
                       style={{
-                        position: "relative",
-                        width: "100%",
-                        height: 50,
-                        justifyContent: "center",
-                        marginBottom: 15,
+                        fontSize: 18,
+                        color: "#EF4444",
+                        fontWeight: "bold",
                       }}
                     >
-                      <Text style={{ position: "absolute", left: 10 }}>$</Text>
-                    </View>
-
-                    {errors.start && touched.start && (
-                      <Text style={{ color: "red", marginTop: 5 }}>
-                        {errors.start}
-                      </Text>
-                    )}
-                  </View>
-                  <View style={{ width: "100%" }}>
-                    <Text style={{ fontWeight: "500" }}>
-                      Empleado para venta
+                      *
                     </Text>
-                    <SafeAreaView
-                      style={{
-                        width: "100%",
-                        marginTop: 10,
-                        borderWidth: 1,
-                        borderColor: "#D1D5DB",
-                        padding: 12,
-                        borderRadius: 5,
-                      }}
-                    >
-                      <Dropdown
-                        style={[isFocus && { borderColor: "blue" }]}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        inputSearchStyle={styles.inputSearchStyle}
-                        iconStyle={styles.iconStyle}
-                        data={employee_list}
-                        itemTextStyle={{
-                          fontSize: 16,
-                        }}
-                        search
-                        maxHeight={250}
-                        labelField="fullName"
-                        valueField="id"
-                        placeholder={!isFocus ? "Selecciona un item " : "..."}
-                        searchPlaceholder="Escribe para buscar..."
-                        value={employee}
-                        onFocus={() => setIsFocus(true)}
-                        onBlur={() => setIsFocus(false)}
-                        onChange={(item) => {
-                          setEmployee(item);
-                          setIsFocus(false);
-                        }}
-                        renderLeftIcon={() => (
-                          <AntDesign
-                            style={styles.icon}
-                            color={isFocus ? "blue" : "black"}
-                            name="Safety"
-                            size={20}
-                          />
-                        )}
-                      />
-                    </SafeAreaView>
-                  </View>
+                  </Text>
                   <View
                     style={{
-                      marginBottom: 20,
-                      padding: 20,
+                      position: "relative",
+                      width: "100%",
+                      height: 50,
+                      justifyContent: "center",
+                      marginBottom: 15,
                     }}
                   >
-                    <Button
-                      title="Guardar"
-                      color="#f194ff"
-                      onPress={() => handleSubmit()}
+                    <Input
+                      placeholder="00.00"
+                      onChangeText={handleChange("start")}
+                      keyboardType="numeric"
+                      values={String(values.start)}
+                      handleBlur={handleBlur("start")}
+                      icon="currency-usd"
                     />
                   </View>
+
+                  {errors.start && touched.start && (
+                    <Text style={{ color: "red", marginTop: 5 }}>
+                      {errors.start}
+                    </Text>
+                  )}
                 </View>
-              </>
-            )}
-          </Formik>
-        </View>
-      </View>
+                <View style={{ width: "100%" }}>
+                  <Text style={{ fontWeight: "500" }}>Empleado para venta</Text>
+                  <SafeAreaView
+                    style={{
+                      width: "100%",
+                      marginTop: 10,
+                      borderWidth: 1,
+                      borderColor: "#D1D5DB",
+                      padding: 12,
+                      borderRadius: 5,
+                    }}
+                  >
+                    <Dropdown
+                      style={[isFocus && { borderColor: "blue" }]}
+                      placeholderStyle={styles.placeholderStyle}
+                      selectedTextStyle={styles.selectedTextStyle}
+                      inputSearchStyle={styles.inputSearchStyle}
+                      iconStyle={styles.iconStyle}
+                      data={employee_list}
+                      itemTextStyle={{
+                        fontSize: 16,
+                      }}
+                      search
+                      maxHeight={250}
+                      labelField="fullName"
+                      valueField="id"
+                      placeholder={!isFocus ? "Selecciona un item " : "..."}
+                      searchPlaceholder="Escribe para buscar..."
+                      value={employee}
+                      onFocus={() => setIsFocus(true)}
+                      onBlur={() => setIsFocus(false)}
+                      onChange={(item) => {
+                        setEmployee(item);
+                        setIsFocus(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={styles.icon}
+                          color={isFocus ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
+                  </SafeAreaView>
+                </View>
+                <View
+                  style={{
+                    width: "auto",
+                    marginTop: 5,
+                    marginBottom: 5,
+                  }}
+                >
+                  <Button
+                    withB={290}
+                    onPress={() => handleSubmit()}
+                    Title="Ingresar"
+                    color={theme.colors.dark}
+                  />
+                </View>
+              </View>
+            </>
+          )}
+        </Formik>
+      </Card>
     </>
   );
 };

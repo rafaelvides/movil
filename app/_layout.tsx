@@ -176,14 +176,6 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
                   initialRouteName={is_authenticated ? "home" : "login"}
                   drawerContent={(props) => <CustomDrawer {...props} />}
                 >
-                  {/* <Drawer.Screen
-                    name="login"
-                    options={{
-                      drawerLabel: "Login",
-                      title: "Login",
-                      headerShown: false,
-                    }}
-                  /> */}
                   <Drawer.Screen
                     name="home"
                     options={{

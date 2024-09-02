@@ -168,7 +168,13 @@ const login = () => {
                             />
                           </View>
                           {errors.userName && touched.userName && (
-                            <Text style={{ color: "red", left: "6%", marginBottom: 10 }}>
+                            <Text
+                              style={{
+                                color: "red",
+                                left: "6%",
+                                marginBottom: 10,
+                              }}
+                            >
                               {errors.userName}
                             </Text>
                           )}
@@ -203,6 +209,7 @@ const login = () => {
                               aria-errormessage="inputError"
                             /> */}
                             <TextInput
+                              secureTextEntry={keyVisualizate}
                               style={styles.input}
                               onChangeText={handleChange("password")}
                               onBlur={handleBlur("password")}
@@ -255,7 +262,7 @@ const login = () => {
                           >
                             <Button
                               withB={280}
-                              onPress={handleSubmit}
+                              onPress={() => handleSubmit()}
                               Title="Ingresar"
                               color="#1359"
                             />

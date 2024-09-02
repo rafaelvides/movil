@@ -125,7 +125,6 @@ function home() {
           <View style={styles.centeredView}>
             <Modal visible={showModalClose} animationType="slide">
               <View style={styles.centeredView}>
-                <View style={styles.modalView}>
                   {isVisible ? (
                     <OptionsCloseBox
                       box={box}
@@ -136,7 +135,6 @@ function home() {
                   ) : (
                     <AddBox closeModal={() => setIsShowModalClose(false)} />
                   )}
-                </View>
               </View>
             </Modal>
           </View>
@@ -154,22 +152,7 @@ const styles = StyleSheet.create({
     zIndex: 20,
     backgroundColor: "rgba(80, 80, 80, 0.8)",
   },
-  modalView: {
-    margin: 20,
-    backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    zIndex: 10,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
+
   button: {
     borderRadius: 20,
     padding: 10,
