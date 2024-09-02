@@ -172,7 +172,8 @@ const login = () => {
                               style={{
                                 color: "red",
                                 left: "6%",
-                                marginBottom: 10,
+                                top: -10,
+                                marginBottom: 5,
                               }}
                             >
                               {errors.userName}
@@ -248,6 +249,7 @@ const login = () => {
                               style={{
                                 color: "red",
                                 left: "6%",
+                                top: -10,
                                 marginBottom: 10,
                               }}
                             >
@@ -379,7 +381,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 50,
     justifyContent: "center",
-    marginBottom: 2,
+    marginBottom: 10,
   },
   icon: {
     position: "absolute",

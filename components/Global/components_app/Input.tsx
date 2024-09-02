@@ -1,6 +1,5 @@
 import {
   StyleSheet,
-  Text,
   View,
   TextInput,
   NativeSyntheticEvent,
@@ -17,9 +16,11 @@ const Input = ({
   placeholder,
   keyboardType,
   icon,
+  defaultValue,
 }: {
-  values: string;
+  values?: string;
   placeholder?: string;
+  defaultValue?: string;
   icon: string;
   keyboardType?: KeyboardTypeOptions | undefined;
   onChangeText?: (text: string) => void | undefined;
@@ -37,6 +38,7 @@ const Input = ({
       />
       <TextInput
         //   secureTextEntry
+        defaultValue={defaultValue}
         style={styles.input}
         onChangeText={onChangeText}
         value={values}

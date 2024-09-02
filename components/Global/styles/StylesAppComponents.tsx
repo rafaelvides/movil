@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 
- const stylesGlobals = StyleSheet.create({
+const stylesGlobals = StyleSheet.create({
   //Spinners
   viewSpinnerInit: {
     flex: 1,
@@ -12,6 +12,12 @@ import { StyleSheet } from "react-native";
   //====================================
   safeAreaViewStyle: {
     flex: 1,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "white",
+    paddingHorizontal: 8,
+  },
+  safeAreaForm: {
     width: "100%",
     height: "100%",
     backgroundColor: "white",
@@ -52,6 +58,33 @@ import { StyleSheet } from "react-native";
     color: "#4B5563",
     marginLeft: 60,
   },
-  //=====================================
+  //Input styles===============================
+  viewInput: {
+    position: "relative",
+    width: "100%",
+    height: 50,
+    justifyContent: "center",
+    marginBottom: 15,
+  },
+  textInput: {
+    marginLeft: "3%",
+    fontWeight: "500",
+    marginBottom: 5,
+  },
+  //Button======================================
+  viewBotton: {
+    width: "auto",
+    marginTop: 5,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 5,
+  },
+  ViewGroupButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+    width: "100%",
+  },
+  //============================================
 });
-export default stylesGlobals
+export default stylesGlobals;

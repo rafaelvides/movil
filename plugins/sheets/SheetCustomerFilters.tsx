@@ -1,4 +1,8 @@
-// import { Input } from "@/~/components/ui/input";
+import Button from "@/components/Global/components_app/Button";
+import Input from "@/components/Global/components_app/Input";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import { ThemeContext } from "@/hooks/useTheme";
+import { useContext } from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
 
@@ -6,6 +10,8 @@ const SheetCustomerFilters = ({
   sheetId,
   payload,
 }: SheetProps<"customer-filters-sheet">) => {
+  const { theme } = useContext(ThemeContext);
+
   return (
     <>
       <ActionSheet
@@ -27,36 +33,35 @@ const SheetCustomerFilters = ({
               width: "100%",
             }}
           >
-            <Text style={{ marginLeft: "3%", fontWeight: "500" }}>Nombre</Text>
+            <Text style={stylesGlobals.textInput}>Nombre</Text>
             <View style={styles.inputWrapper}>
-             
+              <Input
+                placeholder="Nombre del cliente..."
+                onChangeText={payload?.onChangeValueName}
+                defaultValue={payload?.name}
+                icon="account"
+              />
             </View>
-            <Text style={{ marginLeft: "3%", fontWeight: "500" }}>Correo</Text>
+            <Text style={stylesGlobals.textInput}>Correo</Text>
             <View style={styles.inputWrapper}>
-             
+              <Input
+                placeholder="example@gmail.com"
+                defaultValue={payload?.correo}
+                onChangeText={payload?.onChangeValueCorreo}
+                icon="gmail"
+              />
             </View>
           </View>
-          <Pressable
-            onPress={() => payload?.handleConfirm()}
-            style={{
-              width: "100%",
-              padding: 12,
-              borderRadius: 4,
-              backgroundColor: "#1F91DC",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 10,
-            }}
+          <View
+            style={stylesGlobals.viewBotton}
           >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-            >
-              Filtrar
-            </Text>
-          </Pressable>
+            <Button
+              withB={390}
+              onPress={() => payload?.handleConfirm()}
+              Title="Filtrar"
+              color={theme.colors.dark}
+            />
+          </View>
         </View>
       </ActionSheet>
     </>

@@ -5,8 +5,8 @@ import {
   ManyToOne,
   RelationId,
 } from "typeorm/browser";
-import { Products } from "./product.entity";
-@Entity("branch-products", { name: "branch-products" })
+import { Product } from "./product.entity";
+@Entity("branch-products")
 export class BranchProducts {
   @PrimaryGeneratedColumn()
   id!: number;
@@ -38,8 +38,8 @@ export class BranchProducts {
   @Column({ type: "int", default: 0 })
   supplierId!: number;
 
-  @ManyToOne(() => Products)
-  product!: Products;
+  @ManyToOne(() => Product)
+  product!: Product;
 
   @RelationId((branchProduct: BranchProducts) => branchProduct.product)
   productId!: number;

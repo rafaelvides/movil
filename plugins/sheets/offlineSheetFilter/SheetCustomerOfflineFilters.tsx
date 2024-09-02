@@ -1,13 +1,19 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
 // import { Input } from "@/~/components/ui/input";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import SwitchToggle from "@imcarlosguerrero/react-native-switch-toggle";
+import Input from "@/components/Global/components_app/Input";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const SheetCustomerOfflineFilters = ({
   sheetId,
   payload,
 }: SheetProps<"customer-offline-filters-sheet">) => {
+  const { theme } = useContext(ThemeContext);
+
   const [checked, setChecked] = useState(payload?.esContribuyente!);
 
   return (
@@ -31,7 +37,7 @@ const SheetCustomerOfflineFilters = ({
           }}
         >
           <Text style={{ marginLeft: "3%", fontWeight: "500" }}>Nombre</Text>
-          <View style={styles.inputWrapper}>
+          <View style={stylesGlobals.safeAreaViewStyle}>
             {/* <Input
               className="rounded-3xl"
               style={styles.input}
@@ -41,11 +47,17 @@ const SheetCustomerOfflineFilters = ({
               aria-labelledby="inputLabel"
               aria-errormessage="inputError"
             /> */}
+            <Input
+              placeholder="Nombre del cliente..."
+              onChangeText={payload?.onChangeValueName}
+              defaultValue={payload?.name}
+              icon="currency-usd"
+            />
           </View>
           <Text style={{ marginLeft: "3%", fontWeight: "500" }}>
             Num Documento
           </Text>
-          <View style={styles.inputWrapper}>
+          <View style={stylesGlobals.safeAreaViewStyle}>
             {/* <Input
               className="rounded-3xl"
               style={styles.input}
@@ -55,6 +67,12 @@ const SheetCustomerOfflineFilters = ({
               aria-labelledby="inputLabel"
               aria-errormessage="inputError"
             /> */}
+            <Input
+              placeholder="000000000/-0"
+              onChangeText={payload?.onChangeValueNuD}
+              defaultValue={payload?.numDocumento}
+              icon="currency-usd"
+            />
           </View>
         </View>
         <View
@@ -100,27 +118,14 @@ const SheetCustomerOfflineFilters = ({
             />
           </View>
         </View>
-        <Pressable
-          onPress={() => payload?.handleConfirm(checked)}
-          style={{
-            width: "100%",
-            padding: 12,
-            borderRadius: 4,
-            backgroundColor: "#1F91DC",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 10,
-          }}
-        >
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: "bold",
-            }}
-          >
-            Filtrar
-          </Text>
-        </Pressable>
+        <View style={stylesGlobals.viewBotton}>
+          <Button
+            withB={390}
+            onPress={() => payload?.handleConfirm(checked)}
+            Title="Filtrar"
+            color={theme.colors.dark}
+          />
+        </View>
       </View>
     </ActionSheet>
   );
@@ -129,13 +134,6 @@ const SheetCustomerOfflineFilters = ({
 export default SheetCustomerOfflineFilters;
 
 const styles = StyleSheet.create({
-  inputWrapper: {
-    position: "relative",
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    marginBottom: 15,
-  },
   icon: {
     position: "absolute",
     right: 20,

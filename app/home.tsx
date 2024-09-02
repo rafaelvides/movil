@@ -1,13 +1,12 @@
 import AddBox from "@/components/box/AddBox";
 import OptionsCloseBox from "@/components/box/OptionsCloseBox";
-import Button from "@/components/Global/components_app/Button";
+import Card from "@/components/Global/components_app/Card";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
 import { get_point_sale_Id } from "@/plugins/async_storage";
-import { return_token } from "@/plugins/secure_store";
 import { verify_box } from "@/services/box.service";
 import { get_theme_by_transmitter } from "@/services/personalization.service";
 import { IBox } from "@/types/box/box.types";
-import { useFocusEffect } from "expo-router";
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -122,22 +121,29 @@ function home() {
           }}
         >
           <Text>Welcome home!</Text>
-          <View style={styles.centeredView}>
-            <Modal visible={showModalClose} animationType="slide">
-              <View style={styles.centeredView}>
-                  {isVisible ? (
-                    <OptionsCloseBox
-                      box={box}
-                      closeModal={() => {
-                        setIsShowModalClose(false);
-                      }}
-                    />
-                  ) : (
-                    <AddBox closeModal={() => setIsShowModalClose(false)} />
-                  )}
-              </View>
-            </Modal>
-          </View>
+          <Modal visible={showModalClose} animationType="slide">
+            <View style={styles.centeredView}>
+              <Card
+                style={{
+                  width: stylesGlobals.styleCard.width,
+                  height: 340,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {isVisible ? (
+                  <OptionsCloseBox
+                    box={box}
+                    closeModal={() => {
+                      setIsShowModalClose(false);
+                    }}
+                  />
+                ) : (
+                  <AddBox closeModal={() => setIsShowModalClose(false)} />
+                )}
+              </Card>
+            </View>
+          </Modal>
         </View>
       </ScrollView>
     </>
@@ -151,27 +157,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     zIndex: 20,
     backgroundColor: "rgba(80, 80, 80, 0.8)",
-  },
-
-  button: {
-    borderRadius: 20,
-    padding: 10,
-    elevation: 2,
-  },
-  buttonOpen: {
-    backgroundColor: "#F194FF",
-  },
-  buttonClose: {
-    backgroundColor: "#2196F3",
-  },
-  textStyle: {
-    color: "white",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
   },
 });
 

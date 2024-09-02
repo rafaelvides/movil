@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { Dispatch, SetStateAction, useContext } from "react";
 import { ThemeContext } from "@/hooks/useTheme";
+import Button from "@/components/Global/components_app/Button";
 
 const ButtonDual = ({
   setTypeClient,
@@ -14,7 +15,6 @@ const ButtonDual = ({
   isModalButtons: boolean;
 }) => {
   const { theme } = useContext(ThemeContext);
-  console.log(isModalButtons);
   const handleClose = () => {
     setIsModalButtons(false);
   };
@@ -22,16 +22,27 @@ const ButtonDual = ({
   return (
     <View>
       {isModalButtons === true && (
-        <View
-          style={{
-            flexDirection: "row",
-            width: "100%",
-            justifyContent: "center",
-            gap: 30,
-          }}
-        >
-        
-         
+        <View style={styles.viewBotton}>
+          <Button
+            withB={160}
+            onPress={() => {
+              handleClose();
+              openModal();
+              setTypeClient("normal");
+            }}
+            Title="Cliente Normal"
+            color={theme.colors.dark}
+          />
+          <Button
+            withB={190}
+            onPress={() => {
+              handleClose();
+              openModal();
+              setTypeClient("contribuyente");
+            }}
+            Title="Cliente contribuyente"
+            color={theme.colors.dark}
+          />
         </View>
       )}
     </View>
@@ -40,4 +51,11 @@ const ButtonDual = ({
 
 export default ButtonDual;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  viewBotton: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "center",
+    gap: 30,
+  },
+});

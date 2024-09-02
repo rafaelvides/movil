@@ -95,10 +95,10 @@ const of_customers = () => {
                     handleClick={() => handleSaveClients()}
                     buttonColor={theme.colors.third}
                     iconName="download"
-                    width={42}
-                    height={42}
+                    width={40}
+                    height={40}
                     left={10}
-                    size={30}
+                    size={25}
                     top={0}
                   />
                 </View>

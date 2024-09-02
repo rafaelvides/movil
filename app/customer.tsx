@@ -25,13 +25,15 @@ import {
   SafeAreaView,
   Text,
   View,
-  StyleSheet,
   ScrollView,
 } from "react-native";
 import { SheetManager } from "react-native-actions-sheet";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Card from "@/components/Global/components_app/Card";
+import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
+import Button from "@/components/Global/components_app/Button";
 
 const customer = () => {
-  const [showDetailContributor, setShowDetailContributor] = useState(false);
   const [showDetailNormal, setShowDetailNormal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [customerId, setCustomerId] = useState(0);
@@ -192,161 +194,79 @@ const customer = () => {
     setSelectedCustomer(undefined);
     setSelectedTitle("");
     setShowDetailNormal(false);
-    setShowDetailContributor(false);
   };
-
-  useEffect(() => {}, [typeClient]);
 
   return (
     <>
       <StatusBar style="dark" />
       {loading ? (
         <>
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#fff",
-              zIndex: 1000,
-            }}
-          >
+          <View style={stylesGlobals.viewSpinnerInit}>
             <SpinnerInitPage />
           </View>
         </>
       ) : (
         <>
-          <SafeAreaView
-            style={{
-              flex: 1,
-              width: "100%",
-              height: "100%",
-              backgroundColor: "white",
-              paddingHorizontal: 8,
-            }}
-          >
-            {/* <Pressable
-            onPress={() =>
-              SheetManager.show("customer-filters-sheet", {
-                payload: {
-                  onChangeValueName(text) {
-                    setName(text);
-                  },
-                  name: name,
-                  onChangeValueCorreo(text) {
-                    setCorreo(text);
-                  },
-                  correo: correo,
-                  handleConfirm() {
-                    setRefreshing(true);
-                    SheetManager.hide("customer-filters-sheet");
-                  },
-                },
-              })
-            }
-            style={styles.filter}
-          >
-            <Text
-              style={{
-                color: "#718096",
-                fontSize: 16,
-              }}
-            >
-              Filtros disponibles
-            </Text>
-            <Pressable
-              style={{
-                position: "absolute",
-                right: 20,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="filter"
-                size={25}
-                color="#607274"
-              />
-            </Pressable>
-          </Pressable> */}
-            <View style={styles.filter}>
-              <View
-                style={{
-                  position: "absolute",
-                  justifyContent: "space-between",
-                  gap: 100,
-                }}
-              >
-                <AnimatedButton
-                  handleClick={() => {
-                    SheetManager.show("customer-filters-sheet", {
-                      payload: {
-                        onChangeValueName(text) {
-                          setName(text);
-                        },
-                        name: name,
-                        onChangeValueCorreo(text) {
-                          setCorreo(text);
-                        },
-                        correo: correo,
-                        handleConfirm() {
-                          setRefreshing(true);
-                          SheetManager.hide("customer-filters-sheet");
-                        },
-                      },
-                    });
-                  }}
-                  iconName="filter"
-                  buttonColor={theme.colors.third}
-                  width={42}
-                  height={42}
-                  right={100}
-                  size={30}
-                  top={0}
-                />
-                <AnimatedButton
-                  handleClick={() => {
-                    isModalButtons
-                      ? setIsModalButtons(false)
-                      : setIsModalButtons(true);
-                  }}
-                  iconName="plus"
-                  buttonColor={theme.colors.third}
-                  width={42}
-                  height={42}
-                  right={100}
-                  size={30}
-                  left={100}
-                  top={0}
-                />
-              </View>
-            </View>
-
-            <View style={{ top: 0 }}>
-              <ButtonDual
-                setIsModalButtons={setIsModalButtons}
-                isModalButtons={isModalButtons}
-                setTypeClient={setTypeClient}
-                openModal={() => setIsOpen(true)}
-              />
-            </View>
+          <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
             {is_loading ? (
-              <View
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <SpinLoading is_showing={is_loading} />
-              </View>
+              <SpinLoading is_showing={is_loading} />
             ) : (
               <>
+                <View style={stylesGlobals.filter}>
+                  <AnimatedButton
+                    handleClick={() => {
+                      SheetManager.show("customer-filters-sheet", {
+                        payload: {
+                          onChangeValueName(text) {
+                            setName(text);
+                          },
+                          name: name,
+                          onChangeValueCorreo(text) {
+                            setCorreo(text);
+                          },
+                          correo: correo,
+                          handleConfirm() {
+                            setRefreshing(true);
+                            SheetManager.hide("customer-filters-sheet");
+                          },
+                        },
+                      });
+                    }}
+                    iconName="filter"
+                    buttonColor={theme.colors.third}
+                    width={40}
+                    height={40}
+                    right={42}
+                    left={10}
+                    size={25}
+                    top={0}
+                  />
+                  <AnimatedButton
+                    handleClick={() => {
+                      isModalButtons
+                        ? setIsModalButtons(false)
+                        : setIsModalButtons(true);
+                    }}
+                    iconName="plus"
+                    buttonColor={theme.colors.third}
+                    width={42}
+                    height={42}
+                    right={10}
+                    size={25}
+                    top={0}
+                  />
+                </View>
+
+                <View style={{ top: 0 }}>
+                  <ButtonDual
+                    setIsModalButtons={setIsModalButtons}
+                    isModalButtons={isModalButtons}
+                    setTypeClient={setTypeClient}
+                    openModal={() => setIsOpen(true)}
+                  />
+                </View>
+
                 <ScrollView
-                  style={{
-                    flex: 1,
-                    marginTop: 5,
-                    marginBottom: 5,
-                  }}
                   refreshControl={
                     <RefreshControl
                       refreshing={refreshing}
@@ -354,21 +274,100 @@ const customer = () => {
                     />
                   }
                 >
-                  <View
-                    style={{
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
+                  <View style={stylesGlobals.viewScroll}>
                     <>
                       {customers &&
                         customers.map((customer, index) => (
-                          <></>
+                          <Card key={index} style={stylesGlobals.styleCard}>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.secondary}
+                                name="account"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {customer.nombre}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.third}
+                                name="phone"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {customer.telefono}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.third}
+                                name="map-marker"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {`${customer.direccion.nombreDepartamento}/${customer.direccion.nombreMunicipio}`}
+                              </Text>
+                            </View>
+                            <View style={[stylesGlobals.ViewCard]}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.dark}
+                                name="mail"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+
+                              <Text style={[stylesGlobals.textCard]}>
+                                {customer.correo}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewGroupButton}>
+                              <ButtonForCard
+                                onPress={() =>
+                                  handleChangeCustomer(customer, "edit")
+                                }
+                                icon={"pencil"}
+                              />
+
+                              <ButtonForCard
+                                onPress={() => {
+                                  handleChangeDetailsCustomer(customer);
+                                  setShowDetailNormal(true);
+                                }}
+                                color={theme.colors.third}
+                                icon={"card-text"}
+                              />
+
+                              <ButtonForCard
+                                onPress={() => {
+                                  setIsModalCustomer(true);
+                                  setCustomerId(customer.id);
+                                }}
+                                color={theme.colors.danger}
+                                icon={"delete"}
+                              />
+                            </View>
+                          </Card>
                         ))}
                     </>
                   </View>
                 </ScrollView>
-                {customers.length > 0 && (
+                {customers.length >= 5 && (
                   <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}
@@ -381,15 +380,14 @@ const customer = () => {
           <Modal visible={isOpen}>
             <View
               style={{
-                backgroundColor: "white",
                 padding: 20,
-                borderRadius: 10,
                 alignItems: "center",
+                justifyContent: "center",
                 flexDirection: "row",
               }}
             >
               <Text
-                style={{ fontWeight: "bold", marginLeft: 130, marginRight: 80 }}
+                style={{ fontWeight: "bold", textAlign: "center", marginTop: 20, marginBottom: 15 }}
               >
                 {selectedCustomer
                   ? selectedTitle !== ""
@@ -397,14 +395,22 @@ const customer = () => {
                     : "Editar cliente"
                   : "Nuevo cliente"}
               </Text>
-             
+              <View style={{ position: "absolute", right: 0, top: -5 }}>
+                <ButtonForCard
+                  onPress={() => {
+                    clearClose();
+                    setIsOpen(false);
+                  }}
+                  color={"white"}
+                  icon={"close"}
+                  iconColor="black"
+                  sizeIcon={26}
+                />
+              </View>
             </View>
             <View
               style={{
-                backgroundColor: "white",
                 padding: 10,
-                borderRadius: 10,
-                alignItems: "center",
               }}
             >
               {typeClient === "normal" ? (
@@ -466,27 +472,3 @@ const customer = () => {
   );
 };
 export default customer;
-
-const styles = StyleSheet.create({
-  filter: {
-    justifyContent: "center",
-    width: "100%",
-    paddingLeft: 20,
-    marginTop: 15,
-    borderBottomWidth: 0.5,
-    height: 56,
-    alignItems: "center",
-  },
-  card: {
-    height: "auto",
-    marginBottom: 25,
-    padding: 5,
-    width: "95%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 10,
-  },
-});

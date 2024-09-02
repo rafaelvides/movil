@@ -17,7 +17,7 @@ import "@/plugins/sheets";
 import { NetworkProvider, useIsConnected } from "react-native-offline";
 import { es, registerTranslation } from "react-native-paper-dates";
 import ThemeProvider, { ThemeContext } from "@/hooks/useTheme";
-// import { useDataBaseInitialize } from "@/hooks/useTypeOrm";
+import { useDataBaseInitialize } from "@/hooks/useTypeOrm";
 import { createSocket } from "@/hooks/useSocket";
 registerTranslation("es", es);
 
@@ -27,7 +27,7 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
-  // const { ready } = useDataBaseInitialize();
+  const { ready } = useDataBaseInitialize();
 
   useEffect(() => {
     if (loaded) {
@@ -44,23 +44,26 @@ export default function RootLayout() {
     <ToastProvider>
       <NetworkProvider>
         <StatusBar style="light" />
-       
+        {ready ? (
           <ValidationNetwork />
-       
+        ) : (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text>Cargando...</Text>
+          </View>
+        )}
       </NetworkProvider>
     </ToastProvider>
   );
 }
 const ValidationNetwork = () => {
   const isConnected = useIsConnected();
-  const toast = useToast();
   const { theme } = useContext(ThemeContext);
-
-  useEffect(() => {
-    if (isConnected !== null && !isConnected) {
-      toast.show("No internet connection");
-    }
-  }, [isConnected]);
 
   return (
     <PaperProvider theme={theme}>
@@ -154,7 +157,7 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
       <GestureHandlerRootView style={{ flex: 1 }}>
         {isConnected === true ? (
           <>
-            {!loading && is_authenticated ? (
+            {is_authenticated ? (
               <>
                 <Drawer
                   screenOptions={{

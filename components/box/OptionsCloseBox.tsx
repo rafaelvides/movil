@@ -59,7 +59,7 @@ const OptionsCloseBox = ({
         <View
           style={{
             alignContent: "center",
-            marginBottom: 40,
+            marginBottom: 10,
             justifyContent: "center",
             alignItems: "center",
           }}

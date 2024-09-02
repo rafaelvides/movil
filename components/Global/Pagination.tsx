@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   button: {
     padding: 10,
     marginHorizontal: 5,
-    borderRadius: 10,
+    borderRadius: 15,
   },
   pageButton: {
     padding: 12,
