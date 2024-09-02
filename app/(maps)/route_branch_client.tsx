@@ -36,6 +36,7 @@ import HTMLView from "react-native-htmlview";
 import { formatDate } from "@/utils/date";
 import { IBranch } from "@/types/branch/branch.types";
 import { Coordenada } from "@/utils/filters";
+import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 
 const route_branch_client = () => {
   const [loading, setLoading] = useState(false);
@@ -43,12 +44,20 @@ const route_branch_client = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [showModalMap, setShowModalMap] = useState(false);
   const [steps, setSteps] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(true);
+  const [checked, setChecked] = useState(false);
   const [startDate, setStartDate] = useState(formatDate());
   const [selectedBranch, setSelectedBranch] = useState<IBranch>();
   const [selectedCustomer, setSelectedCustomer] = useState<ICustomer>();
   const [selectedOptionMap, setSelectedOptionMap] =
     useState<MapType>("standard");
+  const [startRoutePoint, setStartRoutePoint] = React.useState<{
+    latitude: number;
+    longitude: number;
+  }>();
+  const [finalRoutePoint, setFinalRoutePoint] = React.useState<{
+    latitude: number;
+    longitude: number;
+  }>();
   const [detail, setDetail] = useState<MapDirectionsResponse>();
   const { OnGetLocation, coordinatesRealTime } = useLocationStore();
   const { OnGetBranchList } = useBranchStore();
@@ -69,7 +78,7 @@ const route_branch_client = () => {
   );
   useEffect(() => {
     socket.on("reload", () => {
-      if (isEnabled) {
+      if (checked) {
         OnGetLocationRouter(selectedBranch?.id ?? 0, startDate);
         OnGetLocation(selectedBranch?.id ?? 0);
         update_active_location(1, true);
@@ -79,14 +88,16 @@ const route_branch_client = () => {
       socket.off("reload");
       socket.disconnect();
     };
-  }, [isEnabled]);
+  }, [checked]);
 
   useEffect(() => {
     OnGetBranchList();
-    (async () => {
-      await OnGetLocationRouter(selectedBranch?.id ?? 0, startDate);
-      await OnGetLocation(selectedBranch?.id ?? 0);
-    })();
+    if (!checked) {
+      (async () => {
+        await OnGetLocationRouter(selectedBranch?.id ?? 0, startDate);
+        await OnGetLocation(selectedBranch?.id ?? 0);
+      })();
+    }
     OnGetCustomersList();
     setRefreshing(false);
   }, [refreshing]);
@@ -121,14 +132,14 @@ const route_branch_client = () => {
       );
     });
   };
-  const markerCoordinates = {
+  const startmarkerCoordinates = {
+    latitude: Number(coordinatesRealTime?.latitude!),
+    longitude: Number(coordinatesRealTime?.longitude!),
+  };
+  const endMarkerCoordinates = {
     latitude: Number(selectedCustomer?.latitude!),
     longitude: Number(selectedCustomer?.longitude!),
   }; // Coordenadas del marcador fuera de la calle
-  const [finalRoutePoint, setFinalRoutePoint] = React.useState<{
-    latitude: number;
-    longitude: number;
-  }>();
 
   const generateCurvePoints = (start: any, end: any) => {
     const controlPoints = [];
@@ -155,7 +166,6 @@ const route_branch_client = () => {
 
     return controlPoints;
   };
-console.log("detalle",detail?.legs)
   return (
     <>
       <StatusBar style="dark" />
@@ -194,16 +204,20 @@ console.log("detalle",detail?.legs)
                     startDate: startDate,
                     setSelectedBranch,
                     selectedBranch: selectedBranch,
+                    setChecked,
+                    checked: checked,
                     handleConfirm(
                       selectedOptionMap,
                       selectedCustomer,
                       selectedBranch,
-                      startDate
+                      startDate,
+                      checked
                     ) {
                       setSelectedCustomer(selectedCustomer);
                       setSelectedOptionMap(selectedOptionMap);
                       setStartDate(startDate);
                       setSelectedBranch(selectedBranch);
+                      setChecked(checked);
                       setRefreshing(true);
                       SheetManager.hide("routes-branch-client-filters-sheet");
                     },
@@ -314,6 +328,17 @@ console.log("detalle",detail?.legs)
                         </Text>
                       </Callout>
                     </Marker>
+                    {startRoutePoint && (
+                      <Polyline
+                        coordinates={generateCurvePoints(
+                          startRoutePoint,
+                          startmarkerCoordinates
+                        )}
+                        strokeColor="#b4b4b4"
+                        strokeWidth={5}
+                        lineDashPattern={[2, 6]}
+                      />
+                    )}
                     <MapViewDirections
                       origin={coordinatesRealTime}
                       timePrecision={"now"}
@@ -327,7 +352,9 @@ console.log("detalle",detail?.legs)
                         setDetail(result);
                         const lastPoint =
                           result.coordinates[result.coordinates.length - 1];
+                        const lastPointStart = result.coordinates[0];
                         setFinalRoutePoint(lastPoint);
+                        setStartRoutePoint(lastPointStart);
                       }}
                       onError={(errorMessage) => {
                         ToastAndroid.show(
@@ -340,7 +367,7 @@ console.log("detalle",detail?.legs)
                       <Polyline
                         coordinates={generateCurvePoints(
                           finalRoutePoint,
-                          markerCoordinates
+                          endMarkerCoordinates
                         )}
                         strokeColor="#b4b4b4"
                         strokeWidth={5}
@@ -351,7 +378,53 @@ console.log("detalle",detail?.legs)
                 )}
             </MapView>
           </View>
-          
+          {selectedCustomer && (
+            <>
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 20,
+                  right: 10,
+                }}
+              >
+                <ButtonForCard
+                  onPress={() => setShowModalMap(true)}
+                  icon="arrow-expand-all"
+                  radius={25}
+                  paddingB={15}
+                  color={theme.colors.warning}
+                />
+                <ButtonForCard
+                  onPress={() => {
+                    setSelectedCustomer(undefined);
+                    setSelectedBranch(undefined);
+                    setSelectedOptionMap("standard");
+                  }}
+                  icon="broom"
+                  radius={25}
+                  paddingB={15}
+                />
+                {detail && (
+                  <>
+                    {/* <ButtonForCard
+                      onPress={repeatCurrentStep}
+                      icon="cached"
+                      radius={25}
+                      paddingB={15}
+                      color={theme.colors.third}
+                    /> */}
+                    <ButtonForCard
+                      onPress={() => setSteps(true)}
+                      icon="format-list-bulleted"
+                      radius={25}
+                      paddingB={15}
+                      color={theme.colors.secondary}
+                    />
+                  </>
+                )}
+              </View>
+            </>
+          )}
         </>
       )}
       <Modal visible={showModalMap} animationType="fade">
@@ -433,6 +506,17 @@ console.log("detalle",detail?.legs)
                     </Text>
                   </Callout>
                 </Marker>
+                {startRoutePoint && (
+                  <Polyline
+                    coordinates={generateCurvePoints(
+                      startRoutePoint,
+                      startmarkerCoordinates
+                    )}
+                    strokeColor="#b4b4b4"
+                    strokeWidth={5}
+                    lineDashPattern={[2, 6]}
+                  />
+                )}
                 <MapViewDirections
                   origin={coordinatesRealTime}
                   timePrecision={"now"}
@@ -459,7 +543,7 @@ console.log("detalle",detail?.legs)
                   <Polyline
                     coordinates={generateCurvePoints(
                       finalRoutePoint,
-                      markerCoordinates
+                      endMarkerCoordinates
                     )}
                     strokeColor="#b4b4b4"
                     strokeWidth={5}
@@ -469,7 +553,53 @@ console.log("detalle",detail?.legs)
               </>
             )}
         </MapView>
-       
+        {selectedCustomer && (
+          <>
+            <View
+              style={{
+                position: "absolute",
+                bottom: 20,
+                right: 10,
+              }}
+            >
+              <ButtonForCard
+                onPress={() => setShowModalMap(true)}
+                icon="arrow-expand-all"
+                radius={25}
+                paddingB={15}
+                color={theme.colors.warning}
+              />
+              <ButtonForCard
+                onPress={() => {
+                  setSelectedCustomer(undefined);
+                  setSelectedBranch(undefined);
+                  setSelectedOptionMap("standard");
+                }}
+                icon="broom"
+                radius={25}
+                paddingB={15}
+              />
+              {detail && (
+                <>
+                  {/* <ButtonForCard
+                      onPress={repeatCurrentStep}
+                      icon="cached"
+                      radius={25}
+                      paddingB={15}
+                      color={theme.colors.third}
+                    /> */}
+                  <ButtonForCard
+                    onPress={() => setSteps(true)}
+                    icon="format-list-bulleted"
+                    radius={25}
+                    paddingB={15}
+                    color={theme.colors.secondary}
+                  />
+                </>
+              )}
+            </View>
+          </>
+        )}
       </Modal>
       <Modal visible={steps} animationType="fade">
         <Pressable

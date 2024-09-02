@@ -6,7 +6,7 @@ import {
   IGetBranchProductList,
 } from "@/types/branch_product/branch_product.types";
 import { return_token } from "../plugins/secure_store";
-import { get_branch_id, get_user } from "@/plugins/async_storage";
+import { get_branch_id } from "@/plugins/async_storage";
 
 export const get_branch_products = async (
   id: number,

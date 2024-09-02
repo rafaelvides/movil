@@ -89,10 +89,13 @@ declare module "react-native-actions-sheet" {
         selectedOptionMap: MapType;
         setSelectedBranch: Dispatch<SetStateAction<IBranch | undefined>>;
         selectedBranch: IBranch | undefined;
+        setChecked: Dispatch<SetStateAction<boolean>>;
+        checked: boolean;
         handleConfirm: (
           selectedOptionMap: MapType,
           selectedBranch: IBranch,
-          startDate: string
+          startDate: string,
+          cached: boolean
         ) => void;
       };
     }>;
@@ -121,11 +124,14 @@ declare module "react-native-actions-sheet" {
         selectedCustomer: ICustomer | undefined;
         setSelectedBranch: Dispatch<SetStateAction<IBranch | undefined>>;
         selectedBranch: IBranch | undefined;
+        setChecked: Dispatch<SetStateAction<boolean>>;
+        checked: boolean;
         handleConfirm: (
           selectedOptionMap: MapType,
           selectedCustomer: ICustomer,
           selectedBranch: IBranch,
-          startDate: string
+          startDate: string,
+          cached: boolean
         ) => void;
       };
     }>;

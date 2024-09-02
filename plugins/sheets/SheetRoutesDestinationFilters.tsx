@@ -1,5 +1,5 @@
 import { StyleSheet, Pressable, SafeAreaView, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
 import { Dropdown } from "react-native-element-dropdown";
 import { typeMap } from "@/utils/type_maps";
@@ -8,6 +8,9 @@ import { MapType } from "react-native-maps";
 import { useCustomerStore } from "@/store/customer.store";
 import { ICustomer } from "@/types/customer/customer.types";
 import SwitchToggle from "@imcarlosguerrero/react-native-switch-toggle";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const SheetRoutesDestinationFilters = ({
   sheetId,
@@ -22,6 +25,8 @@ const SheetRoutesDestinationFilters = ({
   const [selectedCustomer, setSelectedCustomer] = useState<ICustomer>(
     payload?.selectedCustomer!
   );
+  const { theme } = useContext(ThemeContext);
+
   const { customer_list } = useCustomerStore();
   const handleMapTypeChange = (newMapType: MapType) => {
     setSelectedOptionMap(newMapType);
@@ -45,15 +50,14 @@ const SheetRoutesDestinationFilters = ({
           <Text style={{ fontSize: 20 }}>Filtros de ubicación</Text>
         </View>
         <View style={{ width: "100%", marginTop: 10 }}>
-          <Text style={{ fontWeight: "500", marginTop: 10 }}>Tipo de mapa</Text>
+          <Text style={stylesGlobals.textInput}>Tipo de mapa</Text>
           <SafeAreaView
             style={{
               width: "100%",
-              marginTop: 10,
               borderWidth: 1,
               borderColor: "#D1D5DB",
               padding: 12,
-              borderRadius: 5,
+              borderRadius: 15,
             }}
           >
             <Dropdown
@@ -190,29 +194,20 @@ const SheetRoutesDestinationFilters = ({
             />
           </View>
         </View>
-        <Pressable
-          onPress={() =>
-            payload?.handleConfirm(selectedOptionMap, selectedCustomer, checked)
-          }
-          style={{
-            width: "100%",
-            padding: 12,
-            borderRadius: 4,
-            backgroundColor: "#1d4ed8",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 10,
-          }}
-        >
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: "bold",
-            }}
-          >
-            Filtrar
-          </Text>
-        </Pressable>
+        <View style={stylesGlobals.viewBotton}>
+          <Button
+            withB={390}
+            onPress={() =>
+              payload?.handleConfirm(
+                selectedOptionMap,
+                selectedCustomer,
+                checked
+              )
+            }
+            Title="Filtrar"
+            color={theme.colors.dark}
+          />
+        </View>
       </View>
     </ActionSheet>
   );

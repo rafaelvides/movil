@@ -14,7 +14,7 @@ export const useLocationStore = create<ILocationStore>((set) => ({
   has_enabled: false,
   coordinatesRealTime: {} as Coordenada,
   coordinatesRouter: [],
-  address: {} as IAddressLocations,
+  address: "",
   OnGetLocationDisponible() {
     return_location()
       .then((value) => {
@@ -44,11 +44,11 @@ export const useLocationStore = create<ILocationStore>((set) => ({
         //   longitude: coordinates.longitude,
         // });
         // const address = response[0].city || response[0].name;
-        // const street = response[0].street
-        //   ? response[0].street
-        //   : "Nombre de calle no disponible";
-        // const subregion = response[0].subregion;
-        set({ coordinatesRealTime: coordinates });
+
+        set({
+          coordinatesRealTime: coordinates,
+          address: "address" ?? "No encontrado",
+        });
       })
       .catch((error) => {
         set({ coordinatesRealTime: {} as Coordenada });

@@ -1,5 +1,5 @@
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
 import { Dropdown } from "react-native-element-dropdown";
 import { typeMap } from "@/utils/type_maps";
@@ -7,6 +7,9 @@ import { AntDesign } from "@expo/vector-icons";
 import { MapType } from "react-native-maps";
 import { useBranchStore } from "@/store/branch.store";
 import { IBranch } from "@/types/branch/branch.types";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const SheetMapRealTimeFiters = ({
   sheetId,
@@ -17,6 +20,7 @@ const SheetMapRealTimeFiters = ({
   const [selectedOptionMap, setSelectedOptionMap] = useState<MapType>(
     payload?.selectedOptionMap!
   );
+  const { theme } = useContext(ThemeContext);
   const [selectedBranch, setSelectedBranch] = useState<IBranch>(
     payload?.selectedBranch!
   );
@@ -44,15 +48,14 @@ const SheetMapRealTimeFiters = ({
           <Text style={{ fontSize: 20 }}>Filtros de ubicación</Text>
         </View>
         <View style={{ width: "100%", marginTop: 10 }}>
-          <Text style={{ fontWeight: "500", marginTop: 10 }}>Tipo de mapa</Text>
+          <Text style={stylesGlobals.textInput}>Tipo de mapa</Text>
           <SafeAreaView
             style={{
               width: "100%",
-              marginTop: 10,
               borderWidth: 1,
               borderColor: "#D1D5DB",
               padding: 12,
-              borderRadius: 5,
+              borderRadius: 15,
             }}
           >
             <Dropdown
@@ -93,17 +96,14 @@ const SheetMapRealTimeFiters = ({
           </SafeAreaView>
         </View>
         <View style={{ width: "100%", marginTop: 10 }}>
-          <Text style={{ fontWeight: "500", marginTop: 10 }}>
-            Sucursal en tiempo real
-          </Text>
+          <Text style={stylesGlobals.textInput}>Sucursal en tiempo real</Text>
           <SafeAreaView
             style={{
               width: "100%",
-              marginTop: 10,
               borderWidth: 1,
               borderColor: "#D1D5DB",
               padding: 12,
-              borderRadius: 5,
+              borderRadius: 15,
             }}
           >
             <Dropdown
@@ -152,7 +152,7 @@ const SheetMapRealTimeFiters = ({
                 ) : (
                   <AntDesign
                     style={styles.icon}
-                    color={isFocus ? "blue" : "black"}
+                    color={isFocusBran ? "blue" : "black"}
                     name="Safety"
                     size={20}
                   />
@@ -161,29 +161,16 @@ const SheetMapRealTimeFiters = ({
             />
           </SafeAreaView>
         </View>
-        <Pressable
-          onPress={() =>
-            payload?.handleConfirm(selectedOptionMap, selectedBranch)
-          }
-          style={{
-            width: "100%",
-            padding: 12,
-            borderRadius: 4,
-            backgroundColor: "#1d4ed8",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 10,
-          }}
-        >
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: "bold",
-            }}
-          >
-            Filtrar
-          </Text>
-        </Pressable>
+        <View style={stylesGlobals.viewBotton}>
+          <Button
+            withB={390}
+            onPress={() =>
+              payload?.handleConfirm(selectedOptionMap, selectedBranch)
+            }
+            Title="Filtrar"
+            color={theme.colors.dark}
+          />
+        </View>
       </View>
     </ActionSheet>
   );
@@ -205,7 +192,6 @@ const styles = StyleSheet.create({
   inputSearchStyle: {
     height: 40,
     fontSize: 16,
-  
   },
   icon: {
     marginRight: 5,

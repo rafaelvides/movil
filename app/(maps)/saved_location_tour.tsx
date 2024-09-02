@@ -23,17 +23,16 @@ import { useLocationStore } from "@/store/locations.store";
 import { IBranch } from "@/types/branch/branch.types";
 import { useBranchStore } from "@/store/branch.store";
 import { update_active_location } from "@/services/locations.service";
-import axios from "axios";
-import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "@/hooks/useTheme";
 import { formatDate } from "@/utils/date";
+import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 const saved_location_tour = () => {
   const [loading, setLoading] = useState(false);
   const socket = createSocket();
   const [refreshing, setRefreshing] = useState(false);
   const [showModalMap, setShowModalMap] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(true);
   const [startDate, setStartDate] = useState(formatDate());
+  const [checked, setChecked] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<IBranch>();
   const [selectedOptionMap, setSelectedOptionMap] =
     useState<MapType>("standard");
@@ -54,7 +53,7 @@ const saved_location_tour = () => {
   );
   useEffect(() => {
     socket.on("reload", () => {
-      if (isEnabled) {
+      if (checked) {
         OnGetLocationRouter(selectedBranch?.id ?? 0, startDate);
         update_active_location(1, true);
       }
@@ -64,11 +63,13 @@ const saved_location_tour = () => {
       socket.off("reload");
       socket.disconnect();
     };
-  }, [isEnabled]);
+  }, [checked]);
 
   useEffect(() => {
     OnGetBranchList();
-    // OnGetLocationRouter(selectedBranch?.id ?? 0, startDate);
+    if (!checked) {
+      OnGetLocationRouter(selectedBranch?.id ?? 0, startDate);
+    }
     setRefreshing(false);
   }, [refreshing]);
 
@@ -126,14 +127,19 @@ const saved_location_tour = () => {
                       selectedBranch: selectedBranch,
                       selectedOptionMap: selectedOptionMap,
                       setSelectedOptionMap,
+                      setChecked,
+                      checked: checked,
                       handleConfirm(
                         selectedOptionMap,
                         selectedBranch,
-                        startDate
+                        startDate,
+                        checked
                       ) {
                         setStartDate(startDate);
                         setSelectedBranch(selectedBranch);
                         setSelectedOptionMap(selectedOptionMap);
+                        setChecked(checked);
+                        setRefreshing(true);
                         SheetManager.hide("map-router-filters-sheet");
                       },
                     },
@@ -212,7 +218,23 @@ const saved_location_tour = () => {
                 )}
               </MapView>
             </View>
-           
+            {selectedBranch && (
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 90,
+                  right: 10,
+                }}
+              >
+                <ButtonForCard
+                  onPress={() => setShowModalMap(true)}
+                  icon="arrow-expand-all"
+                  color={theme.colors.warning}
+                  radius={25}
+                  paddingB={15}
+                />
+              </View>
+            )}
           </>
         )}
         <Modal visible={showModalMap} animationType="fade">
@@ -262,7 +284,23 @@ const saved_location_tour = () => {
               </>
             )}
           </MapView>
-          
+          {selectedBranch && (
+            <View
+              style={{
+                position: "absolute",
+                bottom: 152,
+                right: 10,
+              }}
+            >
+              <ButtonForCard
+                onPress={() => setShowModalMap(false)}
+                icon="arrow-collapse-all"
+                color={theme.colors.warning}
+                radius={25}
+                paddingB={15}
+              />
+            </View>
+          )}
         </Modal>
       </>
     </>

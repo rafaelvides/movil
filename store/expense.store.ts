@@ -1,8 +1,7 @@
 import { expense_delete, expenses_update, get_category_expenses, get_expenses_paginated, save_expenses } from "@/services/expense.service";
-import { IExpensePayloads, IUpdateExpense } from "@/types/expenses/expense.types";
+import { IExpensePayloads } from "@/types/expenses/expense.types";
 import { IExpenseStore } from "@/types/store/expense.store";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AxiosError } from "axios";
 import { ToastAndroid } from "react-native";
 import { create } from "zustand";
 

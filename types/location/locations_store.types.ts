@@ -4,8 +4,9 @@ import { IAddressLocations } from "./locations.types";
 export interface ILocationStore {
   has_enabled: boolean;
   coordinatesRealTime: Coordenada;
+  address: string
   coordinatesRouter: Coordenada[][];
-  address: IAddressLocations;
+  // address: IAddressLocations;
   OnSetLocationDisponible: (value: boolean) => void;
   OnGetLocationDisponible: () => void;
   OnGetLocation: (id: number) => void;

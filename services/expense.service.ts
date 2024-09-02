@@ -2,7 +2,6 @@ import { get_box_data } from "@/plugins/async_storage";
 import { return_token } from "@/plugins/secure_store";
 import {
   ICreateExpense,
-  IExpensePayloads,
   IGetExpense,
   IGetExpensesPaginated,
   IResponseExpense,
@@ -10,7 +9,6 @@ import {
 } from "@/types/expenses/expense.types";
 import { API_URL } from "@/utils/constants";
 import axios, { AxiosError } from "axios";
-import * as DocumentPicker from "expo-document-picker";
 import { ToastAndroid } from "react-native";
 
 export const get_expenses_paginated = async (

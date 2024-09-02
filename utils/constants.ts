@@ -1,7 +1,7 @@
-export const API_URL = "http://192.168.0.7:8000/api";
-export const SOCKET = "http://192.168.0.7:8000/socket";
-// export const API_URL = "https://seedcode-api.erpseedcodeone.online/api";
-// export const SOCKET = "https://seedcode-api.erpseedcodeone.online/socket";
+// export const API_URL = "http://192.168.0.7:8000/api";
+// export const SOCKET = "http://192.168.0.7:8000/socket";
+export const API_URL = "https://seedcode-api.erpseedcodeone.online/api";
+export const SOCKET = "https://seedcode-api.erpseedcodeone.online/socket";
 
 export const MH_QUERY = "https://admin.factura.gob.sv/consultaPublicas";
 export const ambiente = "00";

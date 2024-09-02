@@ -36,7 +36,7 @@ const Location_real_time = () => {
   const [selectedBranch, setSelectedBranch] = useState<IBranch>();
   const [selectedOptionMap, setSelectedOptionMap] =
     useState<MapType>("standard");
-  const { OnGetLocation, coordinatesRealTime } = useLocationStore();
+  const { OnGetLocation, coordinatesRealTime, address } = useLocationStore();
   const { OnGetBranchList } = useBranchStore();
   const { theme } = useContext(ThemeContext);
 
@@ -52,9 +52,10 @@ const Location_real_time = () => {
     }, [])
   );
   useEffect(() => {
-    socket.on("reload", () => {
-      OnGetLocation(selectedBranch?.id ?? 0);
-      get_branch_id()
+    socket.on("reload", async () => {
+      ToastAndroid.show("Ruta actualizada", ToastAndroid.SHORT);
+      await OnGetLocation(selectedBranch?.id ?? 0);
+      await get_branch_id()
         .then((data) => {
           update_active_location(Number(data), true);
         })
@@ -70,9 +71,10 @@ const Location_real_time = () => {
 
   useEffect(() => {
     OnGetBranchList();
+    // OnGetLocation(selectedBranch?.id ?? 0);
+
     setRefreshing(false);
   }, [refreshing]);
-
   return (
     <>
       <StatusBar style="dark" />
@@ -166,6 +168,7 @@ const Location_real_time = () => {
                         style={{
                           marginLeft: 25,
                           fontSize: 15,
+                          textAlign: "center",
                         }}
                       >
                         Mi ubicación
@@ -176,6 +179,7 @@ const Location_real_time = () => {
                           coordinatesRealTime.timestamp
                         ).toLocaleTimeString()}
                       </Text>
+                      <Text>Ciudad: {address}</Text>
                     </Callout>
                   </Marker>
                 )}
@@ -186,13 +190,24 @@ const Location_real_time = () => {
               style={{
                 position: "absolute",
                 bottom: 90,
-                right: 20,
+                right: 10,
               }}
             >
               <ButtonForCard
                 onPress={() => setShowModalMap(true)}
                 icon="arrow-expand-all"
                 color={theme.colors.warning}
+                radius={25}
+                paddingB={15}
+              />
+              <ButtonForCard
+                onPress={() => {
+                  setSelectedBranch(undefined);
+                  setSelectedOptionMap("standard");
+                }}
+                icon="broom"
+                radius={25}
+                paddingB={15}
               />
             </View>
           )}
@@ -243,14 +258,24 @@ const Location_real_time = () => {
             style={{
               position: "absolute",
               bottom: 90,
-              right: 20,
-              // zIndex:10
+              right: 10,
             }}
           >
             <ButtonForCard
               onPress={() => setShowModalMap(false)}
-              icon="arrow-expand-all"
+              icon="arrow-collapse-all"
               color={theme.colors.warning}
+              radius={25}
+              paddingB={15}
+            />
+            <ButtonForCard
+              onPress={() => {
+                setSelectedBranch(undefined);
+                setSelectedOptionMap("standard");
+              }}
+              icon="broom"
+              radius={25}
+              paddingB={15}
             />
           </View>
         )}

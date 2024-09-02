@@ -1,5 +1,5 @@
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
 import { useBranchStore } from "@/store/branch.store";
 import { MapType } from "react-native-maps";
@@ -10,6 +10,11 @@ import { typeMap } from "@/utils/type_maps";
 // import { Input } from "@/~/components/ui/input";
 import { DatePickerModal } from "react-native-paper-dates";
 import { returnDate } from "@/utils/date";
+import Input from "@/components/Global/components_app/Input";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import SwitchToggle from "@imcarlosguerrero/react-native-switch-toggle";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const SheetMapRouterFilters = ({
   sheetId,
@@ -21,6 +26,7 @@ const SheetMapRouterFilters = ({
   const [selectedOptionMap, setSelectedOptionMap] = useState<MapType>(
     payload?.selectedOptionMap!
   );
+  const [checked, setChecked] = useState(payload?.checked!);
   const [startDate, setStartDate] = useState(
     payload?.startDate
       ? new Date(
@@ -29,6 +35,8 @@ const SheetMapRouterFilters = ({
         )
       : new Date()
   );
+  const { theme } = useContext(ThemeContext);
+
   const [selectedBranch, setSelectedBranch] = useState<IBranch>(
     payload?.selectedBranch!
   );
@@ -57,23 +65,20 @@ const SheetMapRouterFilters = ({
             <Text style={{ fontSize: 20 }}>Filtros de ubicación</Text>
           </View>
           <View style={{ width: "100%", marginTop: 10 }}>
-            <Text style={{ fontWeight: "500", marginTop: 10 }}>
-              Tipo de mapa
-            </Text>
+            <Text style={stylesGlobals.textInput}>Tipo de mapa</Text>
             <SafeAreaView
               style={{
                 width: "100%",
-                marginTop: 10,
                 borderWidth: 1,
                 borderColor: "#D1D5DB",
                 padding: 12,
-                borderRadius: 5,
+                borderRadius: 15,
               }}
             >
               <Dropdown
                 style={[isFocus && { borderColor: "blue" }]}
                 containerStyle={{
-                  marginVertical: "8%",
+                  marginVertical: "15%",
                 }}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -108,23 +113,20 @@ const SheetMapRouterFilters = ({
             </SafeAreaView>
           </View>
           <View style={{ width: "100%", marginTop: 10 }}>
-            <Text style={{ fontWeight: "500", marginTop: 10 }}>
-              Sucursal en tiempo real
-            </Text>
+            <Text style={stylesGlobals.textInput}>Sucursal en tiempo real</Text>
             <SafeAreaView
               style={{
                 width: "100%",
-                marginTop: 10,
                 borderWidth: 1,
                 borderColor: "#D1D5DB",
                 padding: 12,
-                borderRadius: 5,
+                borderRadius: 15,
               }}
             >
               <Dropdown
                 style={[isFocusBran && { borderColor: "blue" }]}
                 containerStyle={{
-                  marginVertical: "8%",
+                  marginVertical: "15%",
                 }}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -167,7 +169,7 @@ const SheetMapRouterFilters = ({
                   ) : (
                     <AntDesign
                       style={styles.icon}
-                      color={isFocus ? "blue" : "black"}
+                      color={isFocusBran ? "blue" : "black"}
                       name="Safety"
                       size={20}
                     />
@@ -177,55 +179,75 @@ const SheetMapRouterFilters = ({
             </SafeAreaView>
           </View>
           <View style={{ marginTop: 15, width: "100%" }}>
-            <Text style={{ marginLeft: "3%", fontWeight: "500" }}>
-              Fechas de la ubicación
-            </Text>
+            <Text style={stylesGlobals.textInput}>Fechas de la ubicación</Text>
             <View style={styles.inputWrapper}>
-              {/* <Input
-                className="rounded-3xl"
-                style={styles.input}
-                placeholder="Nombre del producto..."
-                value={startDate.toLocaleDateString()}
-                onPress={() => setShowCalendarStart(true)}
-                aria-labelledbyledBy="inputLabel"
-                aria-errormessage="inputError"
-              /> */}
-              <MaterialCommunityIcons
-                color={"#1359"}
-                name="calendar-multiple"
-                size={27}
-                style={styles.iconInput}
+              <Input
+                icon={"calendar-multiple"}
+                values={startDate.toLocaleDateString()}
                 onPress={() => setShowCalendarStart(true)}
               />
             </View>
           </View>
-          <Pressable
-            onPress={() =>
-              payload?.handleConfirm(
-                selectedOptionMap,
-                selectedBranch,
-                returnDate(startDate)
-              )
-            }
+          <View
             style={{
-              width: "100%",
-              padding: 12,
-              borderRadius: 4,
-              backgroundColor: "#1d4ed8",
-              justifyContent: "center",
+              marginTop: 15,
+              marginBottom: 10,
+              flexDirection: "row",
+              justifyContent: "space-between",
               alignItems: "center",
-              marginTop: 10,
+              padding: 12,
+              backgroundColor: "#fff",
+              borderRadius: 10,
+              elevation: 2,
             }}
           >
             <Text
               style={{
-                color: "#fff",
+                fontSize: 16,
                 fontWeight: "bold",
+                color: "#333",
               }}
             >
-              Filtrar
+              {checked
+                ? "Mostrando en tiempo real"
+                : "Desactivado en tiempo real"}
             </Text>
-          </Pressable>
+            <SwitchToggle
+              switchOn={checked}
+              onPress={() => setChecked(!checked)}
+              circleColorOff="#fff"
+              circleColorOn="#fff"
+              backgroundColorOn="#3956C0"
+              backgroundColorOff="#C4C4C4"
+              containerStyle={{
+                // marginTop: 10,
+                width: 55,
+                height: 32,
+                borderRadius: 25,
+                padding: 5,
+              }}
+              circleStyle={{
+                width: 22,
+                height: 22,
+                borderRadius: 20,
+              }}
+            />
+          </View>
+          <View style={stylesGlobals.viewBotton}>
+            <Button
+              withB={390}
+              onPress={() =>
+                payload?.handleConfirm(
+                  selectedOptionMap,
+                  selectedBranch,
+                  returnDate(startDate),
+                  checked
+                )
+              }
+              Title="Filtrar"
+              color={theme.colors.dark}
+            />
+          </View>
         </View>
       </ActionSheet>
       <DatePickerModal
@@ -272,7 +294,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: 50,
     justifyContent: "center",
-    marginBottom: 15,
+    marginBottom: 5,
   },
   iconInput: {
     position: "absolute",

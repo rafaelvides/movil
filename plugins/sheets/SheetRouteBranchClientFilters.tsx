@@ -1,17 +1,21 @@
-import { StyleSheet, Pressable, SafeAreaView, Text, View } from "react-native";
-import React, { useState } from "react";
+import { StyleSheet, SafeAreaView, Text, View } from "react-native";
+import React, { useContext, useState } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
 import { Dropdown } from "react-native-element-dropdown";
 import { typeMap } from "@/utils/type_maps";
-import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { MapType } from "react-native-maps";
 import { useCustomerStore } from "@/store/customer.store";
 import { ICustomer } from "@/types/customer/customer.types";
 import { IBranch } from "@/types/branch/branch.types";
 import { useBranchStore } from "@/store/branch.store";
-// import { Input } from "@/~/components/ui/input";
 import { DatePickerModal } from "react-native-paper-dates";
 import { returnDate } from "@/utils/date";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
+import Input from "@/components/Global/components_app/Input";
+import SwitchToggle from "@imcarlosguerrero/react-native-switch-toggle";
 
 const SheetRouteBranchClientFilters = ({
   sheetId,
@@ -24,6 +28,9 @@ const SheetRouteBranchClientFilters = ({
   const [selectedOptionMap, setSelectedOptionMap] = useState<MapType>(
     payload?.selectedOptionMap!
   );
+  const [checked, setChecked] = useState(payload?.checked!);
+  const { theme } = useContext(ThemeContext);
+
   const [selectedCustomer, setSelectedCustomer] = useState<ICustomer>(
     payload?.selectedCustomer!
   );
@@ -63,23 +70,20 @@ const SheetRouteBranchClientFilters = ({
             <Text style={{ fontSize: 20 }}>Filtros de ubicación</Text>
           </View>
           <View style={{ width: "100%", marginTop: 10 }}>
-            <Text style={{ fontWeight: "500", marginTop: 10 }}>
-              Tipo de mapa
-            </Text>
+            <Text style={stylesGlobals.textInput}>Tipo de mapa</Text>
             <SafeAreaView
               style={{
                 width: "100%",
-                marginTop: 10,
                 borderWidth: 1,
                 borderColor: "#D1D5DB",
                 padding: 12,
-                borderRadius: 5,
+                borderRadius: 15,
               }}
             >
               <Dropdown
                 style={[isFocus && { borderColor: "blue" }]}
                 containerStyle={{
-                  top: "43%",
+                  top: "35%",
                 }}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -114,23 +118,20 @@ const SheetRouteBranchClientFilters = ({
             </SafeAreaView>
           </View>
           <View style={{ width: "100%", marginTop: 10 }}>
-            <Text style={{ fontWeight: "500", marginTop: 10 }}>
-              Sucursal en ruta
-            </Text>
+            <Text style={stylesGlobals.textInput}>Sucursal en ruta</Text>
             <SafeAreaView
               style={{
                 width: "100%",
-                marginTop: 10,
                 borderWidth: 1,
                 borderColor: "#D1D5DB",
                 padding: 12,
-                borderRadius: 5,
+                borderRadius: 15,
               }}
             >
               <Dropdown
                 style={[isFocusBran && { borderColor: "blue" }]}
                 containerStyle={{
-                  bottom: "12%",
+                  top: "40%",
                 }}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -183,23 +184,20 @@ const SheetRouteBranchClientFilters = ({
             </SafeAreaView>
           </View>
           <View style={{ width: "100%", marginTop: 10 }}>
-            <Text style={{ fontWeight: "500", marginTop: 10 }}>
-              Cliente destino
-            </Text>
+            <Text style={stylesGlobals.textInput}>Cliente destino</Text>
             <SafeAreaView
               style={{
                 width: "100%",
-                marginTop: 10,
                 borderWidth: 1,
                 borderColor: "#D1D5DB",
                 padding: 12,
-                borderRadius: 5,
+                borderRadius: 15,
               }}
             >
               <Dropdown
                 style={[isFocusClient && { borderColor: "blue" }]}
                 containerStyle={{
-                  bottom: "15%",
+                  top: "46%",
                 }}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
@@ -234,48 +232,76 @@ const SheetRouteBranchClientFilters = ({
             </SafeAreaView>
           </View>
           <View style={{ marginTop: 15, width: "100%" }}>
-            <Text style={{ marginLeft: "3%", fontWeight: "500" }}>
-              Fechas de la ubicación
-            </Text>
+            <Text style={stylesGlobals.textInput}>Fechas de la ubicación</Text>
             <View style={styles.inputWrapper}>
-             
-              <MaterialCommunityIcons
-                color={"#1359"}
-                name="calendar-multiple"
-                size={27}
-                style={styles.iconInput}
+              <Input
+                icon={"calendar-multiple"}
+                values={startDate.toLocaleDateString()}
                 onPress={() => setShowCalendarStart(true)}
               />
             </View>
           </View>
-          <Pressable
-            onPress={() =>
-              payload?.handleConfirm(
-                selectedOptionMap,
-                selectedCustomer,
-                selectedBranch,
-                returnDate(startDate)
-              )
-            }
+          <View
             style={{
-              width: "100%",
-              padding: 12,
-              borderRadius: 4,
-              backgroundColor: "#1d4ed8",
-              justifyContent: "center",
+              flexDirection: "row",
+              justifyContent: "space-between",
               alignItems: "center",
-              marginTop: 10,
+              padding: 12,
+              backgroundColor: "#fff",
+              borderRadius: 10,
+              elevation: 2,
             }}
           >
             <Text
               style={{
-                color: "#fff",
+                fontSize: 16,
                 fontWeight: "bold",
+                color: "#333",
               }}
             >
-              Filtrar
+              {checked
+                ? "Mostrando en tiempo real"
+                : "Desactivado en tiempo real"}
             </Text>
-          </Pressable>
+            <View>
+              <SwitchToggle
+                switchOn={checked}
+                onPress={() => setChecked(!checked)}
+                circleColorOff="#fff"
+                circleColorOn="#fff"
+                backgroundColorOn="#3956C0"
+                backgroundColorOff="#C4C4C4"
+                containerStyle={{
+                  marginTop: 10,
+                  width: 55,
+                  height: 32,
+                  borderRadius: 25,
+                  padding: 5,
+                }}
+                circleStyle={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 20,
+                }}
+              />
+            </View>
+          </View>
+          <View style={stylesGlobals.viewBotton}>
+            <Button
+              withB={390}
+              onPress={() =>
+                payload?.handleConfirm(
+                  selectedOptionMap,
+                  selectedCustomer,
+                  selectedBranch,
+                  returnDate(startDate),
+                  checked
+                )
+              }
+              Title="Filtrar"
+              color={theme.colors.dark}
+            />
+          </View>
         </View>
       </ActionSheet>
       <DatePickerModal

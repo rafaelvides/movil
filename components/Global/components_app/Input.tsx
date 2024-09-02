@@ -5,6 +5,7 @@ import {
   NativeSyntheticEvent,
   TextInputFocusEventData,
   KeyboardTypeOptions,
+  NativeTouchEvent,
 } from "react-native";
 import React from "react";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -12,6 +13,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 const Input = ({
   onChangeText,
   handleBlur,
+  onPress,
   values,
   placeholder,
   keyboardType,
@@ -27,6 +29,7 @@ const Input = ({
   handleBlur?: (
     e: NativeSyntheticEvent<TextInputFocusEventData>
   ) => void | undefined;
+  onPress?: (e: NativeSyntheticEvent<NativeTouchEvent>) => void | undefined;
 }) => {
   return (
     <View style={styles.inputWrapper}>
@@ -45,6 +48,7 @@ const Input = ({
         onBlur={handleBlur}
         placeholder={placeholder}
         keyboardType={keyboardType}
+        onPress={onPress}
       />
     </View>
   );

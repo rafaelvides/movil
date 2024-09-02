@@ -9,23 +9,31 @@ const ButtonForCard = ({
   color,
   icon,
   iconColor,
-  sizeIcon
+  sizeIcon,
+  radius,
+  paddingB,
 }: {
   onPress: () => void;
   color?: string;
   icon: string;
-  iconColor?: string
-  sizeIcon?: number
+  iconColor?: string;
+  sizeIcon?: number;
+  radius?: number;
+  paddingB?: number;
 }) => {
   const { theme } = useContext(ThemeContext);
-  const C_I = iconColor ? iconColor : "#FFFFFF"
-  const size = sizeIcon ? sizeIcon : 20
+  const C_I = iconColor ? iconColor : "#FFFFFF";
+  const size = sizeIcon ? sizeIcon : 20;
+  const radiosB = radius ? radius : 10;
+  const paddingG = paddingB ? paddingB : padding_global_button.padding;
   return (
-    <View >
+    <View>
       <TouchableOpacity
         onPress={onPress}
         style={{
           ...styles.buttonStyle,
+          borderRadius: radiosB,
+          padding: paddingG,
           backgroundColor: color ? color : theme.colors.dark,
         }}
       >
@@ -47,8 +55,8 @@ export default ButtonForCard;
 
 const styles = StyleSheet.create({
   buttonStyle: {
-    borderRadius: 10,
-    padding: padding_global_button.padding,
-    margin: 12
+    // borderRadius: 10,
+    // padding: padding_global_button.padding,
+    margin: 12,
   },
 });

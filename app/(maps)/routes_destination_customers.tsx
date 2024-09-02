@@ -36,6 +36,7 @@ import { ICustomer } from "@/types/customer/customer.types";
 import { get_branch_id } from "@/plugins/async_storage";
 import HTMLView from "react-native-htmlview";
 import * as Speech from "expo-speech";
+import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 
 const routes_destination_customers = () => {
   const [loading, setLoading] = useState(false);
@@ -93,7 +94,7 @@ const routes_destination_customers = () => {
   useEffect(() => {
     OnGetBranchList();
     OnGetCustomersList();
-    if (checked) {
+    if (!checked) {
       get_branch_id().then((data) => {
         OnGetLocation(Number(data) ?? 0);
       });
@@ -141,8 +142,6 @@ const routes_destination_customers = () => {
 
     return controlPoints;
   };
-  console.log(detail?.legs[0].steps);
-  console.log(coordinatesRealTime);
 
   //13.7400478 -89.7129031
   useEffect(() => {
@@ -156,7 +155,6 @@ const routes_destination_customers = () => {
           currentStep.end_location.lat,
           currentStep.end_location.lng
         );
-        console.log(distance);
         if (distance < 5) {
           // Ajusta la distancia según sea necesario
           Speech.speak(currentStep.html_instructions.replace(/<[^>]*>?/gm, "")); // o Tts.speak(currentStep.instructions);
@@ -192,7 +190,7 @@ const routes_destination_customers = () => {
     if (detail?.legs[0].steps) {
       const steps = detail?.legs[0].steps;
       if (steps.length > currentStepIndex) {
-        const step = steps[currentStepIndex - 1];
+        const step = steps[currentStepIndex];
         Speech.speak(step.html_instructions.replace(/<[^>]*>?/gm, "")); // o Tts.speak(step.html_instructions.replace(/<[^>]*>?/gm, ""));
       }
     }
@@ -337,6 +335,7 @@ const routes_destination_customers = () => {
                       language="es"
                       onReady={(result) => {
                         // handleDirectionsReady(result);
+                        console.log(result);
                         setDetail(result);
                         const lastPoint =
                           result.coordinates[result.coordinates.length - 1];
@@ -366,7 +365,52 @@ const routes_destination_customers = () => {
                 )}
             </MapView>
           </View>
-          
+          {selectedCustomer && (
+            <>
+              <View
+                style={{
+                  position: "absolute",
+                  bottom: 20,
+                  right: 10,
+                }}
+              >
+                <ButtonForCard
+                  onPress={() => setShowModalMap(true)}
+                  icon="arrow-expand-all"
+                  radius={25}
+                  paddingB={15}
+                  color={theme.colors.warning}
+                />
+                <ButtonForCard
+                  onPress={() => {
+                    setSelectedCustomer(undefined);
+                    setSelectedOptionMap("standard");
+                  }}
+                  icon="broom"
+                  radius={25}
+                  paddingB={15}
+                />
+                {detail && (
+                  <>
+                    <ButtonForCard
+                      onPress={repeatCurrentStep}
+                      icon="cached"
+                      radius={25}
+                      paddingB={15}
+                      color={theme.colors.third}
+                    />
+                    <ButtonForCard
+                      onPress={() => setSteps(true)}
+                      icon="format-list-bulleted"
+                      radius={25}
+                      paddingB={15}
+                      color={theme.colors.secondary}
+                    />
+                  </>
+                )}
+              </View>
+            </>
+          )}
         </>
       )}
       <Modal visible={showModalMap} animationType="fade">
@@ -461,7 +505,52 @@ const routes_destination_customers = () => {
               </>
             )}
         </MapView>
-       
+        {selectedCustomer && (
+          <>
+            <View
+              style={{
+                position: "absolute",
+                bottom: 20,
+                right: 10,
+              }}
+            >
+              <ButtonForCard
+                onPress={() => setShowModalMap(false)}
+                icon="arrow-collapse-all"
+                radius={25}
+                paddingB={15}
+                color={theme.colors.warning}
+              />
+              <ButtonForCard
+                onPress={() => {
+                  setSelectedCustomer(undefined);
+                  setSelectedOptionMap("standard");
+                }}
+                icon="broom"
+                radius={25}
+                paddingB={15}
+              />
+              {detail && (
+                <>
+                  <ButtonForCard
+                    onPress={repeatCurrentStep}
+                    icon="cached"
+                    radius={25}
+                    paddingB={15}
+                    color={theme.colors.third}
+                  />
+                  <ButtonForCard
+                    onPress={() => setSteps(true)}
+                    icon="format-list-bulleted"
+                    radius={25}
+                    paddingB={15}
+                    color={theme.colors.secondary}
+                  />
+                </>
+              )}
+            </View>
+          </>
+        )}
       </Modal>
       <Modal visible={steps} animationType="fade">
         <Pressable
