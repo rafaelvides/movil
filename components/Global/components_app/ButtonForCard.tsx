@@ -19,9 +19,9 @@ const ButtonForCard = ({
 }) => {
   const { theme } = useContext(ThemeContext);
   const C_I = iconColor ? iconColor : "#FFFFFF"
-  const size = sizeIcon ? sizeIcon : 24
+  const size = sizeIcon ? sizeIcon : 20
   return (
-    <View style={{ width: 68, height: 68 }}>
+    <View >
       <TouchableOpacity
         onPress={onPress}
         style={{
@@ -34,8 +34,8 @@ const ButtonForCard = ({
           size={size}
           color={C_I}
           style={{
-            right: 2,
-            top: -2,
+            right: 1,
+            top: 0,
           }}
         />
       </TouchableOpacity>
@@ -47,8 +47,8 @@ export default ButtonForCard;
 
 const styles = StyleSheet.create({
   buttonStyle: {
-    borderRadius: 25,
+    borderRadius: 10,
     padding: padding_global_button.padding,
-    margin: 10,
+    margin: 12
   },
 });

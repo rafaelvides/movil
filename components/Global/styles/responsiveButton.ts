@@ -56,7 +56,7 @@ export const padding_global = {
   padding: dimension < 390 ? 8 : 15,
 };
 export const padding_global_button = {
-  padding: dimension < 390 ? 8 : 13,
+  padding: dimension < 390 ? 8 : 11,
 };
 
 export const filter_view_height = {

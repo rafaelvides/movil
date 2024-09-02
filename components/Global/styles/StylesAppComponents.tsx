@@ -77,7 +77,7 @@ const stylesGlobals = StyleSheet.create({
     marginTop: 5,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 5,
+    marginBottom: -10,
   },
   ViewGroupButton: {
     flexDirection: "row",

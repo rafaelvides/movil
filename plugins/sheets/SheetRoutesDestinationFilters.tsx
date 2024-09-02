@@ -163,9 +163,11 @@ const SheetRoutesDestinationFilters = ({
               color: "#333",
             }}
           >
-            {checked ? "Clientes contribuyentes" : "Clientes normales"}
+            {checked
+              ? "Mostrando en tiempo real"
+              : "Desactivado en tiempo real"}
           </Text>
-          <View className="flex-1 justify-center items-center ">
+          <View>
             <SwitchToggle
               switchOn={checked}
               onPress={() => setChecked(!checked)}

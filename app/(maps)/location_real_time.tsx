@@ -4,6 +4,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  ToastAndroid,
   View,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
@@ -23,16 +24,15 @@ import { useLocationStore } from "@/store/locations.store";
 import { IBranch } from "@/types/branch/branch.types";
 import { useBranchStore } from "@/store/branch.store";
 import { update_active_location } from "@/services/locations.service";
-import axios from "axios";
-import { Ionicons } from "@expo/vector-icons";
 import { ThemeContext } from "@/hooks/useTheme";
+import { get_branch_id } from "@/plugins/async_storage";
+import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 
 const Location_real_time = () => {
   const [loading, setLoading] = useState(false);
   const socket = createSocket();
   const [refreshing, setRefreshing] = useState(false);
   const [showModalMap, setShowModalMap] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(true);
   const [selectedBranch, setSelectedBranch] = useState<IBranch>();
   const [selectedOptionMap, setSelectedOptionMap] =
     useState<MapType>("standard");
@@ -53,20 +53,23 @@ const Location_real_time = () => {
   );
   useEffect(() => {
     socket.on("reload", () => {
-      if (isEnabled) {
-        OnGetLocation(selectedBranch?.id ?? 0);
-        update_active_location(1, true);
-      }
+      OnGetLocation(selectedBranch?.id ?? 0);
+      get_branch_id()
+        .then((data) => {
+          update_active_location(Number(data), true);
+        })
+        .catch(() => {
+          ToastAndroid.show("No se encontró la sucursal", ToastAndroid.LONG);
+        });
     });
     return () => {
       socket.off("reload");
       socket.disconnect();
     };
-  }, [isEnabled]);
+  }, []);
 
   useEffect(() => {
     OnGetBranchList();
-    // OnGetLocation(selectedBranch?.id ?? 0);
     setRefreshing(false);
   }, [refreshing]);
 
@@ -178,7 +181,21 @@ const Location_real_time = () => {
                 )}
             </MapView>
           </View>
-          
+          {selectedBranch && (
+            <View
+              style={{
+                position: "absolute",
+                bottom: 90,
+                right: 20,
+              }}
+            >
+              <ButtonForCard
+                onPress={() => setShowModalMap(true)}
+                icon="arrow-expand-all"
+                color={theme.colors.warning}
+              />
+            </View>
+          )}
         </>
       )}
       <Modal visible={showModalMap} animationType="fade">
@@ -221,7 +238,22 @@ const Location_real_time = () => {
               </Marker>
             )}
         </MapView>
-       
+        {selectedBranch && (
+          <View
+            style={{
+              position: "absolute",
+              bottom: 90,
+              right: 20,
+              // zIndex:10
+            }}
+          >
+            <ButtonForCard
+              onPress={() => setShowModalMap(false)}
+              icon="arrow-expand-all"
+              color={theme.colors.warning}
+            />
+          </View>
+        )}
       </Modal>
     </>
   );

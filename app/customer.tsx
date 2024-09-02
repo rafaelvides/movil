@@ -195,7 +195,7 @@ const customer = () => {
     setSelectedTitle("");
     setShowDetailNormal(false);
   };
-
+  console.log(customers.length);
   return (
     <>
       <StatusBar style="dark" />
@@ -366,14 +366,14 @@ const customer = () => {
                         ))}
                     </>
                   </View>
+                  {customers.length > 0 && (
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                    />
+                  )}
                 </ScrollView>
-                {customers.length >= 5 && (
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={handlePageChange}
-                  />
-                )}
               </>
             )}
           </SafeAreaView>
@@ -387,7 +387,12 @@ const customer = () => {
               }}
             >
               <Text
-                style={{ fontWeight: "bold", textAlign: "center", marginTop: 20, marginBottom: 15 }}
+                style={{
+                  fontWeight: "bold",
+                  textAlign: "center",
+                  marginTop: 20,
+                  marginBottom: 15,
+                }}
               >
                 {selectedCustomer
                   ? selectedTitle !== ""
