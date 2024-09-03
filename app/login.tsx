@@ -24,7 +24,7 @@ import Card from "@/components/Global/components_app/Card";
 import Button from "@/components/Global/components_app/Button";
 
 const login = () => {
-  const { OnMakeLogin, OnMakeLoginOffline } = useAuthStore();
+  const { OnMakeLogin, OnMakeLoginOffline, is_authenticated, token } = useAuthStore();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const validationsSchema = yup.object().shape({
@@ -36,12 +36,13 @@ const login = () => {
 
   const onSubmit = async (payload: ILoginPayload) => {
     if (isConnected) {
+      console.log("first")
       await OnMakeLogin(payload);
     } else {
       await OnMakeLoginOffline(payload);
     }
   };
-
+console.log(is_authenticated, token)
   useEffect(() => {
     const loadVisable = async () => {
       try {
