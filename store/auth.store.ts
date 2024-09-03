@@ -149,6 +149,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     const auth = await is_auth();
     const user = await get_user();
     const box = await get_box_data();
+    console.log("el onsetInfo", token, auth)
     if (token && auth) {
       set({
         token,

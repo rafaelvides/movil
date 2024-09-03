@@ -1,5 +1,4 @@
 import { get_branch_id } from "@/plugins/async_storage";
-import { save_location } from "@/services/locations.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useLocationStore } from "@/store/locations.store";
 import { IGetLocationsResponse } from "@/types/location/locations.types";
@@ -26,8 +25,6 @@ TaskManager.defineTask<IGetLocationsResponse>(
       if (data.locations && data.locations.length > 0) {
         const location = data.locations[0];
         if (location.coords.speed > 0 && location.coords.accuracy <= 20) {
-          // await get_branch_id()
-          //   .then(async (id) => {
           axios
             .post(`${API_URL}/coordinate`, {
               branchId: Number(branchId),
@@ -54,13 +51,6 @@ TaskManager.defineTask<IGetLocationsResponse>(
                 ToastAndroid.LONG
               );
             });
-          // })
-          // .catch(() => {
-          //   ToastAndroid.show(
-          //     "Error al obtener la sucursal",
-          //     ToastAndroid.LONG
-          //   );
-          // });
         }
       }
     }
@@ -79,19 +69,14 @@ export const useLocation = () => {
       OnSetInfo();
     })();
   }, []);
+
   useEffect(() => {
     (async () => {
       //Comprueba si el usuario ha habilitado los servicios de ubicación.
       const hasEnabled = await Location.hasServicesEnabledAsync();
+      console.log("hola", has_enabled, hasEnabled, is_authenticated);
       if (!has_enabled && !hasEnabled && !is_authenticated) {
-        TaskManager.getRegisteredTasksAsync().then(async (tasks) => {
-          if (tasks.map((task) => task.taskName).includes(LOCATION_TASK_NAME)) {
-            //Detiene la geovalla para la tarea especificada.
-            await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-            //Anula el registro de la tarea de la aplicación, por lo que la aplicación ya no recibirá actualizaciones para esa tarea.
-            await TaskManager.unregisterTaskAsync(LOCATION_TASK_NAME);
-          }
-        });
+        stopAllProcess();
         return;
       }
 
@@ -115,7 +100,7 @@ export const useLocation = () => {
                 ) {
                   Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
                     accuracy: Location.Accuracy.BestForNavigation,
-                    // activityType: Location.ActivityType.AutomotiveNavigation,
+                    activityType: Location.ActivityType.AutomotiveNavigation,
                     showsBackgroundLocationIndicator: true,
                     distanceInterval: 5,
                     timeInterval: 5000,

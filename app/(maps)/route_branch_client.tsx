@@ -22,7 +22,7 @@ import { useBranchStore } from "@/store/branch.store";
 import { ThemeContext } from "@/hooks/useTheme";
 import { useFocusEffect } from "expo-router";
 import { update_active_location } from "@/services/locations.service";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { SheetManager } from "react-native-actions-sheet";
 import SpinnerLoadinMaps from "@/components/Global/SpinnerLoadinMaps";
 import { StatusBar } from "expo-status-bar";
