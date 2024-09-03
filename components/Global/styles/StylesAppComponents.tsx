@@ -85,6 +85,126 @@ const stylesGlobals = StyleSheet.create({
     marginTop: 10,
     width: "100%",
   },
-  //============================================
+  //Dropdown============================================
+  styleDropdown: {
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 15,
+    height: 50,
+  },
+  isFocusStyles: {
+    borderColor: "blue",
+    borderRadius: 15,
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    // marginTop: 14,
+    marginLeft: 8,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    // marginTop: 6,
+  },
+  inputSearchStyle: {
+    fontSize: 16,
+    height: 40,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  renderLeftIcon: {
+    marginLeft: 10,
+  },
+  //ViewDetailsCustomers============================================
+  materialIconsStyle: {
+    justifyContent: "flex-end",
+    top: 20,
+    right: 20,
+    position: "absolute",
+  },
+  titleDetailsCustomer:{
+    fontSize: 24,
+    fontWeight:"bold",
+    color:"white",
+    justifyContent:"center",
+    marginTop:20,
+    top:35,
+    padding:20
+  },
+  viewContent:{
+    backgroundColor: "white",
+            borderWidth: 1,
+            borderTopRightRadius: 30,
+            borderTopLeftRadius:30,
+            borderColor: "#fff",
+            height: "85%",
+            marginTop:65,
+            width: "100%",
+            borderEndEndRadius:0,
+            borderEndStartRadius:0
+  },
+  viewInMaterial:{
+      marginTop: 50,
+      marginLeft: 30,
+      flexDirection: "row",
+  },
+  iconsStyles:{
+    position: "absolute",
+    marginRight: 60,
+    top: "30%",
+    transform: [{ translateY: -15 }], 
+  },
+  textIconStyle:{
+    marginLeft: 50,
+                color: "black",
+                fontSize: 16,
+                textAlign: "center",
+  }
+
+  // box_close============================================
+,CardBox:{
+  width: 170,
+  height: 160,
+  marginRight: 10,
+  backgroundColor: "#fff",
+  },
+  ViewBox:{
+    height: 60,
+    marginTop: 40,
+    marginLeft: 5,
+    justifyContent: "center",
+  },
+  textCardBox:{
+    fontSize: 15, textAlign: "center", marginTop: 10
+  }
+  
+    // boxAccounting============================================
+    ,View:{
+      flexDirection: "row",
+      width: "100%",
+      height: "100%",
+      flexWrap: "wrap",
+      marginTop: 10,
+      marginBottom: 14,
+      borderBottomColor: "green",
+    },
+    card:{
+      height: 90,
+      width: 170,
+      backgroundColor: "white",
+    },
+    textContentInCard:{
+      fontSize: 16, textAlign: "center"
+    },
+    styleTextData:
+    {
+      fontSize: 16,
+                  textAlign: "center",
+                  color: "green",
+    }
+    // ============================================
+
 });
 export default stylesGlobals;

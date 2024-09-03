@@ -18,20 +18,22 @@ import { ICreateExpense } from "@/types/expenses/expense.types";
 import { Dropdown } from "react-native-element-dropdown";
 import React from "react";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import stylesGlobals from "../Global/styles/StylesAppComponents";
+import { Scroll } from "lucide-react-native";
+import Input from "../Global/components_app/Input";
+import Button from "../Global/components_app/Button";
 
 interface Props {
   closeModal: () => void;
 }
 
-
 const CreateExpense = (props: Props) => {
-  const [idBox, setIdBox] = useState<number>(0)
+  const [idBox, setIdBox] = useState<number>(0);
   const [isFocus, setIsFocus] = useState(false);
   const { getCategoryExpenses, post_expense, categoryExpenses } =
     useExpenseStore();
   const { theme } = useContext(ThemeContext);
   const [selectedCategoryId, setSelectedCategoryId] = useState(0);
-
 
   useEffect(() => {
     get_box_data().then((data) => {
@@ -45,7 +47,6 @@ const CreateExpense = (props: Props) => {
     getCategoryExpenses();
   }, []);
 
-
   const validationSchema = yup.object().shape({
     description: yup.string().required("*La descripción es requerida"),
     total: yup
@@ -53,14 +54,17 @@ const CreateExpense = (props: Props) => {
       .required("*El total es requerido")
       .min(0.01, "*El total debe ser mayor a 0.01")
       .positive("*El total debe ser mayor a 0"),
-      // categoryExpenseId: yup.number().required("**La categoría es requerida**")
-      categoryExpenseId: yup.number().required().test("test", "La categoría es requerida",()=>{
-        if(selectedCategoryId > 0){
-          return true
-        }else{
-          return false
+    // categoryExpenseId: yup.number().required("**La categoría es requerida**")
+    categoryExpenseId: yup
+      .number()
+      .required()
+      .test("test", "La categoría es requerida", () => {
+        if (selectedCategoryId > 0) {
+          return true;
+        } else {
+          return false;
         }
-      })
+      }),
   });
 
   const onSubmit = async (payload: ICreateExpense) => {
@@ -76,7 +80,7 @@ const CreateExpense = (props: Props) => {
     } catch (error) {
       ToastAndroid.show("Error al crear el gasto", ToastAndroid.LONG);
     }
-  }
+  };
 
   return (
     <Formik
@@ -98,119 +102,96 @@ const CreateExpense = (props: Props) => {
         touched,
       }) => (
         <>
-        
-        
-
-          <ScrollView>
-            <View
-              style={{
-                width: 300,
-                height: "100%",
-              }}
-            >
-              <SafeAreaView>
-                <View style={{}}>
-                  <Text style={styles.label}>
-                    Descripción: <Text style={styles.required}>*</Text>
-                  </Text>
-                 
-                  {errors.description && touched.description && (
-                    <Text style={styles.errorText}>{errors.description}</Text>
-                  )}
-
-                  <Text style={styles.label}>
-                    Total: <Text style={styles.required}>*</Text>
-                  </Text>
-                 
-                  {errors.total && touched.total && (
-                    <Text style={styles.errorText}>{errors.total}</Text>
-                  )}
-
-                  <Text style={styles.label}>
-                    Categoría: <Text style={styles.required}>*</Text>
-                  </Text>
-                  <View
-                    style={{
-                      marginTop: 6,
-                      height: 50,
-                      borderColor: "#D9D9DA",
-                      borderWidth: 1,
-                      borderRadius: 15,
-                      width: "98%",
-                    }}
-                  >
-                    <Dropdown
-                      style={[
-                        isFocus && {
-                          borderColor: "blue",
-                          borderRadius: 15,
-                        },
-                      ]}
-                      placeholderStyle={{
-                        fontSize: 16,
-                        marginTop: 10,
-                        marginLeft:10
-                      }}
-                      selectedTextStyle={{
-                        fontSize: 16,
-                        marginTop: 10,
-                      }}
-                      iconStyle={{
-                        width: 20,
-                        height: 20,
-                        top:6,
-                        marginRight:10,
-                      }}
-                      data={categoryExpenses}
-                      itemTextStyle={{
-                        fontSize: 16,
-                      }}
-                      search
-                      maxHeight={250}
-                      labelField="name"
-                      valueField="id"
-                      placeholder={
-                        !isFocus ? "Selecciona una categoría" : "..."
-                      }
-                      searchPlaceholder="Buscar categoría..."
-                      value={values.categoryExpenseId.toString()}
-                      onFocus={() => setIsFocus(true)}
-                      onBlur={() => setIsFocus(false)}
-                      onChange={(item) => setSelectedCategoryId(item.id)}
-                      renderLeftIcon={() => (
-                        <AntDesign
-                          style={{
-                            marginLeft:10,
-                            marginTop: 10,
-                          }}
-                          color={isFocus ? "blue" : "black"}
-                          name="Safety"
-                          size={20}
-                        />
-                      )}
-                    />
-                     {errors.categoryExpenseId && touched.categoryExpenseId && (
-                    <Text style={{...styles.errorText, marginTop: 12}}>{errors.categoryExpenseId}</Text>
-                  )}
-                  </View>
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                  }}
-                ></View>
-              </SafeAreaView>
+        <MaterialCommunityIcons 
+        size={20}
+        name="close"
+        color="black"
+        onPress={()=> props.closeModal()}
+        style={stylesGlobals.materialIconsStyle}
+        />
+          <SafeAreaView style={{ ...stylesGlobals.safeAreaForm }}>
+            <View style={{ width: "auto", height: 300 }}>
               <View
                 style={{
-                  height: "60%",
-                  marginTop: 40,
-                  width:"100%"
+                  width: 260,
                 }}
               >
-               
+                <ScrollView>
+                  <Text style={stylesGlobals.textInput}>
+                    Descripción <Text style={{ color: "#EF4444" }}>*</Text>
+                  </Text>
+                  <Input
+                    handleBlur={handleBlur("description")}
+                    onChangeText={handleChange("description")}
+                    placeholder="Ingrese una descripción"
+                    values={values.description}
+                    icon={"clipboard-text"}
+                  />
+                  {errors.description && touched.description && (
+                    <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                      {errors.description}
+                    </Text>
+                  )}
+                  <Text style={stylesGlobals.textInput}>
+                    Categoría<Text style={{ color: "#EF4444" }}>*</Text>
+                  </Text>
+                  <Dropdown
+                    style={[
+                      isFocus ? stylesGlobals.isFocusStyles : {},
+                      { ...stylesGlobals.styleDropdown },
+                    ]}
+                    placeholderStyle={stylesGlobals.placeholderStyle}
+                    selectedTextStyle={stylesGlobals.selectedTextStyle}
+                    inputSearchStyle={stylesGlobals.inputSearchStyle}
+                    iconStyle={stylesGlobals.iconStyle}
+                    data={categoryExpenses}
+                    itemTextStyle={{
+                      fontSize: 16,
+                    }}
+                    search
+                    labelField="name"
+                    valueField="id"
+                    maxHeight={250}
+                    placeholder={!isFocus ? "Selecciona una categoría" : "..."}
+                    searchPlaceholder="Buscar categoría..."
+                    value={values.categoryExpenseId.toString()}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={(item) => setSelectedCategoryId(item.id)}
+                    renderLeftIcon={() => (
+                      <AntDesign
+                        style={stylesGlobals.renderLeftIcon}
+                        color={isFocus ? "blue" : "black"}
+                        name="Safety"
+                        size={20}
+                      />
+                    )}
+                  />
+                  <Text style={stylesGlobals.textInput}>
+                    Total<Text style={{ color: "#EF4444" }}>*</Text>
+                  </Text>
+                  <Input
+                    handleBlur={handleBlur("total")}
+                    onChangeText={handleChange("total")}
+                    values={values.total.toString()}
+                    keyboardType="numeric"
+                    icon={"cash"}
+                  />
+                  {errors.total && touched.total && (
+                    <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                      {errors.total}
+                    </Text>
+                  )}
+
+                </ScrollView>
+                <View style={{right:20}}>
+          <Button Title="Guardar" onPress={() => handleSubmit()} />
+                  
+                </View>
+
               </View>
             </View>
-          </ScrollView>
+          </SafeAreaView>
         </>
       )}
     </Formik>

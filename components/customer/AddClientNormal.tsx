@@ -273,7 +273,7 @@ const AddClientsNormal = (props: Props) => {
                   margin: 10,
                 }}
               >
-                <View style={{ height: "80%", marginBottom: 5 }}>
+                <View style={{ height: "92%", marginBottom: 5 }}>
                   <ScrollView>
                     <Text style={stylesGlobals.textInput}>
                       Nombre <Text style={{ color: "#EF4444" }}>*</Text>
@@ -283,6 +283,8 @@ const AddClientsNormal = (props: Props) => {
                       onChangeText={handleChange("nombre")}
                       placeholder="Ingresa nombres"
                       icon={"account"}
+                      values={values.nombre}
+                      defaultValue={props.customer?.nombre}
                     />
                     {errors.nombre && touched.nombre && (
                       <Text style={{ color: "#EF4444", marginBottom: 5 }}>
@@ -307,89 +309,85 @@ const AddClientsNormal = (props: Props) => {
                         {errors.correo}
                       </Text>
                     )}
-                    {/* <Text style={stylesGlobals.labelStyle}>
+                    <Text style={stylesGlobals.textInput}>
                       Teléfono:
-                      <Text style={stylesGlobals.styleRequired}>*</Text>
+                      <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
                     <Input
-                      style={stylesGlobals.input}
-                      value={values.telefono}
-                      onBlur={handleBlur("telefono")}
+                      handleBlur={handleBlur("telefono")}
                       onChangeText={handleChange("telefono")}
                       placeholder="0000 0000"
-                      aria-labelledby="inputLabel"
+                      values={values.telefono}
                       defaultValue={props.customer?.telefono}
                       keyboardType="numeric"
+                      icon={"phone"}
                     />
                     {errors.telefono && touched.telefono && (
-                      <Text style={stylesGlobals.errorText}>
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
                         {errors.telefono}
                       </Text>
                     )}
-                    <Text style={stylesGlobals.labelStyle}>
+                    <Text style={stylesGlobals.textInput}>
                       Tipo de documento:
-                      <Text style={stylesGlobals.styleRequired}>*</Text>
+                      <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
-                    <View style={stylesGlobals.styleViewDropdown}>
-                      <Dropdown
-                        style={[
-                          isFocusDoc && {
-                            ...stylesGlobals.isFocusDropdown,
-                          },
-                        ]}
-                        placeholderStyle={stylesGlobals.placeholderStyle}
-                        selectedTextStyle={stylesGlobals.selectedTextStyle}
-                        inputSearchStyle={stylesGlobals.inputSearchStyle}
-                        iconStyle={stylesGlobals.iconStyle}
-                        data={cat_022_tipo_de_documento_de_ide}
-                        itemTextStyle={{
-                          fontSize: 16,
-                        }}
-                        search
-                        maxHeight={250}
-                        labelField="valores"
-                        valueField="codigo"
-                        placeholder={
-                          props.customer?.tipoDocumento
-                            ? `${name}`
-                            : "..." && !isFocusDoc
-                            ? "Selecciona un tipo de documento"
-                            : "..."
-                        }
-                        searchPlaceholder="Escribe para buscar..."
-                        value={values.tipoDocumento}
-                        onFocus={() => setIsFocusDoc(true)}
-                        onBlur={() => setIsFocusDoc(false)}
-                        onChange={(tipoDocumento) => {
-                          handleChange("tipoDocumento")(tipoDocumento.codigo);
-                          // handleChange("tipoDocumento")(setNameTypeDocu);
-                          setNameTypeDocu(tipoDocumento.valores);
-                          setIsFocusDoc(false);
-                        }}
-                        renderLeftIcon={() => (
-                          <AntDesign
-                            style={stylesGlobals.icon}
-                            color={isFocusDoc ? "blue" : "black"}
-                            name="Safety"
-                            size={20}
-                          />
-                        )}
-                      />
-                      {errors.tipoDocumento && touched.tipoDocumento && (
-                        <Text style={{ color: "red", left: "2%" }}>
-                          {errors.tipoDocumento}
-                        </Text>
+                    <Dropdown
+                      style={[
+                        isFocusDoc ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      data={cat_022_tipo_de_documento_de_ide}
+                      itemTextStyle={{
+                        fontSize: 16,
+                      }}
+                      search
+                      labelField="valores"
+                      valueField="codigo"
+                      maxHeight={250}
+                      placeholder={
+                        props.customer?.tipoDocumento
+                          ? `${name}`
+                          : "..." && !isFocusDoc
+                          ? "Selecciona un tipo de documento"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      value={values.tipoDocumento}
+                      onFocus={() => setIsFocusDoc(true)}
+                      onBlur={() => setIsFocusDoc(false)}
+                      onChange={(tipoDocumento) => {
+                        handleChange("tipoDocumento")(tipoDocumento.codigo);
+                        // handleChange("tipoDocumento")(setNameTypeDocu);
+                        setNameTypeDocu(tipoDocumento.valores);
+                        setIsFocusDoc(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocusDoc ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
                       )}
-                    </View>
-                    <Text style={stylesGlobals.labelStyle}>
+                    />
+                    {errors.tipoDocumento && touched.tipoDocumento && (
+                      <Text style={{ color: "red", left: "2%" }}>
+                        {errors.tipoDocumento}
+                      </Text>
+                    )}
+
+                    <Text style={stylesGlobals.textInput}>
                       Número de documento:
-                      <Text style={stylesGlobals.styleRequired}>*</Text>
+                      <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
                     <Input
-                      style={stylesGlobals.input}
-                      value={values.numDocumento}
+                      values={values.numDocumento}
                       defaultValue={props.customer?.numDocumento}
-                      onBlur={handleBlur("numDocumento")}
+                      handleBlur={handleBlur("numDocumento")}
                       onChangeText={handleChange("numDocumento")}
                       placeholder={
                         nameTypeDocu === "DUI"
@@ -400,137 +398,140 @@ const AddClientsNormal = (props: Props) => {
                       }
                       aria-labelledby="inputLabel"
                       keyboardType={tipeKeyboard ? "numeric" : "default"}
+                      icon={"card"}
                     />
                     {errors.numDocumento && touched.numDocumento && (
-                      <Text style={stylesGlobals.errorText}>
+                      <Text style={{ color: "red", left: "2%" }}>
                         {errors.numDocumento}
                       </Text>
                     )}
-
-                    <Text style={stylesGlobals.labelStyle}>
+                    <Text style={stylesGlobals.textInput}>
                       Departamento:
-                      <Text style={stylesGlobals.styleRequired}>*</Text>
+                      <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
-                    <View style={stylesGlobals.styleViewDropdown}>
-                      <Dropdown
-                        style={[
-                          isFocusDepart && {
-                            ...stylesGlobals.isFocusDropdown,
-                          },
-                        ]}
-                        placeholderStyle={stylesGlobals.placeholderStyle}
-                        selectedTextStyle={stylesGlobals.selectedTextStyle}
-                        inputSearchStyle={stylesGlobals.inputSearchStyle}
-                        iconStyle={stylesGlobals.iconStyle}
-                        data={cat_012_departamento}
-                        itemTextStyle={{
-                          fontSize: 16,
-                        }}
-                        search
-                        maxHeight={250}
-                        labelField="valores"
-                        valueField="id"
-                        placeholder={
-                          props.customer_direction?.departamento
-                            ? `${props.customer_direction.nombreDepartamento}`
-                            : "..." && !isFocusDepart
-                            ? "Selecciona un departamento"
-                            : "..."
-                        }
-                        searchPlaceholder="Escribe para buscar..."
-                        value={props.customer_direction?.nombreDepartamento}
-                        onFocus={() => setIsFocusDepart(true)}
-                        onBlur={() => setIsFocusDepart(false)}
-                        onChange={(departamento) => {
-                          handleChange("departamento")(departamento.codigo);
-                          handleChange("nombreDepartamento")(
-                            departamento.valores
-                          );
-                          setSelectedCodeDep(departamento.codigo);
-                          setIsFocusDepart(false);
-                        }}
-                        renderLeftIcon={() => (
-                          <AntDesign
-                            style={stylesGlobals.icon}
-                            color={isFocusDepart ? "blue" : "black"}
-                            name="Safety"
-                            size={20}
-                          />
-                        )}
-                      />
-                    </View>
-                    <Text style={stylesGlobals.labelStyle}>
-                      Municipios:
-                      <Text style={stylesGlobals.styleRequired}>*</Text>
-                    </Text>
-                    <View style={stylesGlobals.styleViewDropdown}>
-                      <Dropdown
-                        style={[
-                          isFocusMuni && {
-                            ...stylesGlobals.isFocusDropdown,
-                          },
-                        ]}
-                        placeholderStyle={stylesGlobals.placeholderStyle}
-                        selectedTextStyle={stylesGlobals.selectedTextStyle}
-                        inputSearchStyle={stylesGlobals.inputSearchStyle}
-                        iconStyle={stylesGlobals.iconStyle}
-                        data={cat_013_municipios}
-                        itemTextStyle={{
-                          fontSize: 16,
-                        }}
-                        search
-                        maxHeight={250}
-                        labelField="valores"
-                        valueField="id"
-                        placeholder={
-                          props.customer_direction?.municipio
-                            ? `${props.customer_direction.nombreMunicipio}`
-                            : "..." && !isFocusMuni
-                            ? "Selecciona un municipio"
-                            : "..."
-                        }
-                        searchPlaceholder="Escribe para buscar..."
-                        value={props.customer_direction?.nombreMunicipio}
-                        onFocus={() => setIsFocusMuni(true)}
-                        onBlur={() => setIsFocusMuni(false)}
-                        onChange={(item) => {
-                          handleChange("municipio")(item.codigo);
-                          handleChange("nombreMunicipio")(item.valores);
-                          setIsFocusMuni(false);
-                        }}
-                        renderLeftIcon={() => (
-                          <AntDesign
-                            style={stylesGlobals.icon}
-                            color={isFocusMuni ? "blue" : "black"}
-                            name="Safety"
-                            size={20}
-                          />
-                        )}
-                      />
-                    </View>
+                    <Dropdown
+                      style={[
+                        isFocusDepart ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      data={cat_012_departamento}
+                      itemTextStyle={{
+                        fontSize: 16,
+                      }}
+                      search
+                      labelField="valores"
+                      valueField="codigo"
+                      maxHeight={250}
+                      placeholder={
+                        props.customer_direction?.departamento
+                          ? `${props.customer_direction.nombreDepartamento}`
+                          : "..." && !isFocusDepart
+                          ? "Selecciona un departamento"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      value={props.customer_direction?.nombreDepartamento}
+                      onFocus={() => setIsFocusDepart(true)}
+                      onBlur={() => setIsFocusDepart(false)}
+                      onChange={(departamento) => {
+                        handleChange("departamento")(departamento.codigo);
+                        handleChange("nombreDepartamento")(
+                          departamento.valores
+                        );
+                        setSelectedCodeDep(departamento.codigo);
+                        setIsFocusDepart(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocusDepart ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
 
-                    <Text style={stylesGlobals.labelStyle}>
-                      Complemento
-                      <Text style={stylesGlobals.styleRequired}>*</Text>
+                    <Text style={stylesGlobals.textInput}>
+                      Municipios:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Dropdown
+                      style={[
+                        isFocusMuni ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      data={cat_013_municipios}
+                      itemTextStyle={{
+                        fontSize: 16,
+                      }}
+                      search
+                      labelField="valores"
+                      valueField="codigo"
+                      maxHeight={250}
+                      placeholder={
+                        props.customer_direction?.municipio
+                          ? `${props.customer_direction.nombreMunicipio}`
+                          : "..." && !isFocusDepart
+                          ? "Selecciona un municipio"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      value={props.customer_direction?.nombreMunicipio}
+                      onFocus={() => setIsFocusMuni(true)}
+                      onBlur={() => setIsFocusMuni(false)}
+                      onChange={(item) => {
+                        handleChange("municipio")(item.codigo);
+                        handleChange("nombreMunicipio")(item.valores);
+                        setIsFocusMuni(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocusMuni ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
+                    <Text style={stylesGlobals.textInput}>
+                      Complemento <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
                     <Input
-                      style={stylesGlobals.input}
-                      value={values.directionCustomer?.complemento}
-                      defaultValue={props.customer_direction?.complemento}
-                      onBlur={handleBlur("complemento")}
+                      handleBlur={handleBlur("complemento")}
                       onChangeText={handleChange("complemento")}
-                      placeholder="Ingrese el complemento"
-                      aria-labelledby="inputLabel"
-                    /> */}
+                      placeholder="Ingresa un complemento"
+                      icon={"clipboard-outline"}
+                      values={values.directionCustomer?.complemento}
+                      defaultValue={props.customer_direction?.complemento}
+                    />
 
                     <Button
                       Title="Marcar ubicación"
                       onPress={() => setShowModal(true)}
                       color={theme.colors.warning}
                     />
+                     <View
+                      style={{
+                        right: 10,
+                      }}
+                    >
+                      <Button
+                        Title="Guardar"
+                        withB={340}
+                        onPress={() => handleSubmit()}
+                      />
+                    </View>
                   </ScrollView>
                 </View>
-                <Button Title="Guardar" onPress={() => handleSubmit()} />
+               
               </View>
             </SafeAreaView>
           </>

@@ -30,6 +30,9 @@ import {
 } from "@/types/expenses/expense.types";
 import AlertWithAnimation from "@/components/Global/manners/Alert";
 import noResult from "@/assets/gif_json/bx8ntOOR1D.json";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Card from "@/components/Global/components_app/Card";
+import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 const expenses = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setIsLoading] = useState(false);
@@ -122,43 +125,18 @@ const expenses = () => {
       <StatusBar style="dark" />
       {loading ? (
         <>
-          <View
-            style={{
-              flex: 1,
-              height: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#fff",
-            }}
-          >
+          <View style={stylesGlobals.viewSpinnerInit}>
             <SpinnerInitPage />
           </View>
         </>
       ) : (
         <>
-          <View
-            style={{
-              backgroundColor: "#fff",
-              height: "100%",
-            }}
-          >
-            <SafeAreaView
-              style={{
-                flex: 1,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "#FFFFFF",
-                paddingHorizontal: 8,
-              }}
-            >
-              <View style={styles.filter}>
-                <View
-                  style={{
-                    position: "absolute",
-                    justifyContent: "space-between",
-                    gap: 100,
-                  }}
-                >
+          <SafeAreaView style={stylesGlobals.safeAreaForm}>
+            {is_loading ? (
+              <SpinLoading is_showing={is_loading} />
+            ) : (
+              <>
+                <View style={stylesGlobals.filter}>
                   <AnimatedButton
                     handleClick={() => {
                       SheetManager.show("expense-filters-sheet", {
@@ -178,10 +156,11 @@ const expenses = () => {
                     }}
                     iconName="filter"
                     buttonColor={theme.colors.third}
-                    width={42}
-                    height={42}
-                    right={100}
-                    size={30}
+                    width={40}
+                    height={40}
+                    right={42}
+                    left={10}
+                    size={25}
                     top={0}
                   />
                   <AnimatedButton
@@ -190,164 +169,105 @@ const expenses = () => {
                     iconName="plus"
                     width={42}
                     height={42}
-                    right={100}
-                    size={30}
-                    left={100}
+                    right={10}
+                    size={25}
                     top={0}
                   />
                 </View>
-              </View>
-              <View style={{ height: "82%" }}>
-                {/* <Pressable
-                  onPress={() =>
-                    SheetManager.show("expense-filters-sheet", {
-                      payload: {
-                        limit: limit,
-                        setLimit,
-                        setCategory,
-                        category: category,
-                        handleConfirm(limit, category) {
-                          setLimit(limit);
-                          setCategory(category);
-                          setRefreshing(true);
-                          SheetManager.hide("expense-filters-sheet");
-                        },
-                      },
-                    })
-                  }
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    width: "90%",
-                    marginLeft: 18,
-                    paddingLeft: 20,
-                    marginTop: 10,
-                    borderBottomWidth: 1,
-                    borderBottomColor: "#D1D5DB",
-                    height: 56,
-                    backgroundColor: "#f9f9f9",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#718096",
-                      fontSize: 16,
-                    }}
-                  >
-                    Filtros disponibles
-                  </Text>
-                  <Pressable
-                    style={{
-                      position: "absolute",
-                      right: 20,
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name="filter"
-                      size={25}
-                      color="#607274"
+                <ScrollView
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={() => setRefreshing(true)}
                     />
-                  </Pressable>
-                </Pressable> */}
-
-                <View
-                  style={{
-                    height: "100%",
-                  }}
+                  }
                 >
-                  <ScrollView
-                    refreshControl={
-                      <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={handleRefresh}
-                      />
-                    }
-                  >
-                    {is_loading ? (
-                      <View
-                        style={{
-                          alignItems: "center",
-                          justifyContent: "center",
-                          flex: 1,
-                          width: "100%",
-                          height: "100%",
-                        }}
-                      >
-                        <View
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <SpinLoading is_showing={is_loading} />
-                        </View>
-                      </View>
-                    ) : (
-                      <View
-                        style={{
-                          top:10,
-                          // backgroundColor: theme.colors.secondary,
-                          justifyContent:"center",
-                          alignItems: "center",
-                          
-                        }}
-                      >
-                        {expenses.length > 0 ? (
-                          <>
-                            {!is_loading &&
-                              expenses.map((expense, index) => (
-                               <></>
-                              ))}
-                          </>
-                        ) : (
-                          <>
-                             <View
-                              style={{
-                                padding: 40,
-                                width: "100%",
-                                height: "auto",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              }}
-                            >
-                              <LottieView
-                                autoPlay
-                                ref={animation}
+                  <View style={stylesGlobals.viewScroll}>
+                    <>
+                      {expenses &&
+                        expenses.map((expense, index) => (
+                          <Card key={index} style={stylesGlobals.styleCard}>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.secondary}
+                                name="clipboard-text"
+                                size={22}
                                 style={{
-                                  marginTop: 50,
-                                  width: 380,
-                                  height: 380,
+                                  position: "absolute",
+                                  left: 7,
                                 }}
-                                source={noResult}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {expense.description}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.dark}
+                                name="equal-box"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {expense.categoryExpense.name}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.third}
+                                name="cash"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {expense.total}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewGroupButton}>
+                              <ButtonForCard
+                                onPress={() => {
+                                  handleChangeExpenses(expense);
+                                  setIsShowUpdate(true);
+                                }}
+                                icon={"pencil"}
+                              />
+                              <ButtonForCard
+                                onPress={() => {
+                                  setDeleteShow(true);
+                                  setExpenseId(expense.id);
+                                }}
+                                icon={"delete"}
+                                color={theme.colors.danger}
                               />
                             </View>
-                          </>
-                        )}
-                      </View>
-                    )}
-                  </ScrollView>
-                </View>
-              </View>
-              <View style={{
-                bottom:4,
-              }}>
-              {expenses.length > 0 && (
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  onPageChange={handlePageChange}
-                />
-              )}
-                </View>
-              
-            </SafeAreaView>
-          </View>
-          {/* */}
+                          </Card>
+                        ))}
+                    </>
+                  </View>
+                  {expenses.length > 0 && (
+                    <Pagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      onPageChange={handlePageChange}
+                    />
+                  )}
+                </ScrollView>
+              </>
+            )}
+          </SafeAreaView>
 
+          <AlertWithAnimation
+            visible={deleteShow}
+            onClose={() => setDeleteShow(false)}
+            onPress={() => deleteExpense(expenseId)}
+            title="¿Estas seguro que deseas eliminar este registro?"
+          />
           <View style={styles.centeredView}>
             <Modal visible={showModal} animationType="slide">
               <View style={styles.centeredView}>
@@ -373,12 +293,6 @@ const expenses = () => {
               </View>
             </Modal>
           </View>
-          <AlertWithAnimation
-            visible={deleteShow}
-            onClose={() => setDeleteShow(false)}
-            onPress={() => deleteExpense(expenseId)}
-            title="¿Estas seguro que deseas eliminar este registro?"
-          />
         </>
       )}
     </>
@@ -396,8 +310,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 10,
-    height: "62%",
-
+    height: 380,
     backgroundColor: "white",
     borderRadius: 20,
     padding: 35,

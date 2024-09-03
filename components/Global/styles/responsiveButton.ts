@@ -53,7 +53,7 @@ export const button_global = {
   // height: dimension < 390 ? 50 : 65,
 };
 export const padding_global = {
-  padding: dimension < 390 ? 8 : 15,
+  padding: dimension < 390 ? 14 : 15,
 };
 export const padding_global_button = {
   padding: dimension < 390 ? 8 : 11,

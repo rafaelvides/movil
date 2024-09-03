@@ -28,6 +28,9 @@ import SaveLocations from "../save_locations/SaveLocations";
 import of_customers from "@/app/(inventory)/of_customers";
 import { isReadable } from "stream";
 import { DriverOptionNotSetError } from "typeorm/browser";
+import stylesGlobals from "../Global/styles/StylesAppComponents";
+import Input from "../Global/components_app/Input";
+import Button from "../Global/components_app/Button";
 
 interface Props {
   closeModal: () => void;
@@ -269,6 +272,8 @@ function AddClientContributor(props: Props) {
     }
   };
 
+  console.log("datoooooos", props.customer_direction);
+
   return (
     <>
       <StatusBar style="light" />
@@ -287,14 +292,405 @@ function AddClientContributor(props: Props) {
           touched,
         }) => (
           <>
-            <View
-              style={{
-                height: "100%",
-                width: "100%",
-              }}
-            >
-             
-            </View>
+            <SafeAreaView style={stylesGlobals.safeAreaForm}>
+              <View
+                style={{
+                  margin: 20,
+                  bottom: 45,
+                }}
+              >
+                <Text style={{ fontSize: 16 }}>Cliente contribuyente</Text>
+              </View>
+              <View
+                style={{
+                  bottom: 60,
+                  height: "100%",
+                  margin: 10,
+                }}
+              >
+                <View style={{ height: "86%", marginBottom: 5 }}>
+                  <ScrollView>
+                    <Text style={stylesGlobals.textInput}>
+                      Nombre <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Input
+                      handleBlur={handleBlur("nombre")}
+                      onChangeText={handleChange("nombre")}
+                      placeholder="Ingresa nombres"
+                      icon={"account"}
+                      values={values.nombre}
+                      defaultValue={props.customer?.nombre}
+                    />
+                    {errors.nombre && touched.nombre && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.nombre}
+                      </Text>
+                    )}
+                    <Text style={stylesGlobals.textInput}>
+                      Nombre Comercial{" "}
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Input
+                      handleBlur={handleBlur("nombreComercial")}
+                      onChangeText={handleChange("nombreComercial")}
+                      placeholder="Ingresa el nombre comercial"
+                      icon={"card-account-details"}
+                      values={values.nombreComercial}
+                      defaultValue={props.customer?.nombreComercial}
+                    />
+                    {errors.nombreComercial && touched.nombreComercial && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.nombreComercial}
+                      </Text>
+                    )}
+
+                    <Text style={stylesGlobals.textInput}>
+                      Correo electrónico:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Input
+                      handleBlur={handleBlur("correo")}
+                      onChangeText={handleChange("correo")}
+                      placeholder="example@gmail.com"
+                      values={values.correo}
+                      defaultValue={props.customer?.correo}
+                      keyboardType="email-address"
+                      icon={"gmail"}
+                    />
+                    {errors.correo && touched.correo && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.correo}
+                      </Text>
+                    )}
+                    <Text style={stylesGlobals.textInput}>
+                      Teléfono:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Input
+                      handleBlur={handleBlur("telefono")}
+                      onChangeText={handleChange("telefono")}
+                      placeholder="0000 0000"
+                      values={values.telefono}
+                      defaultValue={props.customer?.telefono}
+                      keyboardType="numeric"
+                      icon={"phone"}
+                    />
+                    {errors.telefono && touched.telefono && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.telefono}
+                      </Text>
+                    )}
+                    <Text style={stylesGlobals.textInput}>
+                      Tipo de documento:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Dropdown
+                      style={[
+                        isFocusDoc ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      data={cat_022_tipo_de_documento_de_ide}
+                      itemTextStyle={{
+                        fontSize: 16,
+                      }}
+                      search
+                      labelField="valores"
+                      valueField="codigo"
+                      maxHeight={250}
+                      placeholder={
+                        props.customer?.tipoDocumento
+                          ? `${nameDocument}`
+                          : "..." && !isFocusDoc
+                          ? "Selecciona un tipo de documento"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      value={values.tipoDocumento}
+                      onFocus={() => setIsFocusDoc(true)}
+                      onBlur={() => setIsFocusDoc(false)}
+                      onChange={(tipoDocumento) => {
+                        handleChange("tipoDocumento")(tipoDocumento.codigo);
+                        setNameTypeDocument(tipoDocumento.valores);
+                        // handleChange("descActividad")(codActividad.valores);
+                        setIsFocusDoc(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocusDoc ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
+                    {errors.tipoDocumento && touched.tipoDocumento && (
+                      <Text style={{ color: "red", left: "2%" }}>
+                        {errors.tipoDocumento}
+                      </Text>
+                    )}
+
+                    <Text style={stylesGlobals.textInput}>
+                      Número de documento:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Input
+                      values={values.numDocumento}
+                      defaultValue={props.customer?.numDocumento}
+                      handleBlur={handleBlur("numDocumento")}
+                      onChangeText={handleChange("numDocumento")}
+                      placeholder={
+                        nameTypeDocument === "DUI"
+                          ? "123456789"
+                          : "00000000" && nameTypeDocument === "NIT"
+                          ? "0143-012345-600-1"
+                          : "00000000"
+                      }
+                      aria-labelledby="inputLabel"
+                      keyboardType={nameTypeDocument ? "numeric" : "default"}
+                      icon={"card"}
+                    />
+                    {errors.numDocumento && touched.numDocumento && (
+                      <Text style={{ color: "red", left: "2%" }}>
+                        {errors.numDocumento}
+                      </Text>
+                    )}
+                    <Text style={stylesGlobals.textInput}>
+                      NRC:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Input
+                      handleBlur={handleBlur("nrc")}
+                      onChangeText={handleChange("nrc")}
+                      placeholder="000000000000000"
+                      values={values.nrc}
+                      defaultValue={props.customer?.nrc}
+                      icon={"card-bulleted"}
+                    />
+                    {errors.nrc && touched.nrc && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.nrc}
+                      </Text>
+                    )}
+                    <Text style={stylesGlobals.textInput}>
+                      Tipo de contribuyente:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Dropdown
+                      style={[
+                        isFocusType ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      placeholder={
+                        props.customer?.tipoContribuyente
+                          ? `${props.customer?.tipoContribuyente}`
+                          : "..." && isTypeOfTaxpayer
+                          ? `${isTypeOfTaxpayer}`
+                          : "..." && !isFocusType
+                          ? "Selecciona un tipo de contribuyente"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      labelField="key"
+                      valueField="key"
+                      value={
+                        props.customer?.tipoContribuyente && isTypeOfTaxpayer
+                      }
+                      search
+                      maxHeight={250}
+                      data={typeOfTaxpayer}
+                      onFocus={() => setIsFocusType(true)}
+                      onBlur={() => setIsFocusType(false)}
+                      onChange={(item) => {
+                        handleChange("tipoContribuyente")(item.key);
+                        handleTypeTaxpayer(item.key);
+                        setIsFocusType(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocusType ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
+                    <Text style={stylesGlobals.textInput}>
+                      Actividad económica:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Dropdown
+                      style={[
+                        isFocusDoc ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      data={cat_019_codigo_de_actividad_economica}
+                      search
+                      maxHeight={250}
+                      labelField="valores"
+                      valueField="id"
+                      placeholder={
+                        props.customer?.codActividad
+                          ? `${props.customer.descActividad}`
+                          : "..." && !isFocus
+                          ? "Selecciona una actividad economica"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      value={props.customer?.descActividad}
+                      onFocus={() => setIsFocus(true)}
+                      onBlur={() => setIsFocus(false)}
+                      onChange={(codActividad) => {
+                        handleChange("codActividad")(codActividad.codigo);
+                        handleChange("descActividad")(codActividad.valores);
+                        setIsFocus(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocus ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
+                    <Text style={stylesGlobals.textInput}>
+                      Departamento:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Dropdown
+                      style={[
+                        isFocusDepart ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      data={cat_012_departamento}
+                      itemTextStyle={{
+                        fontSize: 16,
+                      }}
+                      search
+                      labelField="valores"
+                      valueField="codigo"
+                      maxHeight={250}
+                      placeholder={
+                        props.customer_direction?.departamento
+                          ? `${props.customer_direction.nombreDepartamento}`
+                          : "..." && !isFocusDepart
+                          ? "Selecciona un departamento"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      value={props.customer_direction?.nombreDepartamento}
+                      onFocus={() => setIsFocusDepart(true)}
+                      onBlur={() => setIsFocusDepart(false)}
+                      onChange={(departamento) => {
+                        handleChange("departamento")(departamento.codigo);
+                        handleChange("nombreDepartamento")(
+                          departamento.valores
+                        );
+                        setSelectedCodeDep(departamento.codigo);
+                        setIsFocusDepart(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocusDepart ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
+                    <Text style={stylesGlobals.textInput}>
+                      Municipios:
+                      <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Dropdown
+                      style={[
+                        isFocusMuni ? stylesGlobals.isFocusStyles : {},
+                        { ...stylesGlobals.styleDropdown },
+                      ]}
+                      placeholderStyle={stylesGlobals.placeholderStyle}
+                      selectedTextStyle={stylesGlobals.selectedTextStyle}
+                      inputSearchStyle={stylesGlobals.inputSearchStyle}
+                      iconStyle={stylesGlobals.iconStyle}
+                      data={cat_013_municipios}
+                      itemTextStyle={{
+                        fontSize: 16,
+                      }}
+                      search
+                      labelField="valores"
+                      valueField="codigo"
+                      maxHeight={250}
+                      placeholder={
+                        props.customer_direction?.municipio
+                          ? `${props.customer_direction.nombreMunicipio}`
+                          : "..." && !isFocusDepart
+                          ? "Selecciona un municipio"
+                          : "..."
+                      }
+                      searchPlaceholder="Escribe para buscar..."
+                      value={props.customer_direction?.nombreMunicipio}
+                      onFocus={() => setIsFocusMuni(true)}
+                      onBlur={() => setIsFocusMuni(false)}
+                      onChange={(item) => {
+                        handleChange("municipio")(item.codigo);
+                        handleChange("nombreMunicipio")(item.valores);
+                        setIsFocusMuni(false);
+                      }}
+                      renderLeftIcon={() => (
+                        <AntDesign
+                          style={stylesGlobals.renderLeftIcon}
+                          color={isFocusMuni ? "blue" : "black"}
+                          name="Safety"
+                          size={20}
+                        />
+                      )}
+                    />
+                    <Text style={stylesGlobals.textInput}>
+                      Complemento <Text style={{ color: "#EF4444" }}>*</Text>
+                    </Text>
+                    <Input
+                      handleBlur={handleBlur("complemento")}
+                      onChangeText={handleChange("complemento")}
+                      placeholder="Ingresa un complemento"
+                      icon={"clipboard-outline"}
+                      values={values.directionCustomer?.complemento}
+                      defaultValue={props.customer_direction?.complemento}
+                    />
+                    <Button
+                      Title="Marcar ubicación"
+                      onPress={() => setShowModalLocation(true)}
+                      color={theme.colors.warning}
+                    />
+                    <View
+                      style={{
+                        right: 10,
+                      }}
+                    >
+                      <Button
+                        Title="Guardar"
+                        withB={340}
+                        onPress={() => handleSubmit()}
+                      />
+                    </View>
+                  </ScrollView>
+                </View>
+              </View>
+            </SafeAreaView>
           </>
         )}
       </Formik>
