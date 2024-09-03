@@ -34,10 +34,6 @@ const Settings = () => {
   const { stopAllProcess } = useLocation();
 
   const { OnMakeLogout } = useAuthStore();
-  const [modalBiometric, setModalBiometric] = useState(false);
-  const [modalCamera, setModalCamera] = useState(false);
-  const [modalUbication, setModalUbication] = useState(false);
-  const [modalDocument, setModalDocument] = useState(false);
   const { theme } = useContext(ThemeContext);
 
   useFocusEffect(
@@ -66,7 +62,7 @@ const Settings = () => {
     };
 
     getBarCodeScannerPermissions();
-    requestStoragePermission()
+    requestStoragePermission();
   }, []);
   const saveBiometric = () => {
     save_swith_biometric(isBiometric);
@@ -188,8 +184,6 @@ const Settings = () => {
                   name="fingerprint"
                 />
               </View>
-
-             
             </View>
             <View
               style={{
@@ -245,8 +239,6 @@ const Settings = () => {
                       : "#ccc",
                     alignItems: "center",
                     justifyContent: "center",
-                    // borderRadius: 4.5,
-                    // marginLeft: 3,
                     borderColor: hasCameraPermission
                       ? "#2be0b7"
                       : "transparent",
@@ -262,7 +254,6 @@ const Settings = () => {
                     name={hasCameraPermission ? "camera" : "camera-off"}
                   />
                 </View>
-                
               </View>
               <View
                 style={{
@@ -321,7 +312,6 @@ const Settings = () => {
                     name={"map-marker-account"}
                   />
                 </View>
-               
               </View>
               <View
                 style={{
@@ -380,7 +370,6 @@ const Settings = () => {
                     name={"folder"}
                   />
                 </View>
-               
               </View>
 
               <View
@@ -425,7 +414,6 @@ const Settings = () => {
                     name={"delete"}
                   />
                 </View>
-                
               </View>
             </View>
           </ScrollView>

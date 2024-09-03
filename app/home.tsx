@@ -4,6 +4,7 @@ import Card from "@/components/Global/components_app/Card";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
 import { get_point_sale_Id } from "@/plugins/async_storage";
+import { is_auth, return_token } from "@/plugins/secure_store";
 import { verify_box } from "@/services/box.service";
 import { get_theme_by_transmitter } from "@/services/personalization.service";
 import { IBox } from "@/types/box/box.types";
@@ -93,7 +94,10 @@ function home() {
     handleVerifyBox();
     setRefreshing(false);
   }, [refreshing]);
-
+  useEffect(() => {
+    return_token().then((da) => console.log("home",da));
+    is_auth().then((dat) => console.log("home",dat));
+  }, []);
   return (
     <>
       <ScrollView

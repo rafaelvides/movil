@@ -43,13 +43,14 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   OnMakeLogin: async (payload) => {
     return await make_login(payload)
       .then(async ({ data }) => {
-         await save_toke(data.token)
+        console.log("toooo")
         console.log("auth store");
         get().GetConfigurationByTransmitter(data.user.transmitterId);
         console.log("auth 2");
         if (data.ok) {
           console.log("auth 3");
-          
+          await save_toke(data.token)
+
           console.log("auth 4", data.token);
           console.log("auth 5");
           await save_user(data.user);
@@ -79,7 +80,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
                 ToastAndroid.LONG
               );
             });
-          console.log("auth 10");
+          console.log("auth 10", data.user.transmitterId);
           await get().OnLoginMH(data.user.transmitterId, data.token)
           await save_branch_id(String(data.user.branchId));
           console.log("auth 11");
@@ -89,7 +90,6 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
         }
         return true;
       })
-
       .catch(() => {
         ToastAndroid.show(
           "Usuario o contraseña incorrectos",
@@ -99,8 +99,10 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   async OnLoginMH(id, token) {
+    console.log(token)
     get_transmitter(id, token)
       .then(({ data }) => {
+        console.log(data, "data")
         login_mh(data.transmitter.nit, data.transmitter.claveApi)
           .then(async (login_mh) => {
             if (login_mh.data.status === "OK") {
@@ -118,6 +120,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
             }
           })
           .catch((error: AxiosError<ILoginMHFailed>) => {
+            console.log(error.response?.data.body, "1")
             ToastAndroid.show(
               `Error ${error.response?.data.body.descripcionMsg}`,
               ToastAndroid.SHORT
@@ -126,6 +129,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           });
       })
       .catch((error) => {
+        console.log(error, "2")
         console.log("error", error);
         ToastAndroid.show(`Aun no tienes datos asignados`, ToastAndroid.SHORT);
         return;
@@ -145,6 +149,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     const auth = await is_auth();
     const user = await get_user();
     const box = await get_box_data();
+    console.log("el onsetInfo", token, auth)
     if (token && auth) {
       set({
         token,

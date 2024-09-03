@@ -39,15 +39,8 @@ export const useLocationStore = create<ILocationStore>((set) => ({
           coordinateId: Number(data.data.coordinateId),
         };
 
-        // const response = await Location.reverseGeocodeAsync({
-        //   latitude: coordinates.latitude,
-        //   longitude: coordinates.longitude,
-        // });
-        // const address = response[0].city || response[0].name;
-
         set({
           coordinatesRealTime: coordinates,
-          address: "address" ?? "No encontrado",
         });
       })
       .catch((error) => {

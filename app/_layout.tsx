@@ -28,7 +28,6 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const { ready } = useDataBaseInitialize();
-
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -70,7 +69,15 @@ const ValidationNetwork = () => {
       <ThemeProvider>
         <SheetProvider>
           {isConnected === null ? (
-            <Text>Esperando</Text>
+            <Text
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              Esperando
+            </Text>
           ) : (
             <RootLayoutNav isConnected={isConnected} />
           )}

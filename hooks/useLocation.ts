@@ -1,5 +1,4 @@
 import { get_branch_id } from "@/plugins/async_storage";
-import { save_location } from "@/services/locations.service";
 import { useAuthStore } from "@/store/auth.store";
 import { useLocationStore } from "@/store/locations.store";
 import { IGetLocationsResponse } from "@/types/location/locations.types";
@@ -10,7 +9,8 @@ import { useEffect, useState } from "react";
 import { ToastAndroid } from "react-native";
 import { useIsConnected } from "react-native-offline";
 import { createSocket } from "./useSocket";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
+import { API_URL } from "@/utils/constants";
 
 const LOCATION_TASK_NAME = "LOCATION_TASK_BACKGROUND";
 const socket = createSocket();
@@ -21,40 +21,33 @@ TaskManager.defineTask<IGetLocationsResponse>(
     if (error) {
       ToastAndroid.show("Error: " + error.message, ToastAndroid.SHORT);
     } else if (data) {
+      const branchId = await get_branch_id();
       if (data.locations && data.locations.length > 0) {
         const location = data.locations[0];
         if (location.coords.speed > 0 && location.coords.accuracy <= 20) {
-          await get_branch_id()
-            .then(async (id) => {
-              await save_location({
-                branchId: Number(id),
-                date: formatDate(),
-                latitude: data.locations[0].coords.latitude,
-                longitude: data.locations[0].coords.longitude,
-                timestamp: data.locations[0].timestamp,
-                currently: data.locations[0].coords.accuracy,
-              })
-                .then(() => {
-                  socket.emit("locations", "new location")
-                  ToastAndroid.show(
-                    "Ubicación registrada correctamente",
-                    ToastAndroid.LONG
-                  );
-                })
-                .catch((error: AxiosError) => {
-                  ToastAndroid.show(
-                    `Error al registrar la ubicación: ${error.message}`,
-                    ToastAndroid.LONG
-                  );
-                  ToastAndroid.show(
-                    `Error al registrar la ubicación: ${error.response?.data}`,
-                    ToastAndroid.LONG
-                  );
-                });
+          axios
+            .post(`${API_URL}/coordinate`, {
+              branchId: Number(branchId),
+              date: formatDate(),
+              latitude: data.locations[0].coords.latitude,
+              longitude: data.locations[0].coords.longitude,
+              timestamp: data.locations[0].timestamp,
+              currently: data.locations[0].coords.accuracy,
             })
-            .catch(() => {
+            .then(() => {
+              socket.emit("locations", "new location");
               ToastAndroid.show(
-                "Error al obtener la sucursal",
+                "Ubicación registrada correctamente",
+                ToastAndroid.LONG
+              );
+            })
+            .catch((error: AxiosError) => {
+              ToastAndroid.show(
+                `Error al registrar la ubicación: ${error.message}`,
+                ToastAndroid.LONG
+              );
+              ToastAndroid.show(
+                `Error al registrar la ubicación: ${error.response?.data}`,
                 ToastAndroid.LONG
               );
             });
@@ -76,19 +69,14 @@ export const useLocation = () => {
       OnSetInfo();
     })();
   }, []);
+
   useEffect(() => {
     (async () => {
       //Comprueba si el usuario ha habilitado los servicios de ubicación.
       const hasEnabled = await Location.hasServicesEnabledAsync();
+      console.log("hola", has_enabled, hasEnabled, is_authenticated);
       if (!has_enabled && !hasEnabled && !is_authenticated) {
-        TaskManager.getRegisteredTasksAsync().then(async (tasks) => {
-          if (tasks.map((task) => task.taskName).includes(LOCATION_TASK_NAME)) {
-            //Detiene la geovalla para la tarea especificada.
-            await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-            //Anula el registro de la tarea de la aplicación, por lo que la aplicación ya no recibirá actualizaciones para esa tarea.
-            await TaskManager.unregisterTaskAsync(LOCATION_TASK_NAME);
-          }
-        });
+        stopAllProcess();
         return;
       }
 
@@ -111,24 +99,19 @@ export const useLocation = () => {
                   background.status === "granted"
                 ) {
                   Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-                    accuracy: Location.Accuracy.Balanced,
-                    // activityType: Location.ActivityType.AutomotiveNavigation,
+                    accuracy: Location.Accuracy.BestForNavigation,
+                    activityType: Location.ActivityType.AutomotiveNavigation,
                     showsBackgroundLocationIndicator: true,
-                    distanceInterval: 1,
+                    distanceInterval: 5,
                     timeInterval: 5000,
                     // deferredUpdatesDistance: 1,
                     // deferredUpdatesInterval: 1000,
                     foregroundService: {
-                      killServiceOnDestroy: false,
-                      notificationTitle: "FacturacionApp",
+                      killServiceOnDestroy: true,
+                      notificationTitle: "Facturación App",
                       notificationBody: "Ubicación activada",
                       notificationColor: "#fff",
                     },
-                  }).catch(() => {
-                    ToastAndroid.show(
-                      "Error al registrar la ubicación",
-                      ToastAndroid.LONG
-                    );
                   });
                   setIsAvailable(true);
                 } else {
