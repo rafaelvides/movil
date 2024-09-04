@@ -8,7 +8,7 @@ import {
 import { UserLogin } from "@/types/user/user.types";
 import { useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import * as yup from "yup";
 import { Formik } from "formik";
 import { ScrollView } from "react-native-gesture-handler";
@@ -34,7 +34,6 @@ const AddClientsNormal = (props: Props) => {
   const [isFocusDepart, setIsFocusDepart] = useState(false);
   const [isFocusMuni, setIsFocusMuni] = useState(false);
   const [isFocusDoc, setIsFocusDoc] = useState(false);
-  const [name, setIsName] = useState("");
   const [isUser, setUser] = useState<UserLogin | undefined>(undefined);
   const [showModal, setShowModal] = useState(false);
   const [isUpdate, setIsUpdate] = useState(false);
@@ -122,62 +121,18 @@ const AddClientsNormal = (props: Props) => {
     }, [props.customer_direction?.municipio])
   );
 
-  const onChangeSelect = () => {
-    if (nameTypeDocu === "DUI" || nameTypeDocu === "NIT") {
-      setTipyeKeyboard(true);
-    } else if (
-      nameTypeDocu === "Otro" ||
-      nameTypeDocu === "Pasaporte" ||
-      nameTypeDocu === "Carnet de Extranjería"
-    ) {
-      setTipyeKeyboard(false);
-    }
-    if (nameTypeDocu === "default") {
-      if (
-        props.customer?.tipoDocumento === "36" ||
-        props.customer?.tipoDocumento === "13"
-      ) {
-        setTipyeKeyboard(true);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const nameDocument = (code: string) => {
-      if (props.customer?.tipoDocumento) {
-        cat_022_tipo_de_documento_de_ide.map((item) => {
-          if (item.codigo === code) {
-            setIsName(item.valores);
-          }
-        });
-        if (
-          props.customer.tipoDocumento === "13" ||
-          props.customer.tipoDocumento === "36"
-        ) {
-          setTipyeKeyboard(true);
-        } else {
-          setTipyeKeyboard(false);
-        }
-      } else {
-        setIsName("");
-      }
-    };
-    nameDocument(props.customer?.tipoDocumento ?? "");
-  }, [props.customer?.tipoDocumento, tipeKeyboard]);
-
   useEffect(() => {
     OnGetCat012Departamento();
     OnGetCat022TipoDeDocumentoDeIde();
-    onChangeSelect();
-  }, [nameTypeDocu]);
+    UpdateConst();
+    fetchData();
+  }, [props.customer?.tipoDocumento]);
 
-  useEffect(() => {
+  const UpdateConst = () => {
     if (id) {
       setIsUpdate(true);
-    } else {
-      setIsUpdate(false);
     }
-  }, []);
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -190,13 +145,10 @@ const AddClientsNormal = (props: Props) => {
     }, [selectedCodeDep, props.customer_direction])
   );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const userData = await get_user();
-      setUser(userData);
-    };
-    fetchData();
-  }, []);
+  const fetchData = async () => {
+    const userData = await get_user();
+    setUser(userData);
+  };
 
   const onSubmit = async (payload: IPayloadCustomer) => {
     try {
@@ -350,19 +302,16 @@ const AddClientsNormal = (props: Props) => {
                       maxHeight={250}
                       placeholder={
                         props.customer?.tipoDocumento
-                          ? `${name}`
+                          ? `${props.customer.tipoDocumento}`
                           : "..." && !isFocusDoc
                           ? "Selecciona un tipo de documento"
                           : "..."
                       }
-                      searchPlaceholder="Escribe para buscar..."
                       value={values.tipoDocumento}
                       onFocus={() => setIsFocusDoc(true)}
                       onBlur={() => setIsFocusDoc(false)}
                       onChange={(tipoDocumento) => {
                         handleChange("tipoDocumento")(tipoDocumento.codigo);
-                        // handleChange("tipoDocumento")(setNameTypeDocu);
-                        setNameTypeDocu(tipoDocumento.valores);
                         setIsFocusDoc(false);
                       }}
                       renderLeftIcon={() => (
@@ -389,15 +338,9 @@ const AddClientsNormal = (props: Props) => {
                       defaultValue={props.customer?.numDocumento}
                       handleBlur={handleBlur("numDocumento")}
                       onChangeText={handleChange("numDocumento")}
-                      placeholder={
-                        nameTypeDocu === "DUI"
-                          ? "123456789"
-                          : "00000000" && nameTypeDocu === "NIT"
-                          ? "0143-012345-600-1"
-                          : "00000000"
-                      }
+                      placeholder={"000000000000"}
                       aria-labelledby="inputLabel"
-                      keyboardType={tipeKeyboard ? "numeric" : "default"}
+                      keyboardType="numeric"
                       icon={"card"}
                     />
                     {errors.numDocumento && touched.numDocumento && (
@@ -518,7 +461,7 @@ const AddClientsNormal = (props: Props) => {
                       onPress={() => setShowModal(true)}
                       color={theme.colors.warning}
                     />
-                     <View
+                    <View
                       style={{
                         right: 10,
                       }}
@@ -531,7 +474,6 @@ const AddClientsNormal = (props: Props) => {
                     </View>
                   </ScrollView>
                 </View>
-               
               </View>
             </SafeAreaView>
           </>

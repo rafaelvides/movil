@@ -5,10 +5,10 @@ import {
   CustomerDirection,
   IPayloadCustomer,
 } from "@/types/customer/customer.types";
-import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -16,7 +16,6 @@ import {
   StyleSheet,
   Modal,
   ToastAndroid,
-  ProgressBarAndroidComponent,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import * as yup from "yup";
@@ -25,9 +24,6 @@ import { ScrollView } from "react-native-gesture-handler";
 import { UserLogin } from "../../types/user/user.types";
 import { ThemeContext } from "@/hooks/useTheme";
 import SaveLocations from "../save_locations/SaveLocations";
-import of_customers from "@/app/(inventory)/of_customers";
-import { isReadable } from "stream";
-import { DriverOptionNotSetError } from "typeorm/browser";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
 import Input from "../Global/components_app/Input";
 import Button from "../Global/components_app/Button";
@@ -46,15 +42,12 @@ function AddClientContributor(props: Props) {
   const [isFocusDepart, setIsFocusDepart] = useState(false);
   const [isFocusMuni, setIsFocusMuni] = useState(false);
   const [isFocusDoc, setIsFocusDoc] = useState(false);
-  const [typeDocument, setTypeDocument] = useState(false);
-  const [nameTypeDocument, setNameTypeDocument] = useState("default");
-  const [isSelectedDepartment, setSelectedDepartment] = useState(0);
   const [isUser, setUser] = useState<UserLogin | undefined>(undefined);
   const [isFocusType, setIsFocusType] = useState(false);
-  const [isTypeOfTaxpayer, setTypeOfTaxpayer] = useState("");
-  const [showModal, setShowModal] = useState(false);
   const [location, setLocation] = useState<{ latitude: ""; longitude: "" }>();
   const { theme } = useContext(ThemeContext);
+  const { PostCustomer, UpdateCustomer } = useCustomerStore();
+
   const initialValues = {
     nombre: props.customer?.nombre ?? "",
     nombreComercial: props.customer?.nombreComercial ?? "",
@@ -139,67 +132,35 @@ function AddClientContributor(props: Props) {
     props.customer_direction?.departamento ?? "0"
   );
 
-  const [nameDocument, setNameDocument] = useState("");
-
   useFocusEffect(
     React.useCallback(() => {
       if (props.customer_direction?.municipio) {
-        OnGetCat013Municipios(isSelectedDepartment.toString());
+        OnGetCat013Municipios(props.customer_direction.departamento.toString());
       }
     }, [props.customer_direction?.municipio])
   );
 
-  const selectedTypeDocument = () => {
-    if (nameTypeDocument === "DUI" || nameTypeDocument === "NIT") {
-      setTypeDocument(true);
-    } else if (
-      nameTypeDocument === "Otro" ||
-      nameTypeDocument === "Pasaporte" ||
-      nameTypeDocument === "Carnet de Extranjería"
-    ) {
-      setTypeDocument(false);
-    }
-    if (nameTypeDocument === "default") {
-      if (
-        props.customer?.tipoDocumento === "36" ||
-        props.customer?.tipoDocumento === "13"
-      ) {
-        setTypeDocument(true);
-      }
-    }
-  };
-
-  useEffect(() => {
-    const isNameDocument = (code: string) => {
-      if (props.customer?.tipoDocumento) {
-        cat_022_tipo_de_documento_de_ide.map((item) => {
-          if (item.codigo === code) {
-            setNameDocument(item.valores);
-          }
-        });
-      } else {
-        setNameDocument("");
-      }
-    };
-    isNameDocument(props.customer?.tipoDocumento ?? "");
-  }, [props.customer?.tipoDocumento]);
+  const name = useMemo(() => {
+    return cat_022_tipo_de_documento_de_ide.filter(
+      (item) => item.codigo === props.customer?.tipoDocumento
+    );
+  }, []);
 
   useEffect(() => {
     OnGetCat012Departamento();
     OnGetCat019CodigoActividadEconomica();
     OnGetCat022TipoDeDocumentoDeIde();
-    selectedTypeDocument();
-  }, [nameTypeDocument]);
+    dataUser();
+    constUpdate();
+  }, [props.customer?.tipoDocumento]);
 
-  useEffect(() => {
+  const dataUser = () => {
     get_user().then((data) => {
       if (data) {
         setUser(data);
-      } else {
-        setUser(undefined);
       }
     });
-  }, []);
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -212,24 +173,18 @@ function AddClientContributor(props: Props) {
     }, [selectedCodeDep, props.customer_direction])
   );
 
-  const { PostCustomer, UpdateCustomer } = useCustomerStore();
-
-  useEffect(() => {
+  const constUpdate = () => {
     if (props.id) {
       setIsUpdate(true);
     } else {
       setIsUpdate(false);
     }
-  }, []);
+  };
 
   const typeOfTaxpayer = [
     { key: "Gran Contribuyente" },
     { key: "Mediano Contribuyente" },
   ];
-
-  const handleTypeTaxpayer = (key: string) => {
-    setTypeOfTaxpayer(key);
-  };
 
   const onSubmit = async (payload: IPayloadCustomer) => {
     try {
@@ -272,13 +227,10 @@ function AddClientContributor(props: Props) {
     }
   };
 
-  console.log("datoooooos", props.customer_direction);
-
   return (
     <>
       <StatusBar style="light" />
       <Formik
-        // onSubmit={onSubmit}
         onSubmit={isUpdate ? onSubmitUpdate : onSubmit}
         validationSchema={validationSchema}
         initialValues={initialValues}
@@ -402,9 +354,8 @@ function AddClientContributor(props: Props) {
                       valueField="codigo"
                       maxHeight={250}
                       placeholder={
-                        props.customer?.tipoDocumento
-                          ? `${nameDocument}`
-                          : "..." && !isFocusDoc
+                        props.customer?.tipoDocumento 
+                          && !isFocusDoc
                           ? "Selecciona un tipo de documento"
                           : "..."
                       }
@@ -414,8 +365,6 @@ function AddClientContributor(props: Props) {
                       onBlur={() => setIsFocusDoc(false)}
                       onChange={(tipoDocumento) => {
                         handleChange("tipoDocumento")(tipoDocumento.codigo);
-                        setNameTypeDocument(tipoDocumento.valores);
-                        // handleChange("descActividad")(codActividad.valores);
                         setIsFocusDoc(false);
                       }}
                       renderLeftIcon={() => (
@@ -442,15 +391,9 @@ function AddClientContributor(props: Props) {
                       defaultValue={props.customer?.numDocumento}
                       handleBlur={handleBlur("numDocumento")}
                       onChangeText={handleChange("numDocumento")}
-                      placeholder={
-                        nameTypeDocument === "DUI"
-                          ? "123456789"
-                          : "00000000" && nameTypeDocument === "NIT"
-                          ? "0143-012345-600-1"
-                          : "00000000"
-                      }
+                      placeholder={"00000000000"}
                       aria-labelledby="inputLabel"
-                      keyboardType={nameTypeDocument ? "numeric" : "default"}
+                      keyboardType={"numeric"}
                       icon={"card"}
                     />
                     {errors.numDocumento && touched.numDocumento && (
@@ -491,8 +434,6 @@ function AddClientContributor(props: Props) {
                       placeholder={
                         props.customer?.tipoContribuyente
                           ? `${props.customer?.tipoContribuyente}`
-                          : "..." && isTypeOfTaxpayer
-                          ? `${isTypeOfTaxpayer}`
                           : "..." && !isFocusType
                           ? "Selecciona un tipo de contribuyente"
                           : "..."
@@ -500,9 +441,7 @@ function AddClientContributor(props: Props) {
                       searchPlaceholder="Escribe para buscar..."
                       labelField="key"
                       valueField="key"
-                      value={
-                        props.customer?.tipoContribuyente && isTypeOfTaxpayer
-                      }
+                      value={values.tipoContribuyente}
                       search
                       maxHeight={250}
                       data={typeOfTaxpayer}
@@ -510,7 +449,6 @@ function AddClientContributor(props: Props) {
                       onBlur={() => setIsFocusType(false)}
                       onChange={(item) => {
                         handleChange("tipoContribuyente")(item.key);
-                        handleTypeTaxpayer(item.key);
                         setIsFocusType(false);
                       }}
                       renderLeftIcon={() => (
