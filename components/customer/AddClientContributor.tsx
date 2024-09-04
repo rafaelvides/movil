@@ -354,8 +354,9 @@ function AddClientContributor(props: Props) {
                       valueField="codigo"
                       maxHeight={250}
                       placeholder={
-                        props.customer?.tipoDocumento 
-                          && !isFocusDoc
+                        props.customer?.tipoDocumento
+                          ? `${props.customer.tipoDocumento}`
+                          : "..." && !isFocusDoc
                           ? "Selecciona un tipo de documento"
                           : "..."
                       }
