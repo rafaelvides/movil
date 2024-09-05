@@ -1,7 +1,6 @@
 import { ICloseBox } from "@/types/box/box.types";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { View, Image, Text } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
 import Card from "../Global/components_app/Card";
 import Input from "../Global/components_app/Input";

@@ -168,7 +168,7 @@ const stylesGlobals = StyleSheet.create({
     width: 170,
     height: 160,
     marginRight: 10,
-    backgroundColor:"#99b3c6",
+    backgroundColor:"white",
     borderRadius:20,
   
   },

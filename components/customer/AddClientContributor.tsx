@@ -7,7 +7,6 @@ import {
 } from "@/types/customer/customer.types";
 import { AntDesign } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -229,7 +228,6 @@ function AddClientContributor(props: Props) {
 
   return (
     <>
-      <StatusBar style="light" />
       <Formik
         onSubmit={isUpdate ? onSubmitUpdate : onSubmit}
         validationSchema={validationSchema}
@@ -244,6 +242,7 @@ function AddClientContributor(props: Props) {
           touched,
         }) => (
           <>
+           
             <SafeAreaView style={stylesGlobals.safeAreaForm}>
               <View
                 style={{

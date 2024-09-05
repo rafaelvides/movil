@@ -22,6 +22,7 @@ import { isValidDUI, isValidNIT } from "@/utils/validations";
 import Input from "../Global/components_app/Input";
 import Button from "../Global/components_app/Button";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
+import ButtonForCard from "../Global/components_app/ButtonForCard";
 
 interface Props {
   closeModal: () => void;
@@ -194,7 +195,6 @@ const AddClientsNormal = (props: Props) => {
 
   return (
     <>
-      <StatusBar style="light" />
       <Formik
         onSubmit={isUpdate ? onSubmitUpdate : onSubmit}
         validationSchema={validationSchema}
@@ -209,6 +209,7 @@ const AddClientsNormal = (props: Props) => {
           touched,
         }) => (
           <>
+            
             <SafeAreaView style={stylesGlobals.safeAreaForm}>
               <View
                 style={{

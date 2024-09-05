@@ -264,45 +264,14 @@ const Settings = () => {
                   size={24}
                   color={theme.colors.danger}
                   name={"delete"}
+                  onPress={() => handleClear()}
                 />
               </View>
-              <Text style={{...stylesGlobals.textComponent, marginTop:18}}>
-               Restaurar datos
+              <Text style={{ ...stylesGlobals.textComponent, marginTop: 18 }}>
+                Restaurar datos
               </Text>
             </View>
-            
           </ScrollView>
-          {/* <View
-            style={{
-              bottom: 0,
-              position: "absolute",
-              width: "50%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Button
-              style={{
-                
-                width: "100%",
-                height: 50,
-                borderRadius: 30,
-                justifyContent: "center",
-                borderColor:theme.colors.danger,
-                borderWidth:1,
-                alignItems: "center",
-                marginBottom: 14,
-                marginLeft: "120%",
-                flexDirection: "row",
-              }}
-              onPress={() => handleClear()}
-            >
-              <MaterialCommunityIcons name="delete" size={24} color={theme.colors.danger}/>
-              <Text style={{ color: "#000", fontSize: 12 }}>
-                Restaurar configuración
-              </Text>
-            </Button>
-          </View> */}
         </SafeAreaView>
       )}
     </>
