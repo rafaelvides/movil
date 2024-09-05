@@ -1,6 +1,6 @@
 import { save_detail_close_box, verify_box } from "@/services/box.service";
 import { useBoxStore } from "@/store/box.store";
-import { ICloseBox, IGetBoxDetail } from "@/types/box/box.types";
+import { IBox, ICloseBox, IGetBoxDetail } from "@/types/box/box.types";
 import React, { useContext, useEffect, useState } from "react";
 import {
   View,
@@ -23,6 +23,7 @@ import { StatusBar } from "expo-status-bar";
 interface Props {
   idBox?: number | undefined;
   closeModal: () => void;
+  validation?: boolean
 }
 
 const Box_close = (props: Props) => {
@@ -45,7 +46,7 @@ const Box_close = (props: Props) => {
   const { OnRemoveBox } = useBoxStore();
   const [boxPreview, setBoxPreview] = useState<IGetBoxDetail>();
   const [isGroupButton, setIsGroupButton] = useState(false);
-  const [boxId, setIdBox] = useState(0);
+  const [box, setBox] = useState<IBox>();
   const router = useRouter();
   const [pointSaleId, setPointSaleId] = useState(0);
   const { theme } = useContext(ThemeContext);
@@ -60,7 +61,7 @@ const Box_close = (props: Props) => {
   useEffect(() => {
     get_box_data().then((values) => {
       if (values) {
-        setIdBox(values.id);
+        setBox(values);
       }
     });
     get_point_sale_Id().then((values) => {
@@ -88,8 +89,8 @@ const Box_close = (props: Props) => {
           ToastAndroid.show("No se pudo cerrar caja error", ToastAndroid.SHORT);
         });
     }
-    if (boxId) {
-      save_detail_close_box(boxValues, boxId)
+    if (box) {
+      save_detail_close_box(boxValues, box.id)
         .then(({ data }) => {
           if (data.ok) {
             setBoxPreview(data);
@@ -116,12 +117,13 @@ const Box_close = (props: Props) => {
   };
 
   const completeBox = () => {
-    if (props.idBox) {
+    if (props.idBox && props.validation === true ) {
       save_detail_close_box({ ...boxValues, state: "true" }, props.idBox!)
         .then(({ data }) => {
           if (data.ok) {
             OnRemoveBox(),
               ToastAndroid.show("Caja cerrada con éxito", ToastAndroid.SHORT);
+              router.navigate("/home");
             props.closeModal();
             setBoxPreview(undefined);
           }
@@ -131,13 +133,14 @@ const Box_close = (props: Props) => {
           ToastAndroid.show("No se pudo cerrar la caja", ToastAndroid.SHORT);
         });
     }
-    if (boxId) {
-      save_detail_close_box({ ...boxValues, state: "true" }, boxId)
+     if (box && props.validation === true) {
+      save_detail_close_box({ ...boxValues, state: "true" }, box.id)
         .then(({ data }) => {
           if (data.ok) {
             OnRemoveBox(),
               ToastAndroid.show("Caja cerrada con éxito", ToastAndroid.SHORT);
             router.navigate("/home");
+            props.closeModal()
             setIsGroupButton(false);
             setBoxPreview(undefined);
           }
@@ -163,6 +166,14 @@ const Box_close = (props: Props) => {
           borderColor: "green",
         }}
       >
+      {props.validation && (
+        <Text style={{
+          fontSize: 14, margin:10
+        }}>
+            Para continuar necesitas cerrar la caja con fecha:  <Text style={{fontSize: 14,
+          fontWeight:"bold", color:"red"}}>{box?.date.toString()}</Text>
+          </Text>
+      )}
         <ScrollView
           style={{
             marginBottom: 14,
@@ -170,6 +181,7 @@ const Box_close = (props: Props) => {
             borderColor: "green",
           }}
         >
+          
           <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
         </ScrollView>
         {boxPreview && <BoxAccounting boxPreview={boxPreview} />}

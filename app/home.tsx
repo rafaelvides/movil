@@ -3,11 +3,16 @@ import OptionsCloseBox from "@/components/box/OptionsCloseBox";
 import Card from "@/components/Global/components_app/Card";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
-import { get_point_sale_Id } from "@/plugins/async_storage";
+import {
+  box_data,
+  get_box_data,
+  get_point_sale_Id,
+} from "@/plugins/async_storage";
 import { is_auth, return_token } from "@/plugins/secure_store";
 import { verify_box } from "@/services/box.service";
 import { get_theme_by_transmitter } from "@/services/personalization.service";
 import { IBox } from "@/types/box/box.types";
+import { formatDate } from "@/utils/date";
 import React from "react";
 import { useContext, useEffect, useState } from "react";
 import {
@@ -19,14 +24,24 @@ import {
   ToastAndroid,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
+import Box_close from "./Box_close";
+import { useFocusEffect } from "expo-router";
 
 function home() {
   const [refreshing, setRefreshing] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showModalClose, setIsShowModalClose] = useState(false);
   const [box, setBox] = useState<IBox>();
-
+  const [boxCloseDate, setBoxCloseDate] = useState(false);
   const { toggleTheme } = useContext(ThemeContext);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      get_box_data().then((data) => {
+        setBox(data);
+      });
+    }, [])
+  );
 
   useEffect(() => {
     const GetThemeConfiguration = async () => {
@@ -49,8 +64,26 @@ function home() {
         }
       } catch (e) {}
     };
+
     GetThemeConfiguration();
   }, []);
+
+  useEffect(() => {
+    const dateBoxClose = () => {
+      if (box && box.date !== new Date(currentDate)) {
+        setBoxCloseDate(true);
+      } else {
+        setBoxCloseDate(false);
+      }
+    };
+    dateBoxClose();
+  }, [box]);
+
+  const currentDate = formatDate();
+  // console.log("ver validación", box?.date)
+  // console.log("dataaaaa", boxCloseDate);
+
+ 
 
   useEffect(() => {
     const handleVerifyBox = async () => {
@@ -94,10 +127,14 @@ function home() {
     handleVerifyBox();
     setRefreshing(false);
   }, [refreshing]);
+
+
   useEffect(() => {
-    return_token().then((da) => console.log("home",da));
-    is_auth().then((dat) => console.log("home",dat));
+    return_token().then((da) => console.log("home", da));
+    is_auth().then((dat) => console.log("home", dat));
   }, []);
+
+
   return (
     <>
       <ScrollView
@@ -125,29 +162,43 @@ function home() {
           }}
         >
           <Text>Welcome home!</Text>
-          <Modal visible={showModalClose} animationType="slide">
-            <View style={styles.centeredView}>
-              <Card
-                style={{
-                  width: stylesGlobals.styleCard.width,
-                  height: 340,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                {isVisible ? (
-                  <OptionsCloseBox
-                    box={box}
-                    closeModal={() => {
-                      setIsShowModalClose(false);
-                    }}
-                  />
-                ) : (
-                  <AddBox closeModal={() => setIsShowModalClose(false)} />
-                )}
-              </Card>
-            </View>
-          </Modal>
+          {boxCloseDate === true ? (
+            <Modal
+              visible={boxCloseDate}
+              animationType="slide"
+              transparent={false}
+            >
+              <Box_close
+                idBox={box?.id}
+                closeModal={() => setBoxCloseDate(false)}
+                validation={true}
+              />
+            </Modal>
+          ) : (
+            <Modal visible={showModalClose} animationType="slide">
+              <View style={styles.centeredView}>
+                <Card
+                  style={{
+                    width: stylesGlobals.styleCard.width,
+                    height: 340,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                   {isVisible ? (
+                      <OptionsCloseBox
+                        box={box}
+                        closeModal={() => {
+                          setIsShowModalClose(false);
+                        }}
+                      />
+                    ) : (
+                      <AddBox closeModal={() => setIsShowModalClose(false)} />
+                    )}
+                </Card>
+              </View>
+            </Modal>
+          )}
         </View>
       </ScrollView>
     </>
