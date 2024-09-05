@@ -139,11 +139,7 @@ function AddClientContributor(props: Props) {
     }, [props.customer_direction?.municipio])
   );
 
-  const name = useMemo(() => {
-    return cat_022_tipo_de_documento_de_ide.filter(
-      (item) => item.codigo === props.customer?.tipoDocumento
-    );
-  }, []);
+  
 
   useEffect(() => {
     OnGetCat012Departamento();

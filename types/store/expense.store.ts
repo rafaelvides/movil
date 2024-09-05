@@ -7,7 +7,7 @@ export interface IExpenseStore {
     pagination_expenses: IPagination
     is_loading: boolean;
     getCategoryExpenses: () => void
-    getPaginatedExpenses: (id: number, page: number, limit: number, category: string) => void
+    getPaginatedExpenses: (id:number, page: number, limit: number, category: string) => void
     post_expense: (payload:IExpensePayloads) => void
     update_expenses:(payload:IUpdateExpense, id:number) => void
     delete_expense:(id:number) => void

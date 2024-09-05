@@ -76,12 +76,7 @@ const expenses = () => {
     setRefreshing(false);
   }, [refreshing]);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    getPaginatedExpenses(idBox, currentPage, 5, category);
-    setRefreshing(false);
-  };
-
+ 
   const fetchExpenses = (page: any) => {
     getPaginatedExpenses(idBox, page, 5, category);
   };

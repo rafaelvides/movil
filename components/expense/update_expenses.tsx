@@ -1,5 +1,3 @@
-import { ThemeContext } from "@/hooks/useTheme";
-import { get_box_data } from "@/plugins/async_storage";
 import { useExpenseStore } from "@/store/expense.store";
 import {
   IExpensePayload,
@@ -7,14 +5,8 @@ import {
 } from "@/types/expenses/expense.types";
 import { AntDesign } from "@expo/vector-icons";
 import { Formik } from "formik";
-import { useContext, useEffect, useState } from "react";
-import {
-  Text,
-  SafeAreaView,
-  ToastAndroid,
-  View,
-
-} from "react-native";
+import { useEffect, useMemo, useState } from "react";
+import { Text, SafeAreaView, ToastAndroid, View } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 import { ScrollView } from "react-native-gesture-handler";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -22,7 +14,6 @@ import * as yup from "yup";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
 import Input from "../Global/components_app/Input";
 import Button from "../Global/components_app/Button";
-
 interface Props {
   closeModal: () => void;
   expenses?: IExpensePayload;
@@ -33,10 +24,10 @@ export const UpdateExpenses = (props: Props) => {
   const [isFocus, setIsFocus] = useState(false);
   const { update_expenses, getCategoryExpenses, categoryExpenses } =
     useExpenseStore();
-  const [boxId, setBoxId] = useState(0);
-  const [category, setCategory] = useState("");
 
-  
+  useEffect(() => {
+    getCategoryExpenses();
+  }, []);
 
   const validationSchema = yup.object().shape({
     description: yup.string().required("*La descripción es requerida"),
@@ -57,21 +48,9 @@ export const UpdateExpenses = (props: Props) => {
     }
   };
 
-  useEffect(() => {
-    const selectedCategory = () => {
-      if (props.expenses?.categoryExpenseId) {
-        categoryExpenses.map((data) => {
-          if (data.id === props.expenses?.categoryExpenseId) {
-            setCategory(data.name);
-          }
-        });
-      }
-    };
-    selectedCategory();
-    selectedCategory();
-    getCategoryExpenses();
-  }, [props.expenses?.categoryExpenseId, category, categoryExpenses]);
-
+  const selectedCategory = categoryExpenses?.filter(
+    (category) => category.id === props.expenses?.categoryExpenseId
+  )[0]?.name;
   return (
     <>
       <Formik
@@ -147,15 +126,13 @@ export const UpdateExpenses = (props: Props) => {
                     valueField="id"
                     placeholder={
                       props.expenses?.categoryExpenseId
-                        ? `${category}`
+                        ? `${selectedCategory}`
                         : "..." && !isFocus
                         ? "Selecciona una categoría"
                         : "..."
                     }
                     searchPlaceholder="Buscar categoría..."
-                    value={
-                      props.expenses?.categoryExpenseId.toString() && category
-                    }
+                    value={props.expenses?.categoryExpenseId.toString()}
                     onFocus={() => setIsFocus(true)}
                     onBlur={() => setIsFocus(false)}
                     onChange={(item) => {

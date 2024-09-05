@@ -5,7 +5,6 @@ import {
   View,
   StyleSheet,
   ToastAndroid,
-  Image,
   ScrollView,
 } from "react-native";
 import { ThemeContext } from "@/hooks/useTheme";
@@ -32,7 +31,6 @@ const CreateExpense = (props: Props) => {
   const [isFocus, setIsFocus] = useState(false);
   const { getCategoryExpenses, post_expense, categoryExpenses } =
     useExpenseStore();
-  const { theme } = useContext(ThemeContext);
   const [selectedCategoryId, setSelectedCategoryId] = useState(0);
 
   useEffect(() => {
@@ -41,11 +39,9 @@ const CreateExpense = (props: Props) => {
         setIdBox(data.id);
       }
     });
-  }, []);
-
-  useEffect(() => {
     getCategoryExpenses();
   }, []);
+
 
   const validationSchema = yup.object().shape({
     description: yup.string().required("*La descripción es requerida"),

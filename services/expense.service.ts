@@ -12,16 +12,16 @@ import axios, { AxiosError } from "axios";
 import { ToastAndroid } from "react-native";
 
 export const get_expenses_paginated = async (
-  // id:number,
+  id:number,
   page= 1,
   limit: number,
   category: string
 ) => {
   const token = await return_token();
   const data = await get_box_data()
-  const  idBox = data?.id
+  id = Number(data?.id)
   return axios.get<IGetExpensesPaginated>(
-    `${API_URL}/expenses/list-paginated/${idBox}?page=${page}&limit=${limit}&category=${category}`,
+    `${API_URL}/expenses/list-paginated/${id}?page=${page}&limit=${limit}&category=${category}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
