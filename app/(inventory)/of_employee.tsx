@@ -152,7 +152,7 @@ const of_customers = () => {
                                   width: 380,
                                   height: 380,
                                 }}
-                                source={noResult}
+                                source={require("@/assets/gif_json/gif_global.json")}
                               />
                             </View>
                           </>

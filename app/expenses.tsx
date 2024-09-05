@@ -244,24 +244,13 @@ const expenses = () => {
                         </>
                       ) : (
                         <View
-                          style={{
-                            padding: 40,
-                            width: "100%",
-                            height: "auto",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
+                          style={stylesGlobals.viewLottie}
                         >
                           <LottieView
                             autoPlay
                             ref={animation}
-                            style={{
-                              marginTop: 50,
-                              width: 380,
-                              height: 380,
-                            }}
-                          source={require("@/assets/gif_json/NODATA.json")}
+                            style={stylesGlobals.LottieStyle}
+                          source={require("@/assets/gif_json/gif_global.json")}
                           />
                         </View>
                       )}

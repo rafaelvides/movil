@@ -168,9 +168,8 @@ const stylesGlobals = StyleSheet.create({
     width: 170,
     height: 160,
     marginRight: 10,
-    backgroundColor:"white",
-    borderRadius:20,
-  
+    backgroundColor: "white",
+    borderRadius: 20,
   },
   ViewBox: {
     height: 60,
@@ -182,7 +181,7 @@ const stylesGlobals = StyleSheet.create({
     fontSize: 15,
     textAlign: "center",
     marginTop: 10,
-    color:"black"
+    color: "black",
   },
 
   // boxAccounting============================================
@@ -213,7 +212,7 @@ const stylesGlobals = StyleSheet.create({
   viewMain: {
     marginTop: 35,
     flexDirection: "row",
-    padding:10
+    padding: 10,
   },
   textSettings: {
     fontSize: 16,
@@ -243,8 +242,22 @@ const stylesGlobals = StyleSheet.create({
   styleSwitch: {
     transform: [{ scaleX: 1.0 }, { scaleY: 1.0 }],
     marginLeft: 10,
-  }
-  
+  },
+
+  //LottieVie ============================================
+  viewLottie: {
+    padding: 40,
+    width: "100%",
+    height: "auto",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  LottieStyle: {
+    marginTop: 50,
+    width: 380,
+    height: 380,
+  },
   // ============================================
 });
 export default stylesGlobals;

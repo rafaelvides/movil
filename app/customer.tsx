@@ -18,7 +18,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Modal,
   RefreshControl,
@@ -32,6 +32,7 @@ import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 import Button from "@/components/Global/components_app/Button";
+import LottieView from "lottie-react-native";
 
 const customer = () => {
   const [showDetailNormal, setShowDetailNormal] = useState(false);
@@ -58,7 +59,7 @@ const customer = () => {
   const [selectedId, setSelectedId] = useState<number>(0);
   const [typeClient, setTypeClient] = useState("normal");
   const [selectedTitle, setSelectedTitle] = useState("");
-
+const animation = useRef(null)
   const { theme } = useContext(ThemeContext);
   useFocusEffect(
     React.useCallback(() => {
@@ -69,7 +70,6 @@ const customer = () => {
       }, 1000);
     }, [])
   );
-
   useEffect(() => {
     getCustomersPagination(currentPage, 5, name, correo);
     setRefreshing(false);
@@ -138,27 +138,18 @@ const customer = () => {
   };
 
   const clearClose = () => {
-    // setIsOpen(false);
     handleChangeCustomer({} as ICustomer, "");
     setTypeClient("normal");
     setSelectedId(0);
     setSelectedCustomer(undefined);
     setSelectedTitle("");
-    // setShowDetailNormal(false);
   };
 
   const handle = () => {
     setIsModalCustomer(false);
   };
 
-  // const clearClients = () => {
-  //   handleChangeDetailsCustomer({} as ICustomer);
-  //   setTypeClient("normal");
-  //   setSelectedId(0);
-  //   setSelectedCustomer(undefined);
-  //   setSelectedTitle("");
-  //   setShowDetailNormal(false);
-  // };
+ 
   return (
     <>
       <StatusBar style="dark" />
@@ -238,7 +229,8 @@ const customer = () => {
                   }
                 >
                   <View style={stylesGlobals.viewScroll}>
-                    <>
+                    {customers && customers.length > 0 ? (
+                      <>
                       {customers &&
                         customers.map((customer, index) => (
                           <Card key={index} style={stylesGlobals.styleCard}>
@@ -334,6 +326,21 @@ const customer = () => {
                           </Card>
                         ))}
                     </>
+                    ):(
+                      <View 
+                      style={stylesGlobals.viewLottie}
+                      >
+                        <LottieView
+                        autoPlay
+                        ref={animation}
+                        style={stylesGlobals.LottieStyle}
+                        source={require("@/assets/gif_json/gif_global.json")}
+
+                        />
+
+                      </View>
+                    )}
+                    
                   </View>
                   {customers.length > 0 && (
                     <Pagination

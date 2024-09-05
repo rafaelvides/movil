@@ -7,7 +7,6 @@ import {
 } from "@/types/customer/customer.types";
 import { UserLogin } from "@/types/user/user.types";
 import { useFocusEffect } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import * as yup from "yup";
 import { Formik } from "formik";
@@ -15,14 +14,12 @@ import { ScrollView } from "react-native-gesture-handler";
 import { View, Text, StyleSheet, Modal, ToastAndroid } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Dropdown } from "react-native-element-dropdown";
-import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { ThemeContext } from "@/hooks/useTheme";
 import SaveLocations from "../save_locations/SaveLocations";
-import { isValidDUI, isValidNIT } from "@/utils/validations";
 import Input from "../Global/components_app/Input";
 import Button from "../Global/components_app/Button";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
-import ButtonForCard from "../Global/components_app/ButtonForCard";
 
 interface Props {
   closeModal: () => void;
@@ -41,8 +38,6 @@ const AddClientsNormal = (props: Props) => {
   const [location, setLocation] = useState<{ latitude: ""; longitude: "" }>();
   const { PostCustomer, UpdateCustomer } = useCustomerStore();
   const { theme } = useContext(ThemeContext);
-  const [tipeKeyboard, setTipyeKeyboard] = useState(false);
-  const [nameTypeDocu, setNameTypeDocu] = useState("default");
   const { closeModal, id } = props;
   const {
     OnGetCat012Departamento,
