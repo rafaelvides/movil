@@ -80,10 +80,6 @@ function home() {
   }, [box]);
 
   const currentDate = formatDate();
-  // console.log("ver validación", box?.date)
-  // console.log("dataaaaa", boxCloseDate);
-
- 
 
   useEffect(() => {
     const handleVerifyBox = async () => {
