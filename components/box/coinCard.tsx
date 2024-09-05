@@ -1,10 +1,10 @@
 import { ICloseBox } from "@/types/box/box.types";
-import { useState } from "react";
+import { useContext } from "react";
 import { View, Image, Text } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
 import Card from "../Global/components_app/Card";
 import Input from "../Global/components_app/Input";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const CoinCards = ({
   boxValues,
@@ -13,6 +13,8 @@ const CoinCards = ({
   boxValues: ICloseBox;
   setBoxValues: React.Dispatch<React.SetStateAction<ICloseBox>>;
 }) => {
+
+  const {theme} = useContext(ThemeContext)
   const handleInputChange = (field: keyof ICloseBox) => (text: string) => {
     const validNumber = text.replace(/[^0-9]/g, "");
 
@@ -35,7 +37,7 @@ const CoinCards = ({
           alignItems: "center",
         }}
       >
-        <Card style={stylesGlobals.CardBox}>
+        <Card style={{...stylesGlobals.CardBox}}>
           <View
             style={stylesGlobals.ViewBox}
           >
@@ -47,7 +49,7 @@ const CoinCards = ({
             <Text style={stylesGlobals.textCardBox}>
               Moneda de 0.01
             </Text>
-            <View style={{ marginBottom: 40 }}>
+            <View style={{ marginBottom:40 , backgroundColor:"white", borderRadius:19}}>
               <Input
                 onChange={(e) =>
                   setBoxValues({

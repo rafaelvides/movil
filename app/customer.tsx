@@ -18,7 +18,7 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Modal,
   RefreshControl,
@@ -32,6 +32,7 @@ import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 import Button from "@/components/Global/components_app/Button";
+import LottieView from "lottie-react-native";
 
 const customer = () => {
   const [showDetailNormal, setShowDetailNormal] = useState(false);
@@ -58,8 +59,7 @@ const customer = () => {
   const [selectedId, setSelectedId] = useState<number>(0);
   const [typeClient, setTypeClient] = useState("normal");
   const [selectedTitle, setSelectedTitle] = useState("");
-  const [limit, setLimit] = useState(5);
-
+const animation = useRef(null)
   const { theme } = useContext(ThemeContext);
   useFocusEffect(
     React.useCallback(() => {
@@ -70,47 +70,10 @@ const customer = () => {
       }, 1000);
     }, [])
   );
-
   useEffect(() => {
-    getCustomersPagination(currentPage, limit, name, correo);
+    getCustomersPagination(currentPage, 5, name, correo);
     setRefreshing(false);
   }, [refreshing]);
-
-  const handleChangeDetailsCustomer = (customer: ICustomer) => {
-    const payload_customer: IPayloadCustomer = {
-      nombre: customer.nombre,
-      correo: customer.correo,
-      telefono: customer.telefono,
-      numDocumento: customer.numDocumento,
-      nombreComercial: customer.nombreComercial,
-      nrc: customer.nrc,
-      // nit: customer.nit,
-      tipoDocumento: customer.tipoDocumento,
-      bienTitulo: "05",
-      codActividad: customer.codActividad,
-      descActividad: customer.descActividad,
-      esContribuyente: customer.esContribuyente ? 1 : 0,
-      tipoContribuyente: customer.tipoContribuyente,
-    };
-
-    const payload_direction: CustomerDirection = {
-      id: customer.direccion?.id ?? 0,
-      municipio: customer.direccion?.municipio ?? "",
-      nombreMunicipio: customer.direccion?.nombreMunicipio ?? "",
-      departamento: customer.direccion?.departamento ?? "",
-      nombreDepartamento: customer.direccion?.nombreDepartamento ?? "",
-      complemento: customer.direccion?.complemento ?? "",
-      active: customer.direccion?.active ?? false,
-    };
-    setSelectedCustomer(payload_customer);
-    setSelectedCustomerDirection(payload_direction);
-    setSelectedId(customer.id);
-    if (customer.esContribuyente) {
-      setTypeClient("contribuyente");
-    } else {
-      setTypeClient("normal");
-    }
-  };
 
   const handleChangeCustomer = (customer: ICustomer, type = "edit") => {
     const payload_customer: IPayloadCustomer = {
@@ -120,7 +83,6 @@ const customer = () => {
       numDocumento: customer.numDocumento,
       nombreComercial: customer.nombreComercial,
       nrc: customer.nrc,
-      // nit: customer.nit,
       tipoDocumento: customer.tipoDocumento,
       bienTitulo: "05",
       codActividad: customer.codActividad,
@@ -128,7 +90,6 @@ const customer = () => {
       esContribuyente: customer.esContribuyente ? 1 : 0,
       tipoContribuyente: customer.tipoContribuyente,
     };
-
     const payload_direction: CustomerDirection = {
       id: customer.direccion?.id ?? 0,
       municipio: customer.direccion?.municipio ?? "",
@@ -151,12 +112,13 @@ const customer = () => {
       setIsOpen(true);
       return;
     }
-    if (customer.esContribuyente) {
-      setTypeClient("normal");
-    } else {
-      setTypeClient("contribuyente");
+    if (type === "details") {
+      if (customer.esContribuyente) {
+        setTypeClient("contribuyente");
+      } else {
+        setTypeClient("normal");
+      }
     }
-    setIsOpen(true);
   };
 
   const handlePageChange = (page: number) => {
@@ -164,38 +126,30 @@ const customer = () => {
   };
 
   const fetchCustomer = (page: number) => {
-    getCustomersPagination(page, limit, name, correo);
+    getCustomersPagination(page, 5, name, correo);
   };
 
   useEffect(() => {
     fetchCustomer(currentPage);
-  }, [currentPage, limit, name, correo]);
+  }, [currentPage, 5, name, correo]);
 
   const deleteCustomer = (id: number) => {
     DeleteCustomer(id);
   };
 
   const clearClose = () => {
-    setIsOpen(false);
     handleChangeCustomer({} as ICustomer, "");
     setTypeClient("normal");
     setSelectedId(0);
     setSelectedCustomer(undefined);
     setSelectedTitle("");
   };
+
   const handle = () => {
     setIsModalCustomer(false);
   };
 
-  const clearClients = () => {
-    handleChangeDetailsCustomer({} as ICustomer);
-    setTypeClient("normal");
-    setSelectedId(0);
-    setSelectedCustomer(undefined);
-    setSelectedTitle("");
-    setShowDetailNormal(false);
-  };
-  console.log(customers.length);
+ 
   return (
     <>
       <StatusBar style="dark" />
@@ -275,7 +229,8 @@ const customer = () => {
                   }
                 >
                   <View style={stylesGlobals.viewScroll}>
-                    <>
+                    {customers && customers.length > 0 ? (
+                      <>
                       {customers &&
                         customers.map((customer, index) => (
                           <Card key={index} style={stylesGlobals.styleCard}>
@@ -339,14 +294,20 @@ const customer = () => {
                             <View style={stylesGlobals.ViewGroupButton}>
                               <ButtonForCard
                                 onPress={() =>
-                                  handleChangeCustomer(customer, "edit")
+                                  handleChangeCustomer(
+                                    customer,
+                                    "edit",
+                                  )
                                 }
                                 icon={"pencil"}
                               />
 
                               <ButtonForCard
                                 onPress={() => {
-                                  handleChangeDetailsCustomer(customer);
+                                  handleChangeCustomer(
+                                    customer,
+                                    "details",
+                                  );
                                   setShowDetailNormal(true);
                                 }}
                                 color={theme.colors.third}
@@ -365,6 +326,21 @@ const customer = () => {
                           </Card>
                         ))}
                     </>
+                    ):(
+                      <View 
+                      style={stylesGlobals.viewLottie}
+                      >
+                        <LottieView
+                        autoPlay
+                        ref={animation}
+                        style={stylesGlobals.LottieStyle}
+                        source={require("@/assets/gif_json/gif_global.json")}
+
+                        />
+
+                      </View>
+                    )}
+                    
                   </View>
                   {customers.length > 0 && (
                     <Pagination
@@ -400,7 +376,7 @@ const customer = () => {
                     : "Editar cliente"
                   : "Nuevo cliente"}
               </Text>
-              <View style={{ position: "absolute", right: 0, top: -5 }}>
+               <View style={{ position: "absolute", right: 0, top: -5 }}>
                 <ButtonForCard
                   onPress={() => {
                     clearClose();
@@ -411,7 +387,7 @@ const customer = () => {
                   iconColor="black"
                   sizeIcon={26}
                 />
-              </View>
+              </View> 
             </View>
             <View
               style={{
@@ -452,7 +428,7 @@ const customer = () => {
             {typeClient === "contribuyente" ? (
               <DetailsCustomerContributor
                 closeModal={() => {
-                  clearClients();
+                  clearClose();
                   setShowDetailNormal(false);
                 }}
                 customer={selectedCustomer}
@@ -462,7 +438,7 @@ const customer = () => {
             ) : (
               <DetailsCustomerNormal
                 closeModal={() => {
-                  clearClients();
+                  clearClose();
                   setShowDetailNormal(false);
                 }}
                 customer={selectedCustomer}

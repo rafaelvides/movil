@@ -57,11 +57,9 @@ declare module "react-native-actions-sheet" {
     }>;
     "expense-filters-sheet": SheetDefinition<{
       payload: {
-        limit: number;
-        setLimit: Dispatch<SetStateAction<number>>;
         category: string;
         setCategory: Dispatch<SetStateAction<string>>;
-        handleConfirm: (limit: number, category: string) => void;
+        handleConfirm: (category: string) => void;
       };
     }>;
     "note-sheet": SheetDefinition<{

@@ -7,12 +7,10 @@ import { useState } from "react";
 import {
   SafeAreaView,
   View,
-  Text,
   StyleSheet,
-  ToastAndroid,
+
 } from "react-native";
 import { RefreshControl, ScrollView } from "react-native-gesture-handler";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import NoResult from "@/assets/gif_json/bx8ntOOR1D.json";
 import { ThemeContext } from "@/hooks/useTheme";
 import { useBranchProductStore } from "../../store/branch_product.store";
@@ -195,7 +193,7 @@ const of_products = () => {
                                   width: 380,
                                   height: 380,
                                 }}
-                                source={NoResult}
+                                source={require("@/assets/gif_json/gif_global.json")}
                               />
                             </View>
                           </>

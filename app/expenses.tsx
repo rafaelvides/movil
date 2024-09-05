@@ -6,11 +6,9 @@ import { get_box_data } from "@/plugins/async_storage";
 import { useExpenseStore } from "@/store/expense.store";
 import { useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import LottieView from "lottie-react-native";
 import React, { useEffect, useRef } from "react";
 import { useContext, useState } from "react";
 import {
-  Pressable,
   View,
   Text,
   StyleSheet,
@@ -24,25 +22,21 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import CreateExpense from "@/components/expense/create_expense";
 import Pagination from "@/components/Global/Pagination";
 import { UpdateExpenses } from "@/components/expense/update_expenses";
-import {
-  IExpensePayload,
-  IExpensePayloads,
-} from "@/types/expenses/expense.types";
+import { IExpensePayload } from "@/types/expenses/expense.types";
 import AlertWithAnimation from "@/components/Global/manners/Alert";
 import noResult from "@/assets/gif_json/bx8ntOOR1D.json";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
+import LottieView from "lottie-react-native";
 const expenses = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setIsLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [deleteShow, setDeleteShow] = useState(false);
   const [expenseId, setExpenseId] = useState(0);
-  const [page, setPage] = useState(1);
   const [selectedExpenses, setSelectedExpenses] = useState<IExpensePayload>();
   const [selectedId, setSelectedId] = useState(0);
-  const [limit, setLimit] = useState(5);
   const [currentPage, setCurrentPage] = useState(1);
   const [category, setCategory] = useState("");
   const [idBox, setIdBox] = useState(0);
@@ -78,23 +72,18 @@ const expenses = () => {
 
   //--------useEffect----------
   useEffect(() => {
-    getPaginatedExpenses(idBox, currentPage, limit, category);
+    getPaginatedExpenses(idBox, currentPage, 5, category);
     setRefreshing(false);
   }, [refreshing]);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    getPaginatedExpenses(idBox, currentPage, limit, category);
-    setRefreshing(false);
-  };
-
+ 
   const fetchExpenses = (page: any) => {
-    getPaginatedExpenses(idBox, page, limit, category);
+    getPaginatedExpenses(idBox, page, 5, category);
   };
 
   useEffect(() => {
     fetchExpenses(currentPage);
-  }, [currentPage, limit, category]);
+  }, [currentPage, 5, category]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -141,12 +130,9 @@ const expenses = () => {
                     handleClick={() => {
                       SheetManager.show("expense-filters-sheet", {
                         payload: {
-                          limit: limit,
-                          setLimit,
                           setCategory,
                           category: category,
-                          handleConfirm(limit, category) {
-                            setLimit(limit);
+                          handleConfirm(category) {
                             setCategory(category);
                             setRefreshing(true);
                             SheetManager.hide("expense-filters-sheet");
@@ -184,70 +170,85 @@ const expenses = () => {
                 >
                   <View style={stylesGlobals.viewScroll}>
                     <>
-                      {expenses &&
-                        expenses.map((expense, index) => (
-                          <Card key={index} style={stylesGlobals.styleCard}>
-                            <View style={stylesGlobals.ViewCard}>
-                              <MaterialCommunityIcons
-                                color={theme.colors.secondary}
-                                name="clipboard-text"
-                                size={22}
-                                style={{
-                                  position: "absolute",
-                                  left: 7,
-                                }}
-                              />
-                              <Text style={stylesGlobals.textCard}>
-                                {expense.description}
-                              </Text>
-                            </View>
-                            <View style={stylesGlobals.ViewCard}>
-                              <MaterialCommunityIcons
-                                color={theme.colors.dark}
-                                name="equal-box"
-                                size={22}
-                                style={{
-                                  position: "absolute",
-                                  left: 7,
-                                }}
-                              />
-                              <Text style={stylesGlobals.textCard}>
-                                {expense.categoryExpense.name}
-                              </Text>
-                            </View>
-                            <View style={stylesGlobals.ViewCard}>
-                              <MaterialCommunityIcons
-                                color={theme.colors.third}
-                                name="cash"
-                                size={22}
-                                style={{
-                                  position: "absolute",
-                                  left: 7,
-                                }}
-                              />
-                              <Text style={stylesGlobals.textCard}>
-                                {expense.total}
-                              </Text>
-                            </View>
-                            <View style={stylesGlobals.ViewGroupButton}>
-                              <ButtonForCard
-                                onPress={() => {
-                                  handleChangeExpenses(expense);
-                                  setIsShowUpdate(true);
-                                }}
-                                icon={"pencil"}
-                              />
-                              <ButtonForCard
-                                onPress={() => {
-                                  setDeleteShow(true);
-                                  setExpenseId(expense.id);
-                                }}
-                                icon={"delete"}
-                                color={theme.colors.danger}
-                              />
-                            </View>
-                          </Card>
-                        ))}
+                      {expenses && expenses.length > 0 ? (
+                        <>
+                          {expenses &&
+                            expenses.map((expense, index) => (
+                              <Card key={index} style={stylesGlobals.styleCard}>
+                                <View style={stylesGlobals.ViewCard}>
+                                  <MaterialCommunityIcons
+                                    color={theme.colors.secondary}
+                                    name="clipboard-text"
+                                    size={22}
+                                    style={{
+                                      position: "absolute",
+                                      left: 7,
+                                    }}
+                                  />
+                                  <Text style={stylesGlobals.textCard}>
+                                    {expense.description}
+                                  </Text>
+                                </View>
+                                <View style={stylesGlobals.ViewCard}>
+                                  <MaterialCommunityIcons
+                                    color={theme.colors.dark}
+                                    name="equal-box"
+                                    size={22}
+                                    style={{
+                                      position: "absolute",
+                                      left: 7,
+                                    }}
+                                  />
+                                  <Text style={stylesGlobals.textCard}>
+                                    {expense.categoryExpense.name}
+                                  </Text>
+                                </View>
+                                <View style={stylesGlobals.ViewCard}>
+                                  <MaterialCommunityIcons
+                                    color={theme.colors.third}
+                                    name="cash"
+                                    size={22}
+                                    style={{
+                                      position: "absolute",
+                                      left: 7,
+                                    }}
+                                  />
+                                  <Text style={stylesGlobals.textCard}>
+                                    {expense.total}
+                                  </Text>
+                                </View>
+                                <View style={stylesGlobals.ViewGroupButton}>
+                                  <ButtonForCard
+                                    onPress={() => {
+                                      handleChangeExpenses(expense);
+                                      setIsShowUpdate(true);
+                                    }}
+                                    icon={"pencil"}
+                                  />
+                                  <ButtonForCard
+                                    onPress={() => {
+                                      setDeleteShow(true);
+                                      setExpenseId(expense.id);
+                                    }}
+                                    icon={"delete"}
+                                    color={theme.colors.danger}
+                                  />
+                                </View>
+                              </Card>
+                            ))}
+                        </>
+                      ) : (
+                        <View
+                          style={stylesGlobals.viewLottie}
+                        >
+                          <LottieView
+                            autoPlay
+                            ref={animation}
+                            style={stylesGlobals.LottieStyle}
+                          source={require("@/assets/gif_json/gif_global.json")}
+                          />
+                        </View>
+                      )}
                     </>
                   </View>
                   {expenses.length > 0 && (

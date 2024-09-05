@@ -7,12 +7,11 @@ import {
 } from "@/types/customer/customer.types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { StatusBar } from "expo-status-bar";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  TouchableOpacity,
   ScrollView,
 } from "react-native";
 
@@ -31,7 +30,7 @@ export const DetailsCustomerContributor = (props: Props) => {
 
   useEffect(() => {
     OnGetCat022TipoDeDocumentoDeIde();
-  }, [OnGetCat022TipoDeDocumentoDeIde]);
+  }, []);
 
   useEffect(() => {
     const categoryDocument = () => {

@@ -3,7 +3,7 @@ import { useCustomerStore } from "@/store/customer.store";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   RefreshControl,
   SafeAreaView,
@@ -18,6 +18,7 @@ import SpinLoading from "@/components/Global/SpinLoading";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import AnimatedButton from "@/components/Global/AnimatedButtom";
+import LottieView from "lottie-react-native";
 
 const of_customers = () => {
   const [isloading, setIsLoading] = useState(false);
@@ -25,7 +26,7 @@ const of_customers = () => {
   const { customer_list, is_loading, OnGetCustomersList } = useCustomerStore();
   const { theme } = useContext(ThemeContext);
   const { OnSaveClient } = useClientOfflineStore();
-
+const animation = useRef(null)
   useFocusEffect(
     React.useCallback(() => {
       setIsLoading(true);
@@ -112,72 +113,86 @@ const of_customers = () => {
                   }
                 >
                   <View style={stylesGlobals.viewScroll}>
-                    {customer_list && customer_list.length > 0 && (
-                      <>
-                        {!is_loading &&
-                          customer_list.map((customer, index) => (
-                            <Card key={index} style={stylesGlobals.styleCard}>
-                              <View style={stylesGlobals.ViewCard}>
-                                <MaterialCommunityIcons
-                                  color={theme.colors.secondary}
-                                  name="account"
-                                  size={22}
-                                  style={{
-                                    position: "absolute",
-                                    left: 7,
-                                  }}
-                                />
-                                <Text style={stylesGlobals.textCard}>
-                                  {customer.nombre}
-                                </Text>
-                              </View>
-                              <View style={stylesGlobals.ViewCard}>
-                                <MaterialCommunityIcons
-                                  color={theme.colors.third}
-                                  name="phone"
-                                  size={22}
-                                  style={{
-                                    position: "absolute",
-                                    left: 7,
-                                  }}
-                                />
-                                <Text style={stylesGlobals.textCard}>
-                                  {customer.telefono}
-                                </Text>
-                              </View>
-                              <View style={stylesGlobals.ViewCard}>
-                                <MaterialCommunityIcons
-                                  color={theme.colors.third}
-                                  name="map-marker"
-                                  size={22}
-                                  style={{
-                                    position: "absolute",
-                                    left: 7,
-                                  }}
-                                />
-                                <Text style={stylesGlobals.textCard}>
-                                  {`${customer.direccion.nombreDepartamento}/${customer.direccion.nombreMunicipio}`}
-                                </Text>
-                              </View>
-                              <View style={[stylesGlobals.ViewCard]}>
-                                <MaterialCommunityIcons
-                                  color={theme.colors.dark}
-                                  name="mail"
-                                  size={22}
-                                  style={{
-                                    position: "absolute",
-                                    left: 7,
-                                  }}
-                                />
+                 {customer_list && customer_list.length > 0?(
+                  <>
+                  {customer_list && customer_list.length > 0 && (
+                    <>
+                      {!is_loading &&
+                        customer_list.map((customer, index) => (
+                          <Card key={index} style={stylesGlobals.styleCard}>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.secondary}
+                                name="account"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {customer.nombre}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.third}
+                                name="phone"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {customer.telefono}
+                              </Text>
+                            </View>
+                            <View style={stylesGlobals.ViewCard}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.third}
+                                name="map-marker"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
+                              <Text style={stylesGlobals.textCard}>
+                                {`${customer.direccion.nombreDepartamento}/${customer.direccion.nombreMunicipio}`}
+                              </Text>
+                            </View>
+                            <View style={[stylesGlobals.ViewCard]}>
+                              <MaterialCommunityIcons
+                                color={theme.colors.dark}
+                                name="mail"
+                                size={22}
+                                style={{
+                                  position: "absolute",
+                                  left: 7,
+                                }}
+                              />
 
-                                <Text style={[stylesGlobals.textCard]}>
-                                  {customer.correo}
-                                </Text>
-                              </View>
-                            </Card>
-                          ))}
-                      </>
-                    )}
+                              <Text style={[stylesGlobals.textCard]}>
+                                {customer.correo}
+                              </Text>
+                            </View>
+                          </Card>
+                        ))}
+                    </>
+                  )}
+                  </>
+                 ):(
+                  <View style={stylesGlobals.viewLottie}>
+                    <LottieView
+                       autoPlay
+                       ref={animation}
+                       style={stylesGlobals.LottieStyle}
+                     source={require("@/assets/gif_json/gif_global.json")}
+                    />
+                    </View>
+                 )}
+                  
                   </View>
                 </ScrollView>
               </>
