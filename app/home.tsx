@@ -124,12 +124,10 @@ function home() {
     setRefreshing(false);
   }, [refreshing]);
 
-
   useEffect(() => {
     return_token().then((da) => console.log("home", da));
     is_auth().then((dat) => console.log("home", dat));
   }, []);
-
 
   return (
     <>
@@ -166,7 +164,10 @@ function home() {
             >
               <Box_close
                 idBox={box?.id}
-                closeModal={() => setBoxCloseDate(false)}
+                closeModal={() => {
+                  setBoxCloseDate(false);
+                  setIsShowModalClose(false);
+                }}
                 validation={true}
               />
             </Modal>
@@ -181,16 +182,16 @@ function home() {
                     alignItems: "center",
                   }}
                 >
-                   {isVisible ? (
-                      <OptionsCloseBox
-                        box={box}
-                        closeModal={() => {
-                          setIsShowModalClose(false);
-                        }}
-                      />
-                    ) : (
-                      <AddBox closeModal={() => setIsShowModalClose(false)} />
-                    )}
+                  {isVisible ? (
+                    <OptionsCloseBox
+                      box={box}
+                      closeModal={() => {
+                        setIsShowModalClose(false);
+                      }}
+                    />
+                  ) : (
+                    <AddBox closeModal={() => setIsShowModalClose(false)} />
+                  )}
                 </Card>
               </View>
             </Modal>

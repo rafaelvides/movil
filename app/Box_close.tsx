@@ -23,7 +23,7 @@ import { StatusBar } from "expo-status-bar";
 interface Props {
   idBox?: number | undefined;
   closeModal: () => void;
-  validation?: boolean
+  validation?: boolean;
 }
 
 const Box_close = (props: Props) => {
@@ -117,13 +117,13 @@ const Box_close = (props: Props) => {
   };
 
   const completeBox = () => {
-    if (props.idBox && props.validation === true ) {
+    if (props.idBox && props.validation === true) {
       save_detail_close_box({ ...boxValues, state: "true" }, props.idBox!)
         .then(({ data }) => {
           if (data.ok) {
             OnRemoveBox(),
               ToastAndroid.show("Caja cerrada con éxito", ToastAndroid.SHORT);
-              router.navigate("/home");
+            router.navigate("/home");
             props.closeModal();
             setBoxPreview(undefined);
           }
@@ -133,14 +133,14 @@ const Box_close = (props: Props) => {
           ToastAndroid.show("No se pudo cerrar la caja", ToastAndroid.SHORT);
         });
     }
-     if (box && props.validation === true) {
-      save_detail_close_box({ ...boxValues, state: "true" }, box.id)
+    if (box || props.validation === true) {
+      save_detail_close_box({ ...boxValues, state: "true" }, box!.id)
         .then(({ data }) => {
           if (data.ok) {
             OnRemoveBox(),
               ToastAndroid.show("Caja cerrada con éxito", ToastAndroid.SHORT);
             router.navigate("/home");
-            props.closeModal()
+            props.closeModal();
             setIsGroupButton(false);
             setBoxPreview(undefined);
           }
@@ -166,14 +166,19 @@ const Box_close = (props: Props) => {
           borderColor: "green",
         }}
       >
-      {props.validation && (
-        <Text style={{
-          fontSize: 14, margin:10
-        }}>
-            Para continuar necesitas cerrar la caja con fecha:  <Text style={{fontSize: 14,
-          fontWeight:"bold", color:"red"}}>{box?.date.toString()}</Text>
+        {props.validation && (
+          <Text
+            style={{
+              fontSize: 14,
+              margin: 10,
+            }}
+          >
+            Para continuar necesitas cerrar la caja con fecha:{" "}
+            <Text style={{ fontSize: 14, fontWeight: "bold", color: "red" }}>
+              {box?.date.toString()}
+            </Text>
           </Text>
-      )}
+        )}
         <ScrollView
           style={{
             marginBottom: 14,
@@ -181,7 +186,6 @@ const Box_close = (props: Props) => {
             borderColor: "green",
           }}
         >
-          
           <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
         </ScrollView>
         {boxPreview && <BoxAccounting boxPreview={boxPreview} />}
@@ -199,7 +203,10 @@ const Box_close = (props: Props) => {
               />
 
               <Button
-                onPress={() => completeBox()}
+                onPress={() => {
+                  completeBox();
+                  console.log("se preciooooona");
+                }}
                 color={theme.colors.warning}
                 Title="Cerrar caja"
               />
