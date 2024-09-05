@@ -26,6 +26,7 @@ import { update_active_location } from "@/services/locations.service";
 import { ThemeContext } from "@/hooks/useTheme";
 import { formatDate } from "@/utils/date";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
+import { colors } from "@/utils/constants";
 const saved_location_tour = () => {
   const [loading, setLoading] = useState(false);
   const socket = createSocket();
@@ -78,17 +79,45 @@ const saved_location_tour = () => {
   );
 
   // Filtrar coordenadas que estan duplicadas y devuelve una cordenada mas exacta
+  // const cleanerCoordinates = sortedCoordinates.map((item) => {
+  //   const unique = [];
+  //   const map = new Map();
+  //   for (const coord of item) {
+  //     if (!map.has(coord.latitude + "," + coord.longitude)) {
+  //       map.set(coord.latitude + "," + coord.longitude, true);
+  //       unique.push(coord);
+  //     }
+  //   }
+  //   return unique;
+  // });
+  const distance = (coord1: any, coord2: any) => {
+    const R = 6371; // Radio de la Tierra en km
+    const dLat = (coord2.latitude - coord1.latitude) * Math.PI / 180;
+    const dLon = (coord2.longitude - coord1.longitude) * Math.PI / 180;
+    const a = 
+      0.5 - Math.cos(dLat)/2 + 
+      Math.cos(coord1.latitude * Math.PI / 180) * Math.cos(coord2.latitude * Math.PI / 180) * 
+      (1 - Math.cos(dLon))/2;
+    return R * 2 * Math.asin(Math.sqrt(a));
+  };
+  
   const cleanerCoordinates = sortedCoordinates.map((item) => {
     const unique = [];
-    const map = new Map();
-    for (const coord of item) {
-      if (!map.has(coord.latitude + "," + coord.longitude)) {
-        map.set(coord.latitude + "," + coord.longitude, true);
-        unique.push(coord);
+    for (let i = 0; i < item.length; i++) {
+      let isUnique = true;
+      for (let j = 0; j < unique.length; j++) {
+        if (distance(item[i], unique[j]) < 0.01) { // Umbral de 10 metros
+          isUnique = false;
+          break;
+        }
+      }
+      if (isUnique) {
+        unique.push(item[i]);
       }
     }
     return unique;
   });
+  
 
   return (
     <>
@@ -192,7 +221,8 @@ const saved_location_tour = () => {
                           strokeWidth={6}
                           lineCap="round"
                           lineJoin="round"
-                          strokeColor="#00826a"
+                          // strokeColor={getRandomColor()}
+                          strokeColor={colors[index % colors.length]}
                         />
                         <Marker
                           coordinate={item[0]}
@@ -201,16 +231,18 @@ const saved_location_tour = () => {
                             "Hora: " +
                             new Date(item[0].timestamp).toLocaleTimeString()
                           }
+                          pinColor={colors[index % colors.length]}
                         />
                         <Marker
                           coordinate={item[item.length - 1]}
-                          title={"Punto actual: " + (index + 1)}
+                          title={"Punto final: " + (index + 1)}
                           description={
                             "Hora: " +
                             new Date(
                               item[item.length - 1].timestamp
                             ).toLocaleTimeString()
                           }
+                          pinColor={colors[index % colors.length]}
                         />
                       </Fragment>
                     ))}
@@ -254,32 +286,35 @@ const saved_location_tour = () => {
               <>
                 {cleanerCoordinates.map((item, index) => (
                   <Fragment key={index}>
-                    <Polyline
-                      coordinates={item}
-                      strokeWidth={6}
-                      lineCap="round"
-                      lineJoin="round"
-                      strokeColor="#00826a"
-                    />
-                    <Marker
-                      coordinate={item[0]}
-                      title={"Comienzo: " + (index + 1)}
-                      description={
-                        "Hora: " +
-                        new Date(item[0].timestamp).toLocaleTimeString()
-                      }
-                    />
-                    <Marker
-                      coordinate={item[item.length - 1]}
-                      title={"Punto actual: " + (index + 1)}
-                      description={
-                        "Hora: " +
-                        new Date(
-                          item[item.length - 1].timestamp
-                        ).toLocaleTimeString()
-                      }
-                    />
-                  </Fragment>
+                  <Polyline
+                    coordinates={item}
+                    strokeWidth={6}
+                    lineCap="round"
+                    lineJoin="round"
+                    // strokeColor={getRandomColor()}
+                    strokeColor={colors[index % colors.length]}
+                  />
+                  <Marker
+                    coordinate={item[0]}
+                    title={"Comienzo: " + (index + 1)}
+                    description={
+                      "Hora: " +
+                      new Date(item[0].timestamp).toLocaleTimeString()
+                    }
+                    pinColor={colors[index % colors.length]}
+                  />
+                  <Marker
+                    coordinate={item[item.length - 1]}
+                    title={"Punto final: " + (index + 1)}
+                    description={
+                      "Hora: " +
+                      new Date(
+                        item[item.length - 1].timestamp
+                      ).toLocaleTimeString()
+                    }
+                    pinColor={colors[index % colors.length]}
+                  />
+                </Fragment>
                 ))}
               </>
             )}

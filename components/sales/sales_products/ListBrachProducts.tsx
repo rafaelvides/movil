@@ -4,13 +4,22 @@ import { get_branch_id } from "@/plugins/async_storage";
 import { useBranchProductStore } from "@/store/branch_product.store";
 import { formatCurrency } from "@/utils/dte";
 import { useContext, useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  RefreshControl,
+  SafeAreaView,
+} from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import BarcodeScanner from "@/components/Global/BarcodeScanner";
-// import {
-//   getBranchProductPaginated,
-// } from "@/offline/services/branch_product.service";
 import { StatusBar } from "expo-status-bar";
+import Card from "@/components/Global/components_app/Card";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import { useDebounce } from "@uidotdev/usehooks";
 
 interface Props {
   closeModal: () => void;
@@ -23,6 +32,8 @@ const CartProductsList = (props: Props) => {
   const [showScanner, setShowScanner] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [showModalScanner, setShowModalScanner] = useState(false);
+  const debouncedSearchTerm = useDebounce(nameProduct, 300);
+
   const {
     branch_products,
     OnAddProductByCode,
@@ -31,30 +42,33 @@ const CartProductsList = (props: Props) => {
   } = useBranchProductStore();
   const totalPages = pagination_branch_product?.totalPag ?? 1;
   const { theme } = useContext(ThemeContext);
-  const [id, setId] = useState(0);
-  const [limit, setLimit] = useState(5);
 
   useEffect(() => {
     (async () => {
       await get_branch_id().then(async (id) => {
-        setId(Number(id));
         if (id !== null && id !== undefined) {
-          await GetPaginatedBranchProducts(
-            Number(id),
-            currentPage,
-            5,
-            nameProduct,
-            ""
-          );
+          if (debouncedSearchTerm) {
+            await GetPaginatedBranchProducts(
+              Number(id),
+              currentPage,
+              5,
+              debouncedSearchTerm ?? "",
+              ""
+            );
+          } else {
+            await GetPaginatedBranchProducts(
+              Number(id),
+              currentPage,
+              5,
+              debouncedSearchTerm ?? "",
+              ""
+            );
+          }
         }
       });
     })();
-    setLimit(5), getFilter();
-  }, [refresh, currentPage, limit]);
-
-  const getFilter = () => {
-    GetPaginatedBranchProducts(id, currentPage, limit, nameProduct, "");
-  };
+    setRefresh(false);
+  }, [refresh, currentPage, debouncedSearchTerm]);
 
   const onRead = (text: string) => {
     (async () => {
@@ -65,19 +79,187 @@ const CartProductsList = (props: Props) => {
       });
       setScanned(false);
       setShowScanner(false);
-      fetchProducts(currentPage);
     })();
   };
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  const fetchProducts = (page: number) => {
-    // getBranchProductPaginated(id, "", nameProduct, page, limit);
-  };
-
   return (
-    <View></View>
+    <>
+      <StatusBar style="dark" />
+      <View
+        style={{
+          borderRadius: 25,
+          width: "100%",
+          top: -5,
+          height: 130,
+          backgroundColor: theme.colors.third,
+        }}
+      >
+        <Pressable
+          style={{
+            position: "absolute",
+            right: 15,
+            top: 15,
+          }}
+        >
+          <MaterialCommunityIcons
+            color={"white"}
+            name="close"
+            size={34}
+            onPress={() => props.closeModal()}
+          />
+        </Pressable>
+
+        <View style={styles.inputWrapper}>
+          <MaterialCommunityIcons
+            color={"#fff"}
+            name={"magnify"}
+            size={23}
+            style={styles.icon}
+          />
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => setNameProduct(text)}
+            placeholder={"Nombre del producto..."}
+            placeholderTextColor={"white"}
+          />
+          <MaterialCommunityIcons
+            color={"#fff"}
+            name={"barcode-scan"}
+            size={23}
+            style={styles.iconTwo}
+            onPress={() => {
+              setShowScanner(true);
+              setShowModalScanner(true);
+            }}
+          />
+        </View>
+      </View>
+      <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refresh}
+              onRefresh={() => setRefresh(true)}
+            />
+          }
+        >
+          <View style={stylesGlobals.viewScroll}>
+            {branch_products &&
+              branch_products.map((brp, index) => (
+                <Card key={index} style={stylesGlobals.styleCard}>
+                  <View
+                    style={{ marginLeft: 280, position: "absolute", top: -5 }}
+                  >
+                    <Pressable
+                      onPress={() => {
+                        OnAddProductByCode(brp.product.code, brp.branch.id);
+                      }}
+                      style={{
+                        width: 40,
+                        height: 40,
+                        backgroundColor: theme.colors.dark,
+                        borderRadius: 10,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        color={"#ffffff"}
+                        name="plus"
+                        size={25}
+                      />
+                    </Pressable>
+                  </View>
+                  <View style={stylesGlobals.ViewCard}>
+                    <MaterialCommunityIcons
+                      color={theme.colors.secondary}
+                      name="inbox-full-outline"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+                    <Text style={stylesGlobals.textCard}>
+                      {brp.product.name.length > 20
+                        ? `${brp.product.name.substring(0, 18)}...`
+                        : brp.product.name}
+                    </Text>
+                  </View>
+
+                  <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
+                    <MaterialCommunityIcons
+                      color={theme.colors.secondary}
+                      name="focus-field-horizontal"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+
+                    <Text style={stylesGlobals.textCard}>
+                      {brp.product.code}
+                    </Text>
+                  </View>
+
+                  <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
+                    <MaterialCommunityIcons
+                      color={theme.colors.secondary}
+                      name="currency-usd"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+                    <Text style={stylesGlobals.textCard}>
+                      {formatCurrency(Number(brp.price))}
+                    </Text>
+                  </View>
+                  <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
+                    <MaterialCommunityIcons
+                      color={theme.colors.secondary}
+                      name="mail"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+
+                    <Text style={stylesGlobals.textCard}>
+                      {brp.product.subCategoryProduct?.categoryProduct.name}
+                    </Text>
+                  </View>
+                </Card>
+              ))}
+          </View>
+          <View style={{ marginBottom: 40 }}>
+            {branch_products.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+
+      <BarcodeScanner
+        setShowScanner={setShowScanner}
+        setScanned={setScanned}
+        showScanner={showScanner}
+        scanned={scanned}
+        setShowModal={setShowModalScanner}
+        showModal={showModalScanner}
+        search={onRead}
+      />
+    </>
   );
 };
 
@@ -85,25 +267,31 @@ export default CartProductsList;
 
 const styles = StyleSheet.create({
   inputWrapper: {
-    position: "relative",
-    width: "96%",
+    alignContent: "center",
+    position: "absolute",
+    width: "90%",
     height: 50,
-    left: 8,
-    bottom: 30,
+    left: 20,
+    top: 60,
   },
   input: {
     height: "100%",
-    paddingLeft: 55,
-    borderColor: "white",
-    backgroundColor: "white",
+    paddingLeft: 40,
+    borderColor: "#D9D9DA",
     borderWidth: 1,
     borderRadius: 15,
-    top: 100,
+    color: "white",
   },
   icon: {
     position: "absolute",
     left: 12,
     top: "50%",
-    transform: [{ translateY: -15 }],
+    transform: [{ translateY: -10 }],
+  },
+  iconTwo: {
+    position: "absolute",
+    right: 12,
+    top: "50%",
+    transform: [{ translateY: -10 }],
   },
 });

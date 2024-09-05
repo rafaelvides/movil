@@ -102,10 +102,7 @@ export const useBranchProductStore = create<IBranchProductStore>(
             },
             is_loading: false,
           });
-          ToastAndroid.show(
-            "No se encontraron productos",
-            ToastAndroid.SHORT
-          );
+          ToastAndroid.show("No se encontraron productos", ToastAndroid.SHORT);
         });
     },
     GetProductByCode: (transmitterId, code) => {
@@ -508,10 +505,7 @@ export const useBranchProductStore = create<IBranchProductStore>(
 
           if (existProduct) {
             get().OnPlusQuantity(existProduct.uuid);
-            ToastAndroid.show(
-              "Producto agregado al carrito",
-              ToastAndroid.LONG
-            );
+            ToastAndroid.show("Producto agregado al carrito", 100);
             return;
           }
 
@@ -552,10 +546,7 @@ export const useBranchProductStore = create<IBranchProductStore>(
                 },
               ],
             });
-            ToastAndroid.show(
-              "Producto agregado al carrito",
-              ToastAndroid.LONG
-            );
+            ToastAndroid.show("Producto agregado al carrito", 100);
           } else {
             if (
               Number(data.product.porcentaje) > 0 &&
@@ -589,10 +580,7 @@ export const useBranchProductStore = create<IBranchProductStore>(
                   },
                 ],
               });
-              ToastAndroid.show(
-                "Producto agregado al carrito",
-                ToastAndroid.LONG
-              );
+              ToastAndroid.show("Producto agregado al carrito", 100);
               return;
             }
             set({
@@ -618,10 +606,7 @@ export const useBranchProductStore = create<IBranchProductStore>(
                 },
               ],
             });
-            ToastAndroid.show(
-              "Producto agregado al carrito",
-              ToastAndroid.LONG
-            );
+            ToastAndroid.show("Producto agregado al carrito", 100);
           }
         })
         .catch(() => {

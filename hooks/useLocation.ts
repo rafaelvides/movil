@@ -35,7 +35,7 @@ TaskManager.defineTask<IGetLocationsResponse>(
               currently: data.locations[0].coords.accuracy,
             })
             .then(() => {
-              socket.emit("locations", "new location");
+              socket.emit("new", "world");
               ToastAndroid.show(
                 "Ubicación registrada correctamente",
                 ToastAndroid.LONG

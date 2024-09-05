@@ -1,4 +1,4 @@
-import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView, StyleSheet, Text, View } from "react-native";
 import React, { useContext, useState } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
 import { Dropdown } from "react-native-element-dropdown";

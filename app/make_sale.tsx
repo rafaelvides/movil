@@ -27,6 +27,10 @@ import { ThemeContext } from "@/hooks/useTheme";
 import { ICondicionDeLaOperacion } from "@/types/billing/cat-016-condicion-de-la-operacion.types";
 import { returnTypeCustomer } from "@/utils/filters";
 import DetailsProduct from "@/components/sales/sales_products/DetailsProduct";
+import AnimatedButton from "@/components/Global/AnimatedButtom";
+import { useCustomerStore } from "@/store/customer.store";
+import { useEmployeeStore } from "@/store/employee.store";
+import { IEmployee } from "@/types/employee/employee.types";
 
 const make_sale = () => {
   const [loading, setLoading] = useState(false);
@@ -38,6 +42,7 @@ const make_sale = () => {
   const [focusButton, setFocusButton] = useState(false);
   const [message, setMessage] = useState("Esperando");
   const [customer, setCustomer] = useState<ICustomer>();
+  const [employee, setEmployee] = useState<IEmployee>();
   const [typeDocument, setTypeDocument] = useState<ICat002TipoDeDocumento>({
     codigo: "01",
     id: 1,
@@ -59,7 +64,9 @@ const make_sale = () => {
     });
   const animation = useRef(null);
   const { theme } = useContext(ThemeContext);
-  const { cart_products, emptyCart } = useBranchProductStore();
+  const { cart_products } = useBranchProductStore();
+  const { OnGetCustomersList, customer_list } = useCustomerStore();
+  const { OnGetEmployeesList } = useEmployeeStore();
 
   const totalAPagar = useMemo(() => {
     return cart_products
@@ -108,6 +115,8 @@ const make_sale = () => {
   );
   useEffect(() => {
     OnGetTransmitter();
+    OnGetCustomersList();
+    OnGetEmployeesList();
     setRefresh(false);
   }, [refresh]);
 
@@ -140,6 +149,14 @@ const make_sale = () => {
       ]);
     }
   }, [cart_products, typeDocument, onePercentRetention, totalAPagar]);
+
+  useMemo(() => {
+    if (!customer) {
+      setCustomer(customer_list.length > 0 ? customer_list[0] : undefined);
+      return customer_list.length > 0 ? customer_list[0] : undefined;
+    }
+  }, [customer_list]);
+
   const handleReset = () => {
     setCustomer(undefined);
     setTypeDocument({
@@ -164,7 +181,6 @@ const make_sale = () => {
       isActivated: true,
       valores: "Contado",
     });
-    // emptyCart();
   };
 
   const handleAddPay = () => {
@@ -235,7 +251,7 @@ const make_sale = () => {
             <View
               style={{
                 width: "100%",
-                height: "100%",
+                height: "75%",
                 paddingHorizontal: 10,
               }}
             >
@@ -245,7 +261,17 @@ const make_sale = () => {
                   alignItems: "flex-end",
                 }}
               >
-               
+                <AnimatedButton
+                  handleClick={() => {
+                    setShowModal(true);
+                  }}
+                  iconName="cart-outline"
+                  buttonColor={theme.colors.dark}
+                  width={44}
+                  height={44}
+                  right={10}
+                  size={25}
+                />
               </View>
               {cart_products && cart_products.length > 0 ? (
                 <>
@@ -276,20 +302,20 @@ const make_sale = () => {
                   </View>
                 </>
               )}
-              <DetailsProduct
-                buttonAction={() => setShowModalSale(true)}
-                total={formatCurrency(totalAPagar)}
-                montoDescuento={discountTotal.toFixed(2)}
-                cantidad={calcQuantityProduct()}
-              />
             </View>
+            <DetailsProduct
+              buttonAction={() => setShowModalSale(true)}
+              total={formatCurrency(totalAPagar)}
+              montoDescuento={discountTotal.toFixed(2)}
+              cantidad={calcQuantityProduct()}
+            />
           </SafeAreaView>
-          <Modal visible={showModal} animationType="fade" >
-            {/* <Pressable
+          <Modal visible={showModal} animationType="fade">
+            <Pressable
               style={{
                 position: "absolute",
-                right: 10,
-                top: 10,
+                right: 15,
+                top: 15,
                 marginBottom: 40,
               }}
             >
@@ -300,17 +326,15 @@ const make_sale = () => {
                 onPress={() => {
                   setShowModal(false);
                 }}
-              /> */}
-            {/* </Pressable> */}
+              />
+            </Pressable>
             <View
-              // style={{
-              //   width: "100%",
-              //   height: "100%",
-              //   paddingHorizontal: 20,
-              //   marginTop: 45,
-              // }}
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
             >
-              <ListBranchProduct closeModal={()=> setShowModal(false)}/>
+              <ListBranchProduct closeModal={() => setShowModal(false)} />
             </View>
           </Modal>
           <Modal visible={showModalSale} animationType="fade">
@@ -340,51 +364,75 @@ const make_sale = () => {
                   style={{
                     display: "flex",
                     flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
+
                     width: "100%",
                     height: "90%",
-                    padding: 32,
+                    // padding: 32,
                   }}
                 >
-                  <Pressable
+                  <View
                     style={{
-                      position: "absolute",
-                      right: 20,
-                      top: 20,
+                      borderRadius: 25,
+                      width: "100%",
+                      top: -5,
+                      height: 130,
+                      backgroundColor: theme.colors.third,
+                      justifyContent: "center",
+                      alignItems: "center",
                     }}
                   >
-                    <MaterialCommunityIcons
-                      color={"#2C3377"}
-                      name="close"
-                      size={30}
-                      onPress={() => {
-                        setShowModalSale(false);
+                    <Pressable
+                      style={{
+                        position: "absolute",
+                        right: 20,
+                        top: 20,
                       }}
+                    >
+                      <MaterialCommunityIcons
+                        color={"white"}
+                        name="close"
+                        size={30}
+                        onPress={() => {
+                          setShowModalSale(false);
+                        }}
+                      />
+                    </Pressable>
+                    <Text style={{ fontSize: 20, top: 15, color: "white" }}>
+                      Procesar venta
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      padding: 15,
+                      width: "100%",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <AddMakeSaleScreen
+                      customer={customer}
+                      setCustomer={setCustomer}
+                      employee={employee}
+                      setEmployee={setEmployee}
+                      typeDocument={typeDocument}
+                      setTypeDocument={setTypeDocument}
+                      typeTribute={typeTribute}
+                      setTypeTribute={setTypeTribute}
+                      handleAddPay={handleAddPay}
+                      onUpdatePeriodo={onUpdatePeriodo}
+                      onUpdateMonto={onUpdateMonto}
+                      handleUpdatePlazo={handleUpdatePlazo}
+                      handleUpdateTipoPago={handleUpdateTipoPago}
+                      handleRemovePay={handleRemovePay}
+                      pays={pays}
+                      setConditionPayment={setConditionPayment}
+                      conditionPayment={conditionPayment}
+                      totalUnformatted={totalPagar}
+                      totalPagarIva={totalPagarIva}
+                      setFocusButton={setFocusButton}
+                      total={discountTotal.toString()}
                     />
-                  </Pressable>
-                  <Text style={{ fontSize: 25 }}>Procesar venta</Text>
-                  <AddMakeSaleScreen
-                    customer={customer}
-                    setCustomer={setCustomer}
-                    typeDocument={typeDocument}
-                    setTypeDocument={setTypeDocument}
-                    typeTribute={typeTribute}
-                    setTypeTribute={setTypeTribute}
-                    handleAddPay={handleAddPay}
-                    onUpdatePeriodo={onUpdatePeriodo}
-                    onUpdateMonto={onUpdateMonto}
-                    handleUpdatePlazo={handleUpdatePlazo}
-                    handleUpdateTipoPago={handleUpdateTipoPago}
-                    handleRemovePay={handleRemovePay}
-                    pays={pays}
-                    setConditionPayment={setConditionPayment}
-                    conditionPayment={conditionPayment}
-                    totalUnformatted={totalPagar}
-                    totalPagarIva={totalPagarIva}
-                    setFocusButton={setFocusButton}
-                    total={discountTotal.toString()}
-                  />
+                  </View>
                 </View>
                 {loadingRevision === true ? (
                   <>

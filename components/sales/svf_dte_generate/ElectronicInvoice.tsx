@@ -1,5 +1,11 @@
 import { Pressable, Text, ToastAndroid, Alert, View } from "react-native";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { ICustomer } from "@/types/customer/customer.types";
 import { ITransmitter } from "@/types/transmitter/transmiter.types";
 import { IFormasDePagoResponse } from "@/types/billing/cat-017-forma-de-pago.types";
@@ -44,6 +50,9 @@ import { IBox } from "@/types/box/box.types";
 import * as Sharing from "expo-sharing";
 import { Blob } from "buffer";
 import { useBranchProductStore } from "@/store/branch_product.store";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const ElectronicInvoice = ({
   customer,
@@ -78,7 +87,7 @@ const ElectronicInvoice = ({
 }) => {
   const { emptyCart } = useBranchProductStore();
   const { OnGetCorrelativesByDte } = usePointOfSaleStore();
-  const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
+  // const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
   const [title, setTitle] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
   const [savedUrls, setSavedUrls] = useState({ json: Blob, urlJSon: "" });
@@ -101,14 +110,15 @@ const ElectronicInvoice = ({
     },
     firma: "",
   });
+  const { theme } = useContext(ThemeContext);
 
-  useEffect(() => {
-    (async () => {
-      await get_configuration().then((data) => {
-        OnImgPDF(String(data?.logo));
-      });
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     await get_configuration().then((data) => {
+  //       OnImgPDF(String(data?.logo));
+  //     });
+  //   })();
+  // }, []);
 
   const generateFactura = async () => {
     if (!conditionPayment) {
@@ -478,7 +488,7 @@ const ElectronicInvoice = ({
             Alert.alert("Éxito", "Se completaron todos los procesos");
             setLoadingSave(false);
             setShowModalSale(false);
-            emptyCart()
+            emptyCart();
             clearAllData();
           })
           .catch((error) => {
@@ -692,15 +702,15 @@ const ElectronicInvoice = ({
                 const blobQR = await axios.get<ArrayBuffer>(QR, {
                   responseType: "arraybuffer",
                 });
-                const document_gen = generateFacturaComercial(
-                  doc,
-                  DTE_FORMED,
-                  new Uint8Array(blobQR.data),
-                  img_invalidation,
-                  img_logo,
-                  false
-                );
-                if (document_gen) {
+                // const document_gen = generateFacturaComercial(
+                //   doc,
+                //   DTE_FORMED,
+                //   new Uint8Array(blobQR.data),
+                //   img_invalidation,
+                //   img_logo,
+                //   false
+                // );
+                if (DTE_FORMED) {
                   const JSON_uri =
                     FileSystem.documentDirectory +
                     DTE.dteJson.identificacion.numeroControl +
@@ -721,36 +731,36 @@ const ElectronicInvoice = ({
                       DTE.dteJson.identificacion.codigoGeneracion
                     }/${DTE.dteJson.identificacion.numeroControl}.json`;
 
-                    const pdf_url = `CLIENTES/${
-                      transmitter.nombre
-                    }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
-                      DTE.dteJson.identificacion.codigoGeneracion
-                    }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
+                    // const pdf_url = `CLIENTES/${
+                    //   transmitter.nombre
+                    // }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
+                    //   DTE.dteJson.identificacion.codigoGeneracion
+                    // }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
 
-                    const filePath = `${FileSystem.documentDirectory}example.pdf`;
-                    await FileSystem.writeAsStringAsync(
-                      filePath,
-                      document_gen.replace(
-                        /^data:application\/pdf;filename=generated\.pdf;base64,/,
-                        ""
-                      ),
-                      {
-                        encoding: FileSystem.EncodingType.Base64,
-                      }
-                    );
-                    const response = await fetch(filePath);
+                    // const filePath = `${FileSystem.documentDirectory}example.pdf`;
+                    // await FileSystem.writeAsStringAsync(
+                    //   filePath,
+                    //   document_gen.replace(
+                    //     /^data:application\/pdf;filename=generated\.pdf;base64,/,
+                    //     ""
+                    //   ),
+                    //   {
+                    //     encoding: FileSystem.EncodingType.Base64,
+                    //   }
+                    // );
+                    // const response = await fetch(filePath);
 
-                    if (!response) {
-                      setLoadingSave(false);
-                      return;
-                    }
+                    // if (!response) {
+                    //   setLoadingSave(false);
+                    //   return;
+                    // }
 
-                    const blob = await response.blob();
-                    const pdfUploadParams = {
-                      Bucket: SPACES_BUCKET,
-                      Key: pdf_url,
-                      Body: blob,
-                    };
+                    // const blob = await response.blob();
+                    // const pdfUploadParams = {
+                    //   Bucket: SPACES_BUCKET,
+                    //   Key: pdf_url,
+                    //   Body: blob,
+                    // };
                     const blobJSON = await fetch(JSON_uri)
                       .then((res) => res.blob())
                       .catch(() => {
@@ -772,21 +782,21 @@ const ElectronicInvoice = ({
                       Body: blobJSON!,
                     };
                     setMessage("Se están subiendo los documentos...");
-                    if (jsonUploadParams && pdfUploadParams) {
+                    if (jsonUploadParams) {
                       s3Client
                         .send(new PutObjectCommand(jsonUploadParams))
                         .then((response) => {
                           if (response.$metadata) {
-                            s3Client
-                              .send(new PutObjectCommand(pdfUploadParams))
-                              .then((response) => {
-                                if (response.$metadata) {
+                            // s3Client
+                            //   .send(new PutObjectCommand(pdfUploadParams))
+                            //   .then((response) => {
+                            //     if (response.$metadata) {
                                   setMessage(
                                     "Estamos guardando tus documentos"
                                   );
 
                                   const payload = {
-                                    pdf: pdf_url,
+                                    pdf: "pdf_url",
                                     dte: json_url,
                                     cajaId: box,
                                     codigoEmpleado: empleado,
@@ -832,21 +842,21 @@ const ElectronicInvoice = ({
                                         ToastAndroid.LONG
                                       );
                                     });
-                                } else {
-                                  setLoadingSave(false);
-                                  ToastAndroid.show(
-                                    "Error inesperado, contacte al equipo de soporte1",
-                                    ToastAndroid.LONG
-                                  );
-                                }
-                              })
-                              .catch(() => {
-                                setLoadingSave(false);
-                                ToastAndroid.show(
-                                  "Ocurrió un error al subir el PDF",
-                                  ToastAndroid.LONG
-                                );
-                              });
+                              //   } else {
+                              //     setLoadingSave(false);
+                              //     ToastAndroid.show(
+                              //       "Error inesperado, contacte al equipo de soporte1",
+                              //       ToastAndroid.LONG
+                              //     );
+                              //   }
+                              // })
+                              // .catch(() => {
+                              //   setLoadingSave(false);
+                              //   ToastAndroid.show(
+                              //     "Ocurrió un error al subir el PDF",
+                              //     ToastAndroid.LONG
+                              //   );
+                              // });
                           } else {
                             setLoadingSave(false);
                             ToastAndroid.show(
@@ -898,29 +908,37 @@ const ElectronicInvoice = ({
   return (
     <>
       {!focusButton && (
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Pressable
-            onPress={generateFactura}
-            style={{
-              width: "84%",
-              padding: 16,
-              borderRadius: 4,
-              marginTop: 12,
-              backgroundColor: "#1d4ed8",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-            >
-              Generar la factura
-            </Text>
-          </Pressable>
+        // <View style={{ justifyContent: "center", alignItems: "center" }}>
+        //   <Pressable
+        //     onPress={generateFactura}
+        //     style={{
+        //       width: "84%",
+        //       padding: 16,
+        //       borderRadius: 4,
+        //       marginTop: 12,
+        //       backgroundColor: "#1d4ed8",
+        //       display: "flex",
+        //       justifyContent: "center",
+        //       alignItems: "center",
+        //     }}
+        //   >
+        //     <Text
+        //       style={{
+        //         color: "#fff",
+        //         fontWeight: "bold",
+        //       }}
+        //     >
+        //       Generar la factura
+        //     </Text>
+        //   </Pressable>
+        // </View>
+        <View style={stylesGlobals.viewBotton}>
+          <Button
+            withB={390}
+            onPress={() => {}}
+            Title="Generar la factura"
+            color={theme.colors.dark}
+          />
         </View>
       )}
     </>

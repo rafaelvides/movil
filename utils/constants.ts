@@ -1,5 +1,5 @@
-export const API_URL = "http://192.168.0.25:8000/api";
-export const SOCKET = "http://192.168.0.7:8000/socket";
+export const API_URL = "http://192.168.0.26:8000/api";
+export const SOCKET = "http://192.168.0.26:8000/socket";
 // export const API_URL = "https://seedcode-api.erpseedcodeone.online/api";
 // export const SOCKET = "https://seedcode-api.erpseedcodeone.online/socket";
 
@@ -29,3 +29,157 @@ export const defaultTheme = {
     dark: "#1d3557",
   },
 };
+
+export const colors = [
+  "#FF69B4", // Rosa
+  "#34A85A", // Verde claro
+  "#FFC107", // Naranja claro
+  "#8E24AA", // Púrpura
+  "#4CAF50", // Verde oscuro
+  "#03A9F4", // Azul claro
+  "#FF9800", // Naranja oscuro
+  "#9C27B0", // Fucsia
+  "#2196F3", // Azul oscuro
+  "#F44336", // Rojo
+  "#009688", // Verde azulado
+  "#795548", // Madera
+  "#9E9E9E", // Gris
+  "#607D8B", // Azul grisáceo
+  "#FFA07A", // Naranja claro
+  "#64B5F6", // Azul claro
+  "#8BC34A", // Verde claro
+  "#FFC0CB", // Rosa claro
+  "#3F51B5", // Azul oscuro
+  "#4DB6AC", // Verde azulado
+  "#FF99CC", // Rosa claro
+  "#9FA8DA", // Azul grisáceo
+  "#F7DC6F", // Amarillo claro
+  "#66CCCC", // Azul claro
+  "#FFA57D", // Naranja claro
+  "#8F9C45", // Verde oscuro
+  "#C5CAE9", // Azul claro
+  "#F2C464", // Naranja claro
+  "#7A288A", // Púrpura
+  "#4C5154", // Gris oscuro
+  "#8B9467", // Verde oscuro
+  "#6495ED", // Azul claro
+  "#FFC080", // Naranja claro
+  "#3B3F54", // Azul oscuro
+  "#455A64", // Azul grisáceo
+  "#FFA07A", // Naranja claro
+  "#8B9467", // Verde oscuro
+  "#2196F3", // Azul oscuro
+  "#F44336", // Rojo
+  "#9C27B0", // Fucsia
+  "#4CAF50", // Verde oscuro
+  "#03A9F4", // Azul claro
+  "#FF9800", // Naranja oscuro
+  "#795548", // Madera
+  "#9E9E9E", // Gris
+  "#607D8B", // Azul grisáceo
+  "#FFC0CB", // Rosa claro
+  "#3F51B5", // Azul oscuro
+  "#4DB6AC", // Verde azulado
+  "#FF99CC", // Rosa claro
+  "#9FA8DA", // Azul grisáceo
+  "#F7DC6F", // Amarillo claro
+  "#66CCCC", // Azul claro
+  "#FFA57D", // Naranja claro
+  "#8F9C45", // Verde oscuro
+  "#C5CAE9", // Azul claro
+  "#F2C464", // Naranja claro
+  "#7A288A", // Púrpura
+  "#4C5154", // Gris oscuro
+  "#8B9467", // Verde oscuro
+  "#6495ED", // Azul claro
+  "#FFC080", // Naranja claro
+  "#3B3F54", // Azul oscuro
+  "#455A64", // Azul grisáceo
+  "#FFA07A", // Naranja claro
+  "#8B9467", // Verde oscuro
+  "#2196F3", // Azul oscuro
+  "#F44336", // Rojo
+  "#9C27B0", // Fucsia
+  "#4CAF50", // Verde oscuro
+  "#03A9F4", // Azul claro
+  "#FF9800", // Naranja oscuro
+  "#795548", // Madera
+  "#9E9E9E", // Gris
+  "#607D8B", // Azul grisáceo
+  "#FFC0CB", // Rosa claro
+  "#3F51B5", // Azul oscuro
+  "#4DB6AC", // Verde azulado
+  "#FF99CC", // Rosa claro
+  "#9FA8DA", // Azul grisáceo
+  "#F7DC6F", // Amarillo claro
+  "#66CCCC", // Azul claro
+  "#FFA57D", // Naranja claro
+  "#8F9C45", // Verde oscuro
+  "#C5CAE9", // Azul claro
+  "#F2C464", // Naranja claro
+  "#7A288A", // Púrpura
+  "#4C5154", // Gris oscuro
+  "#8B9467", // Verde oscuro
+  "#6495ED", // Azul claro
+  "#FFC080", // Naranja claro
+  "#3B3F54", // Azul oscuro
+  "#455A64", // Azul grisáceo
+  "#FFA07A", // Naranja claro
+  "#8B9467", // Verde oscuro
+  "#2196F3", // Azul oscuro
+  "#F44336", // Rojo
+  "#9C27B0", // Fucsia
+  "#4CAF50", // Verde oscuro
+  "#03A9F4", // Azul claro
+  "#FF9800", // Naranja oscuro
+  "#795548", // Madera
+  "#9E9E9E", // Gris
+  "#607D8B", // Azul grisáceo
+  "#FFC0CB", // Rosa claro
+  "#3F51B5", // Azul oscuro
+  "#4DB6AC", // Verde azulado
+  "#FF99CC", // Rosa claro
+  "#9FA8DA", // Azul grisáceo
+  "#F7DC6F", // Amarillo claro
+  "#66CCCC", // Azul claro
+  "#FFA57D", // Naranja claro
+  "#8F9C45", // Verde oscuro
+  "#C5CAE9", // Azul claro
+  "#F2C464", // Naranja claro
+  "#7A288A", // Púrpura
+  "#4C5154", // Gris oscuro
+  "#8B9467", // Verde oscuro
+  "#6495ED", // Azul claro
+  "#FFC080", // Naranja claro
+  "#3B3F54", // Azul oscuro
+  "#455A64", // Azul grisáceo
+  "#FFA07A", // Naranja claro
+  "#8B9467", // Verde oscuro
+  "#2196F3", // Azul oscuro
+  "#F44336", // Rojo
+  "#9C27B0", // Fucsia
+  "#4CAF50", // Verde oscuro
+  "#03A9F4", // Azul claro
+  "#FF9800", // Naranja oscuro
+  "#795548", // Madera
+  "#9E9E9E", // Gris
+  "#607D8B", // Azul grisáceo
+  "#FFC0CB", // Rosa claro
+  "#3F51B5", // Azul oscuro
+  "#4DB6AC", // Verde azulado
+  "#FF99CC", // Rosa claro
+  "#9FA8DA", // Azul grisáceo
+  "#F7DC6F", // Amarillo claro
+  "#66CCCC", // Azul claro
+  "#FFA57D", // Naranja claro
+  "#8F9C45", // Verde oscuro
+  "#C5CAE9", // Azul claro
+  "#F2C464", // Naranja claro
+  "#7A288A", // Púrpura
+  "#4C5154", // Gris oscuro
+  "#8B9467", // Verde oscuro
+  "#6495ED", // Azul claro
+  "#FFC080", // Naranja claro
+  "#3B3F54", // Azul oscuro
+  "#455A64", // Azul grisáceo
+]

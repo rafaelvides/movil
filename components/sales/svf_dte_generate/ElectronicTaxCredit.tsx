@@ -1,5 +1,5 @@
 import { View, Text, ToastAndroid, Alert, Pressable } from "react-native";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
 import { ICustomer } from "@/types/customer/customer.types";
 import { ITransmitter } from "@/types/transmitter/transmiter.types";
 import { ICat002TipoDeDocumento } from "@/types/billing/cat-002-tipo-de-documento.types";
@@ -43,6 +43,9 @@ import { usePointOfSaleStore } from "@/store/point_of_sale.store";
 import { IBox } from "@/types/box/box.types";
 import { generateURL } from "@/utils/utils";
 import * as Sharing from "expo-sharing";
+import Button from "@/components/Global/components_app/Button";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import { ThemeContext } from "@/hooks/useTheme";
 
 interface Props {
   customer: ICustomer | undefined;
@@ -100,16 +103,18 @@ const ElectronicTaxCredit = (props: Props) => {
     },
     firma: "",
   });
-  const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
+  const { theme } = useContext(ThemeContext);
+
+  // const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
   const { OnGetCorrelativesByDte } = usePointOfSaleStore();
 
-  useEffect(() => {
-    (async () => {
-      await get_configuration().then((data) => {
-        OnImgPDF(String(data?.logo));
-      });
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     await get_configuration().then((data) => {
+  //       OnImgPDF(String(data?.logo));
+  //     });
+  //   })();
+  // }, []);
 
   const generateTaxCredit = async () => {
     if (conditionPayment === 0) {
@@ -1043,15 +1048,15 @@ const ElectronicTaxCredit = (props: Props) => {
                 const blobQR = await axios.get<ArrayBuffer>(QR, {
                   responseType: "arraybuffer",
                 });
-                const document_gen = generateCreditoFiscal(
-                  doc,
-                  DTE_FORMED,
-                  new Uint8Array(blobQR.data),
-                  img_invalidation,
-                  img_logo,
-                  false
-                );
-                if (document_gen) {
+                // const document_gen = generateCreditoFiscal(
+                //   doc,
+                //   DTE_FORMED,
+                //   new Uint8Array(blobQR.data),
+                //   img_invalidation,
+                //   img_logo,
+                //   false
+                // );
+                if (DTE_FORMED) {
                   const JSON_uri =
                     FileSystem.documentDirectory +
                     DTE.dteJson.identificacion.numeroControl +
@@ -1072,36 +1077,36 @@ const ElectronicTaxCredit = (props: Props) => {
                       }/${new Date().getFullYear()}/VENTAS/CRÉDITO_FISCAL/${formatDate()}/${
                         DTE.dteJson.identificacion.codigoGeneracion
                       }/${DTE.dteJson.identificacion.numeroControl}.json`;
-                      const pdf_url = `CLIENTES/${
-                        transmitter.nombre
-                      }/${new Date().getFullYear()}/VENTAS/CRÉDITO_FISCAL/${formatDate()}/${
-                        DTE.dteJson.identificacion.codigoGeneracion
-                      }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
+                      // const pdf_url = `CLIENTES/${
+                      //   transmitter.nombre
+                      // }/${new Date().getFullYear()}/VENTAS/CRÉDITO_FISCAL/${formatDate()}/${
+                      //   DTE.dteJson.identificacion.codigoGeneracion
+                      // }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
 
-                      const filePath = `${FileSystem.documentDirectory}example.pdf`;
-                      await FileSystem.writeAsStringAsync(
-                        filePath,
-                        document_gen.replace(
-                          /^data:application\/pdf;filename=generated\.pdf;base64,/,
-                          ""
-                        ),
-                        {
-                          encoding: FileSystem.EncodingType.Base64,
-                        }
-                      );
-                      const response = await fetch(filePath);
+                      // const filePath = `${FileSystem.documentDirectory}example.pdf`;
+                      // await FileSystem.writeAsStringAsync(
+                      //   filePath,
+                      //   document_gen.replace(
+                      //     /^data:application\/pdf;filename=generated\.pdf;base64,/,
+                      //     ""
+                      //   ),
+                      //   {
+                      //     encoding: FileSystem.EncodingType.Base64,
+                      //   }
+                      // );
+                      // const response = await fetch(filePath);
 
-                      if (!response) {
-                        setLoadingSave(false);
-                        return;
-                      }
+                      // if (!response) {
+                      //   setLoadingSave(false);
+                      //   return;
+                      // }
 
-                      const blob = await response.blob();
-                      const pdfUploadParams = {
-                        Bucket: "facturacion-seedcode",
-                        Key: pdf_url,
-                        Body: blob,
-                      };
+                      // const blob = await response.blob();
+                      // const pdfUploadParams = {
+                      //   Bucket: "facturacion-seedcode",
+                      //   Key: pdf_url,
+                      //   Body: blob,
+                      // };
                       const blobJSON = await fetch(JSON_uri)
                         .then((res) => res.blob())
                         .catch(() => {
@@ -1123,20 +1128,20 @@ const ElectronicTaxCredit = (props: Props) => {
                         Body: blobJSON!,
                       };
                       setMessage("Se están subiendo los documentos...");
-                      if (jsonUploadParams && pdfUploadParams) {
+                      if (jsonUploadParams) {
                         s3Client
                           .send(new PutObjectCommand(jsonUploadParams))
                           .then((response) => {
                             if (response.$metadata) {
-                              s3Client
-                                .send(new PutObjectCommand(pdfUploadParams))
-                                .then((response) => {
-                                  if (response.$metadata) {
+                              // s3Client
+                              //   .send(new PutObjectCommand(pdfUploadParams))
+                              //   .then((response) => {
+                              //     if (response.$metadata) {
                                     setMessage(
                                       "Se esta guardando el DTE en nuestra base de datos..."
                                     );
                                     const payload = {
-                                      pdf: pdf_url,
+                                      pdf: "pdf_url",
                                       dte: json_url,
                                       cajaId: box,
                                       codigoEmpleado: employee,
@@ -1183,21 +1188,21 @@ const ElectronicTaxCredit = (props: Props) => {
                                           ToastAndroid.LONG
                                         );
                                       });
-                                  } else {
-                                    setLoadingSave(false);
-                                    ToastAndroid.show(
-                                      "Error inesperado, contacte al equipo de soporte1",
-                                      ToastAndroid.LONG
-                                    );
-                                  }
-                                })
-                                .catch(() => {
-                                  setLoadingSave(false);
-                                  ToastAndroid.show(
-                                    "Ocurrió un error al subir el PDF",
-                                    ToastAndroid.LONG
-                                  );
-                                });
+                                //   } else {
+                                //     setLoadingSave(false);
+                                //     ToastAndroid.show(
+                                //       "Error inesperado, contacte al equipo de soporte1",
+                                //       ToastAndroid.LONG
+                                //     );
+                                //   }
+                                // })
+                                // .catch(() => {
+                                //   setLoadingSave(false);
+                                //   ToastAndroid.show(
+                                //     "Ocurrió un error al subir el PDF",
+                                //     ToastAndroid.LONG
+                                //   );
+                                // });
                             } else {
                               setLoadingSave(false);
                               ToastAndroid.show(
@@ -1261,32 +1266,43 @@ const ElectronicTaxCredit = (props: Props) => {
   return (
     <>
       {!focusButton && (
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Pressable
-            onPress={() => {
-              generateTaxCredit();
-            }}
-            style={{
-              width: "84%",
-              padding: 16,
-              borderRadius: 4,
-              backgroundColor: "#1d4ed8",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-            >
-              Generar el crédito fiscal
-            </Text>
-          </Pressable>
-        </View>
+        // <View style={{ justifyContent: "center", alignItems: "center" }}>
+        //   <Pressable
+        //     onPress={() => {
+        //       generateTaxCredit();
+        //     }}
+        //     style={{
+        //       width: "84%",
+        //       padding: 16,
+        //       borderRadius: 4,
+        //       backgroundColor: "#1d4ed8",
+        //       display: "flex",
+        //       justifyContent: "center",
+        //       alignItems: "center",
+        //       marginTop: 10,
+        //     }}
+        //   >
+        //     <Text
+        //       style={{
+        //         color: "#fff",
+        //         fontWeight: "bold",
+        //       }}
+        //     >
+        //       Generar el crédito fiscal
+        //     </Text>
+        //   </Pressable>
+
+        // </View>
+         <View style={stylesGlobals.viewBotton}>
+         <Button
+           withB={390}
+           onPress={() =>
+             {}
+           }
+           Title="Generar el crédito fiscal"
+           color={theme.colors.dark}
+         />
+       </View>
       )}
     </>
   );

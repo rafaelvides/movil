@@ -1,4 +1,11 @@
-import { useEffect, useState, Dispatch, SetStateAction, useMemo } from "react";
+import {
+  useEffect,
+  useState,
+  Dispatch,
+  SetStateAction,
+  useMemo,
+  useContext,
+} from "react";
 import {
   View,
   Text,
@@ -19,10 +26,19 @@ import { ICat002TipoDeDocumento } from "@/types/billing/cat-002-tipo-de-document
 import { ITipoTributo } from "@/types/billing/cat-015-tipo-de-tributo.types";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { ICondicionDeLaOperacion } from "@/types/billing/cat-016-condicion-de-la-operacion.types";
+import Card from "../Global/components_app/Card";
+import Input from "../Global/components_app/Input";
+import stylesGlobals from "../Global/styles/StylesAppComponents";
+import Button from "../Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
+import { useEmployeeStore } from "@/store/employee.store";
+import { IEmployee } from "@/types/employee/employee.types";
 
 interface Props {
   customer: ICustomer | undefined;
   setCustomer: Dispatch<SetStateAction<ICustomer | undefined>>;
+  employee: IEmployee | undefined;
+  setEmployee: Dispatch<SetStateAction<IEmployee | undefined>>;
   typeDocument: ICat002TipoDeDocumento | undefined;
   setTypeDocument: Dispatch<SetStateAction<ICat002TipoDeDocumento>>;
   typeTribute: ITipoTributo | undefined;
@@ -47,6 +63,7 @@ const AddMakeSaleScreen = (props: Props) => {
     handleRemovePay,
     handleAddPay,
     customer,
+    employee,
     pays,
     handleUpdatePlazo,
     onUpdatePeriodo,
@@ -54,6 +71,7 @@ const AddMakeSaleScreen = (props: Props) => {
     handleUpdateTipoPago,
     setConditionPayment,
     setTypeDocument,
+    setEmployee,
     conditionPayment,
     totalUnformatted,
     setFocusButton,
@@ -63,9 +81,11 @@ const AddMakeSaleScreen = (props: Props) => {
   } = props;
 
   const [isFocus, setIsFocus] = useState(false);
+  const [isFocusEmp, setIsFocusEmp] = useState(false);
   const [isFocusPago, setIsFocusPago] = useState(false);
   const [isFocusTipoDocum, setIsFocusTipoDocum] = useState(false);
   const [isFocusTipoConditions, setIsFocusTipoConditions] = useState(false);
+  const [details, setDetails] = useState(false);
   const [isFocusTributo, setIsFocusTributo] = useState(false);
   const [conditions, setConditions] = useState(0);
   const [typePayment, setTypePayment] = useState({
@@ -74,7 +94,9 @@ const AddMakeSaleScreen = (props: Props) => {
     isActivated: true,
     valores: "Billetes y monedas",
   });
-  const { OnGetCustomersList, customer_list } = useCustomerStore();
+  const { employee_list } = useEmployeeStore();
+
+  const { customer_list } = useCustomerStore();
   const {
     OnGetCat017FormasDePago,
     cat_017_forma_de_pago,
@@ -88,13 +110,14 @@ const AddMakeSaleScreen = (props: Props) => {
     cat_018_plazo,
   } = useBillingStore();
   useEffect(() => {
-    OnGetCustomersList();
     OnGetCat017FormasDePago();
     OnGetCat02TipoDeDocumento();
     OnGetCat015TiposTributos();
     OnGetCat016CondicionDeLaOperacio();
     OnGetCat018Plazo();
   }, []);
+  const { theme } = useContext(ThemeContext);
+
   const [vuelto, setVuelto] = useState(0);
   const [stateMonts, setStateMonts] = useState(false);
   const handlePagoChange = (pagoValue: string) => {
@@ -139,14 +162,617 @@ const AddMakeSaleScreen = (props: Props) => {
     );
   }, [cat_002_tipos_de_documento]);
 
-  const defaultCustomerKey = useMemo(() => {
-    if (!customer) {
-      setCustomer(customer_list.length > 0 ? customer_list[0] : undefined);
-      return customer_list.length > 0 ? customer_list[0] : undefined;
-    }
-  }, [customer_list]);
   return (
-  <></>
+    <>
+      <StatusBar style="light" />
+      {!details ? (
+        <View style={{ width: "100%" }}>
+          <View style={{ width: "100%" }}>
+            <Text style={stylesGlobals.textInput}>Cliente a facturar</Text>
+            <SafeAreaView
+              style={{
+                width: "100%",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                padding: 12,
+                borderRadius: 15,
+              }}
+            >
+              <Dropdown
+                style={[isFocus && { borderColor: "blue" }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={customer_list}
+                itemTextStyle={{
+                  fontSize: 16,
+                }}
+                confirmSelectItem={true}
+                search
+                maxHeight={250}
+                labelField="nombre"
+                valueField="id"
+                placeholder={!isFocus ? "Selecciona un item " : "..."}
+                searchPlaceholder="Escribe para buscar..."
+                value={customer}
+                onFocus={() => setIsFocus(true)}
+                onBlur={() => setIsFocus(false)}
+                onChange={(item) => {
+                  setCustomer(item);
+                  setIsFocus(false);
+                }}
+                renderLeftIcon={() => (
+                  <AntDesign
+                    style={styles.icon}
+                    color={isFocus ? "blue" : "black"}
+                    name="Safety"
+                    size={20}
+                  />
+                )}
+              />
+            </SafeAreaView>
+          </View>
+          <View style={{ width: "100%", marginTop: 20 }}>
+            <Text style={stylesGlobals.textInput}>Empleado de la venta</Text>
+            <SafeAreaView
+              style={{
+                width: "100%",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                padding: 12,
+                borderRadius: 15,
+              }}
+            >
+              <Dropdown
+                style={[isFocusEmp && { borderColor: "blue" }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={employee_list}
+                itemTextStyle={{
+                  fontSize: 16,
+                }}
+                search
+                maxHeight={250}
+                labelField="fullName"
+                valueField="id"
+                placeholder={!isFocusEmp ? "Selecciona un item " : "..."}
+                searchPlaceholder="Escribe para buscar..."
+                value={employee}
+                onFocus={() => setIsFocusEmp(true)}
+                onBlur={() => setIsFocusEmp(false)}
+                onChange={(item) => {
+                  setEmployee(item);
+                  setIsFocusEmp(false);
+                }}
+                renderLeftIcon={() => (
+                  <AntDesign
+                    style={styles.icon}
+                    color={isFocusEmp ? "blue" : "black"}
+                    name="Safety"
+                    size={20}
+                  />
+                )}
+              />
+            </SafeAreaView>
+          </View>
+          <View style={{ width: "100%", marginTop: 20 }}>
+            <Text style={stylesGlobals.textInput}>
+              Condición de la operación
+            </Text>
+            <SafeAreaView
+              style={{
+                width: "100%",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                padding: 12,
+                borderRadius: 15,
+              }}
+            >
+              <Dropdown
+                style={[isFocusTipoConditions && { borderColor: "blue" }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={cat_016_condicion_de_la_operacion}
+                itemTextStyle={{
+                  fontSize: 16,
+                }}
+                search
+                maxHeight={250}
+                labelField="valores"
+                valueField="id"
+                placeholder={
+                  !isFocusTipoConditions ? "Selecciona un item " : "..."
+                }
+                value={conditionPayment}
+                searchPlaceholder="Escribe para buscar..."
+                onFocus={() => setIsFocusTipoConditions(true)}
+                onBlur={() => setIsFocusTipoConditions(false)}
+                onChange={(item) => {
+                  setConditions(item.id);
+                  setConditionPayment(item);
+                  setIsFocusTipoConditions(false);
+                }}
+                renderLeftIcon={() => (
+                  <AntDesign
+                    style={styles.icon}
+                    color={isFocusTipoConditions ? "blue" : "black"}
+                    name="Safety"
+                    size={20}
+                  />
+                )}
+              />
+            </SafeAreaView>
+          </View>
+          <View style={{ width: "100%", marginTop: 20 }}>
+            <Text style={stylesGlobals.textInput}>
+              Tipo de documento a emitir
+            </Text>
+            <SafeAreaView
+              style={{
+                width: "100%",
+                borderWidth: 1,
+                borderColor: "#D1D5DB",
+                padding: 12,
+                borderRadius: 15,
+              }}
+            >
+              <Dropdown
+                style={[isFocusTipoDocum && { borderColor: "blue" }]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={defaultDocument}
+                itemTextStyle={{
+                  fontSize: 16,
+                }}
+                search
+                maxHeight={250}
+                labelField="valores"
+                valueField="id"
+                placeholder={!isFocusTipoDocum ? "Selecciona un item " : "..."}
+                searchPlaceholder="Escribe para buscar..."
+                value={typeDocument}
+                onFocus={() => setIsFocusTipoDocum(true)}
+                onBlur={() => setIsFocusTipoDocum(false)}
+                onChange={(item) => {
+                  setTypeDocument(item);
+                  setIsFocusTipoDocum(false);
+                }}
+                renderLeftIcon={() => (
+                  <AntDesign
+                    style={styles.icon}
+                    color={isFocusTipoDocum ? "blue" : "black"}
+                    name="Safety"
+                    size={20}
+                  />
+                )}
+              />
+            </SafeAreaView>
+          </View>
+          {/* {props.typeDocument && props.typeDocument.codigo === "14" && (
+          <>
+            <View
+              style={{
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  width: "90%",
+                  marginTop: 17,
+                  marginBottom: 20,
+                }}
+              >
+                <Text style={{ fontWeight: "500" }}>Observaciones</Text>
+                <View style={styles.inputObservcation}>
+                  <MaterialCommunityIcons
+                    color={"#939393"}
+                    name="card-text-outline"
+                    size={28}
+                    style={{
+                      position: "absolute",
+                      left: 7,
+                      top: "50%",
+                      transform: [{ translateY: -15 }],
+                    }}
+                  />
+                  <Input
+                    placeholder="Observaciones..."
+                    onFocus={() => {
+                      setFocusButton(true);
+                    }}
+                    handleBlur={() => {
+                      setFocusButton(false);
+                    }}
+                    onChangeText={(text) => {
+                      handlePagoChange(text);
+                    }}
+                    defaultValue={props.customer?.correo}
+                    icon={"card-text-outline"}
+                    keyboardType={"numeric"}
+                  />
+                </View>
+              </View>
+            </View>
+          </>
+        )} */}
+          <View style={{marginTop: 20, flexDirection: "row"}}>
+            <Input
+              placeholder="00.00"
+              //  onChangeText={handleChange("start")}
+              keyboardType="numeric"
+              //  values={String(values.start)}
+              //  handleBlur={handleBlur("start")}
+              icon="currency-usd"
+              
+            />
+            <Text>
+              Vuelto:
+            </Text>
+          </View>
+          <View style={{ ...stylesGlobals.viewBotton, marginTop: 10 }}>
+            <Button
+              withB={390}
+              onPress={() => setDetails(true)}
+              Title="Detalle de pago"
+              color={theme.colors.third}
+            />
+          </View>
+        </View>
+      ) : (
+        <>
+          <View style={{ position: "absolute", top: -115, left: 15 }}>
+            <MaterialCommunityIcons
+              color={"white"}
+              name="arrow-left-thin"
+              size={35}
+              onPress={() => setDetails(false)}
+            />
+          </View>
+          <View
+            style={{
+              height: "100%",
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+              // padding: 10
+            }}
+          >
+            {typeDocument && typeDocument.codigo === "03" && (
+              <View style={{ width: "100%" }}>
+                <Text style={stylesGlobals.textInput}>
+                  Tipo de tributo a aplicar
+                </Text>
+                <SafeAreaView
+                  style={{
+                    width: "100%",
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    padding: 12,
+                    borderRadius: 15,
+                  }}
+                >
+                  <Dropdown
+                    style={[isFocusTributo && { borderColor: "blue" }]}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    inputSearchStyle={styles.inputSearchStyle}
+                    iconStyle={styles.iconStyle}
+                    data={cat_015_tipos_tributo}
+                    itemTextStyle={{
+                      fontSize: 16,
+                    }}
+                    disable={true}
+                    search
+                    maxHeight={250}
+                    labelField="valores"
+                    valueField="id"
+                    placeholder={
+                      !isFocusTributo ? "Selecciona un item " : "..."
+                    }
+                    searchPlaceholder="Escribe para buscar..."
+                    value={typeTribute}
+                    onFocus={() => setIsFocusTributo(true)}
+                    onBlur={() => setIsFocusTributo(false)}
+                    onChange={(item) => {
+                      props.setTypeTribute(item);
+                      setIsFocusTributo(false);
+                    }}
+                    renderLeftIcon={() => (
+                      <AntDesign
+                        style={styles.icon}
+                        color={isFocusTributo ? "blue" : "black"}
+                        name="Safety"
+                        size={20}
+                      />
+                    )}
+                  />
+                </SafeAreaView>
+              </View>
+            )}
+            <ScrollView
+              style={{
+                width: "100%",
+                marginTop: 20,
+                marginBottom: 110,
+              }}
+            >
+              <View style={{ ...stylesGlobals.viewScroll }}>
+                {pays.map((item, index) => (
+                  <Card
+                    style={{ ...stylesGlobals.styleCard, width: "95%" }}
+                    key={index}
+                  >
+                    <Pressable
+                      style={{
+                        position: "absolute",
+                        right: 0,
+                        top: 0,
+                        zIndex: 50,
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        color={"#2C3377"}
+                        name="close"
+                        size={30}
+                        onPress={() => {
+                          handleRemovePay(index);
+                        }}
+                      />
+                    </Pressable>
+                    <View style={{ width: 300, height: "auto" }}>
+                      <View
+                        style={{
+                          width: "100%",
+                          marginTop: 25,
+                          flexDirection: "column",
+                        }}
+                      >
+                        <View style={{ marginTop: 10, width: "100%" }}>
+                          <Text style={stylesGlobals.textInput}>
+                            Método de pago
+                          </Text>
+                          <SafeAreaView
+                            style={{
+                              width: "100%",
+                              borderWidth: 1,
+                              borderColor: "#D1D5DB",
+                              padding: 12,
+                              borderRadius: 15,
+                            }}
+                          >
+                            <Dropdown
+                              style={[isFocusPago && { borderColor: "blue" }]}
+                              placeholderStyle={styles.placeholderStyle}
+                              selectedTextStyle={styles.selectedTextStyle}
+                              inputSearchStyle={styles.inputSearchStyle}
+                              iconStyle={styles.iconStyle}
+                              data={cat_017_forma_de_pago}
+                              itemTextStyle={{
+                                fontSize: 16,
+                              }}
+                              search
+                              maxHeight={250}
+                              labelField="valores"
+                              valueField="id"
+                              placeholder={
+                                !isFocusPago ? "Selecciona un item " : "..."
+                              }
+                              value={typePayment}
+                              searchPlaceholder="Escribe para buscar..."
+                              onFocus={() => setIsFocusPago(true)}
+                              onBlur={() => setIsFocusPago(false)}
+                              onChange={(item) => {
+                                handleUpdateTipoPago(index, item.codigo);
+                                setTypePayment(item);
+                                setIsFocusPago(false);
+                              }}
+                              renderLeftIcon={() => (
+                                <AntDesign
+                                  style={styles.icon}
+                                  color={isFocusPago ? "blue" : "black"}
+                                  name="Safety"
+                                  size={20}
+                                />
+                              )}
+                            />
+                          </SafeAreaView>
+                        </View>
+                        <View
+                          style={{
+                            width: "100%",
+                            marginTop: 15,
+                          }}
+                        >
+                          <Text style={stylesGlobals.textInput}>Monto</Text>
+                          <View style={{ marginBottom: 15 }}>
+                            <Input
+                              keyboardType="numeric"
+                              placeholder="0.0"
+                              onFocus={() => {
+                                setFocusButton(true);
+                              }}
+                              handleBlur={() => {
+                                setFocusButton(false);
+                              }}
+                              defaultValue={
+                                typeDocument?.codigo === "01"
+                                  ? amountsToPay[index].toFixed(2)
+                                  : amountsToPayIva[index].toFixed(2)
+                              }
+                              onChangeText={(text) => {
+                                onUpdateMonto(index, Number(text));
+                                handlePagoChange(text);
+                              }}
+                              icon="currency-usd"
+                              aria-labelledbyledBy="inputLabel"
+                            />
+                          </View>
+                          {typeDocument?.codigo === "01" ? (
+                            <Text
+                              style={{
+                                ...stylesGlobals.textInput,
+                                fontWeight: "500",
+                                fontSize: 15,
+                              }}
+                            >
+                              Total: ${amountsToPay[index].toFixed(2)}
+                            </Text>
+                          ) : (
+                            <View style={{ flexDirection: "row" }}>
+                              <Text
+                                style={{
+                                  fontWeight: "500",
+                                  marginTop: -15,
+                                  fontSize: 16,
+                                }}
+                              >
+                                subtotal: ${amountsToPay[index].toFixed(2)}
+                              </Text>
+                              <Text
+                                style={{
+                                  fontWeight: "500",
+                                  marginTop: -15,
+                                  fontSize: 16,
+                                  marginLeft: 89,
+                                }}
+                              >
+                                Total: ${amountsToPayIva[index].toFixed(2)}
+                              </Text>
+                            </View>
+                          )}
+                          {/* <Text>{`Vuelto: ${formatCurrency(vuelto)}`}</Text> */}
+                        </View>
+                        {conditions > 1 && (
+                          <>
+                            <View style={{ marginTop: 10, width: "100%" }}>
+                              <Text style={{ fontWeight: "500" }}>
+                                Plazo de pago
+                              </Text>
+                              <SafeAreaView
+                                style={{
+                                  width: "100%",
+                                  marginTop: 10,
+                                  borderWidth: 1,
+                                  borderColor: "#D1D5DB",
+                                  padding: 12,
+                                  borderRadius: 5,
+                                }}
+                              >
+                                <Dropdown
+                                  style={[
+                                    isFocusPago && { borderColor: "blue" },
+                                  ]}
+                                  placeholderStyle={styles.placeholderStyle}
+                                  selectedTextStyle={styles.selectedTextStyle}
+                                  inputSearchStyle={styles.inputSearchStyle}
+                                  iconStyle={styles.iconStyle}
+                                  data={cat_018_plazo}
+                                  itemTextStyle={{
+                                    fontSize: 16,
+                                  }}
+                                  search
+                                  maxHeight={250}
+                                  labelField="valores"
+                                  valueField="id"
+                                  placeholder={
+                                    !isFocusPago ? "Selecciona un item " : "..."
+                                  }
+                                  searchPlaceholder="Escribe para buscar..."
+                                  onFocus={() => setIsFocusPago(true)}
+                                  onBlur={() => setIsFocusPago(false)}
+                                  onChange={(item) => {
+                                    handleUpdatePlazo(index, item.codigo);
+                                    setIsFocusPago(false);
+                                  }}
+                                  renderLeftIcon={() => (
+                                    <AntDesign
+                                      style={styles.icon}
+                                      color={isFocusPago ? "blue" : "black"}
+                                      name="Safety"
+                                      size={20}
+                                    />
+                                  )}
+                                />
+                              </SafeAreaView>
+                            </View>
+                            <View
+                              style={{
+                                width: "100%",
+                                marginTop: 25,
+                                flexDirection: "column",
+                              }}
+                            >
+                              <Text style={{ fontWeight: "500" }}>Periodo</Text>
+                              <Input
+                                keyboardType="numeric"
+                                placeholder="Digita los días..."
+                                onFocus={() => {
+                                  setFocusButton(true);
+                                }}
+                                handleBlur={() => {
+                                  setFocusButton(false);
+                                }}
+                                onChangeText={(text) => {
+                                  onUpdatePeriodo(index, Number(text));
+                                }}
+                                icon="calendar-range"
+                                aria-labelledbyledBy="inputLabel"
+                              />
+                            </View>
+                          </>
+                        )}
+                      </View>
+                    </View>
+                    {stateMonts === false && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          marginTop: 20,
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Pressable
+                          onPress={() => {
+                            handleAddPay();
+                            handleMounts();
+                          }}
+                          style={{
+                            flexDirection: "row",
+                            marginTop: 5,
+                            width: 40,
+                            height: 40,
+                            backgroundColor: "#023",
+                            borderRadius: 10,
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            color={"#ffffff"}
+                            name="plus"
+                            size={25}
+                          />
+                        </Pressable>
+                      </View>
+                    )}
+                  </Card>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </>
+      )}
+    </>
   );
 };
 
@@ -170,29 +796,11 @@ const styles = StyleSheet.create({
     height: 40,
     fontSize: 16,
   },
-  card: {
-    marginBottom: 25,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-    padding: 6,
-    margin: 3,
-  },
   input: {
     height: 45,
     borderColor: "#D9D9DA",
     borderWidth: 1,
     borderRadius: 5,
-  },
-  inputWrapper: {
-    position: "relative",
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    marginBottom: 15,
   },
   inputObservcation: {
     position: "relative",

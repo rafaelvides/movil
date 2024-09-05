@@ -52,10 +52,10 @@ const Location_real_time = () => {
     }, [])
   );
   useEffect(() => {
-    socket.on("reload", async () => {
+    socket.on("reload", () => {
       ToastAndroid.show("Ruta actualizada", ToastAndroid.SHORT);
       OnGetLocation(selectedBranch?.id ?? 0);
-      await get_branch_id()
+       get_branch_id()
         .then((data) => {
           update_active_location(Number(data), true);
         })

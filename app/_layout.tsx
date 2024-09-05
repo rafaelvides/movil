@@ -10,7 +10,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { DrawerToggleButton } from "@react-navigation/drawer";
 import CustomDrawer from "@/routes/CustomDrawer";
-import { ToastProvider, useToast } from "react-native-toast-notifications";
+import { ToastProvider } from "react-native-toast-notifications";
 import { PaperProvider } from "react-native-paper";
 import { SheetProvider } from "react-native-actions-sheet";
 import "@/plugins/sheets";
@@ -19,8 +19,8 @@ import { es, registerTranslation } from "react-native-paper-dates";
 import ThemeProvider, { ThemeContext } from "@/hooks/useTheme";
 import { useDataBaseInitialize } from "@/hooks/useTypeOrm";
 import { createSocket } from "@/hooks/useSocket";
-registerTranslation("es", es);
 
+registerTranslation("es", es);
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {

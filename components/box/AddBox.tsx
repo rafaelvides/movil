@@ -24,10 +24,7 @@ import Button from "../Global/components_app/Button";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
 
 const AddBox = ({ closeModal }: { closeModal: () => void }) => {
-  const [isFocus, setIsFocus] = useState(false);
-  const [employee, setEmployee] = useState<IEmployee>();
   const [refreshing, setRefreshing] = useState(false);
-  const { OnGetEmployeesList, employee_list } = useEmployeeStore();
   const { theme } = useContext(ThemeContext);
   const validationSchema = yup.object().shape({
     start: yup.number().required("El monto inicial es requerido"),
@@ -41,8 +38,6 @@ const AddBox = ({ closeModal }: { closeModal: () => void }) => {
           start: Number(start.start),
           pointOfSaleId: Number(pointId),
         };
-        await save_employee_id(String(employee?.id));
-
         OnPostBox(payload, token);
       } else {
         ToastAndroid.show("Error en credenciales de ventas", ToastAndroid.LONG);
@@ -56,7 +51,7 @@ const AddBox = ({ closeModal }: { closeModal: () => void }) => {
     }, [])
   );
   useEffect(() => {
-    OnGetEmployeesList();
+    // OnGetEmployeesList();
     setRefreshing(false);
   }, [refreshing]);
 
@@ -126,52 +121,7 @@ const AddBox = ({ closeModal }: { closeModal: () => void }) => {
                   </Text>
                 )}
               </View>
-              <View style={{ width: "100%" }}>
-                <Text style={{ fontWeight: "500" }}>Empleado para venta</Text>
-                <SafeAreaView
-                  style={{
-                    width: "100%",
-                    marginTop: 10,
-                    borderWidth: 1,
-                    borderColor: "#D1D5DB",
-                    padding: 12,
-                    borderRadius: 5,
-                  }}
-                >
-                  <Dropdown
-                    style={[isFocus && { borderColor: "blue" }]}
-                    placeholderStyle={styles.placeholderStyle}
-                    selectedTextStyle={styles.selectedTextStyle}
-                    inputSearchStyle={styles.inputSearchStyle}
-                    iconStyle={styles.iconStyle}
-                    data={employee_list}
-                    itemTextStyle={{
-                      fontSize: 16,
-                    }}
-                    search
-                    maxHeight={250}
-                    labelField="fullName"
-                    valueField="id"
-                    placeholder={!isFocus ? "Selecciona un item " : "..."}
-                    searchPlaceholder="Escribe para buscar..."
-                    value={employee}
-                    onFocus={() => setIsFocus(true)}
-                    onBlur={() => setIsFocus(false)}
-                    onChange={(item) => {
-                      setEmployee(item);
-                      setIsFocus(false);
-                    }}
-                    renderLeftIcon={() => (
-                      <AntDesign
-                        style={styles.icon}
-                        color={isFocus ? "blue" : "black"}
-                        name="Safety"
-                        size={20}
-                      />
-                    )}
-                  />
-                </SafeAreaView>
-              </View>
+
               <View style={stylesGlobals.viewBotton}>
                 <Button
                   withB={290}

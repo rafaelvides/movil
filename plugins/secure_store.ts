@@ -19,7 +19,7 @@ export const get_data_biometric = async (key: string) => {
   }
 };
 export const save_toke = async (token: string) => {
-  await SecureStore.setItemAsync("token", token);
+  await SecureStore.setItem("token", token);
 };
 export const return_token = async () => {
   const token = await SecureStore.getItem("token");

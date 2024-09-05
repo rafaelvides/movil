@@ -1,3 +1,4 @@
+import Button from "@/components/Global/components_app/Button";
 import { ThemeContext } from "@/hooks/useTheme";
 import { useContext } from "react";
 import { View, Text } from "react-native";
@@ -14,20 +15,21 @@ const DetailsProduct = ({
     <>
       <View
         style={{
+          position: "absolute",
           backgroundColor: theme.colors.dark,
           width: "100%",
           height: "auto",
-          borderRadius: 30,
+          borderTopStartRadius: 20,
+          borderTopRightRadius: 20,
           padding: 10,
-          justifyContent: "space-between",
-          marginTop: "20%",
+          bottom: 0,
         }}
       >
         <View
           style={{
             flexDirection: "row",
             width: "100%",
-            marginBottom: 35,
+            marginBottom: 15,
             justifyContent: "space-between",
             alignItems: "center",
           }}
@@ -134,7 +136,17 @@ const DetailsProduct = ({
             </Text>
           </View>
         </View>
-      
+        {cantidad > 0 && (
+          <View style={{justifyContent: "center", alignItems: "center", marginBottom: 10}}>
+          <Button
+            Title="Enviar"
+            onPress={() => {
+              buttonAction();
+            }}
+            color={theme.colors.third}
+          />
+          </View>
+        )}
       </View>
     </>
   );

@@ -49,7 +49,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
         console.log("auth 2");
         if (data.ok) {
           console.log("auth 3");
-          await save_toke(data.token)
+         save_toke(data.token)
 
           console.log("auth 4", data.token);
           console.log("auth 5");

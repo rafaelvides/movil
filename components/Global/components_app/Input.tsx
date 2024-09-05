@@ -7,6 +7,7 @@ import {
   KeyboardTypeOptions,
   NativeTouchEvent,
   TextInputChangeEventData,
+  Dimensions,
 } from "react-native";
 import React from "react";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -16,11 +17,14 @@ const Input = ({
   handleBlur,
   onChange,
   onPress,
+  onFocus,
   values,
   placeholder,
   keyboardType,
   icon,
   defaultValue,
+  placeholderTextColor,
+  withI
 }: {
   values?: string;
   placeholder?: string;
@@ -30,12 +34,17 @@ const Input = ({
   onChangeText?: (text: string) => void | undefined;
   onChange?:((e: NativeSyntheticEvent<TextInputChangeEventData>) => void)
   | undefined;
-
   handleBlur?: (
     e: NativeSyntheticEvent<TextInputFocusEventData>
   ) => void | undefined;
   onPress?: (e: NativeSyntheticEvent<NativeTouchEvent>) => void | undefined;
+  onFocus?: ((e: NativeSyntheticEvent<TextInputFocusEventData>) => void) | undefined
+  placeholderTextColor?: string | undefined
+  withI?: number
 }) => {
+  const width2 = withI ? withI : 100
+  const screenWidth = Dimensions.get('window').width;
+  const width = screenWidth * width2;
   return (
     <View style={styles.inputWrapper}>
       <MaterialCommunityIcons
@@ -45,13 +54,16 @@ const Input = ({
         style={styles.icon}
       />
       <TextInput
+       
         //   secureTextEntry
         defaultValue={defaultValue}
-        style={styles.input}
+        style={{...styles.input, width: `${width2}%`}}
         onChangeText={onChangeText}
         value={values}
+        onFocus={onFocus}
         onBlur={handleBlur}
         placeholder={placeholder}
+        placeholderTextColor={placeholderTextColor}
         keyboardType={keyboardType}
         onPress={onPress}
       />
@@ -77,7 +89,6 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     position: "relative",
-    width: "100%",
     height: 50,
     justifyContent: "center",
     marginBottom: 2,
