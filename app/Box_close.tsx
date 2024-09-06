@@ -5,14 +5,11 @@ import React, { useContext, useEffect, useState } from "react";
 import {
   View,
   Text,
-  TextInput,
-  Image,
   ToastAndroid,
   Alert,
   SafeAreaView,
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
-import { Card } from "react-native-paper";
 import { get_box_data, get_point_sale_Id } from "@/plugins/async_storage";
 import { ThemeContext } from "@/hooks/useTheme";
 import { useFocusEffect, useRouter } from "expo-router";
