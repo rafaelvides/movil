@@ -53,6 +53,8 @@ import { useBranchProductStore } from "@/store/branch_product.store";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Button from "@/components/Global/components_app/Button";
 import { ThemeContext } from "@/hooks/useTheme";
+import ErrorAlert from "@/components/Global/manners/ErrorAlert";
+import { IEmployee } from "@/types/employee/employee.types";
 
 const ElectronicInvoice = ({
   customer,
@@ -69,8 +71,10 @@ const ElectronicInvoice = ({
   totalUnformatted,
   focusButton,
   onePercentRetention,
+  employee,
 }: {
   customer: ICustomer | undefined;
+  employee: IEmployee | undefined;
   transmitter: ITransmitter;
   typeDocument: ICat002TipoDeDocumento;
   cart_products: ICartProduct[];
@@ -87,10 +91,16 @@ const ElectronicInvoice = ({
 }) => {
   const { emptyCart } = useBranchProductStore();
   const { OnGetCorrelativesByDte } = usePointOfSaleStore();
+  const [modalError, setModalError] = useState(false);
   // const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
   const [title, setTitle] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
   const [savedUrls, setSavedUrls] = useState({ json: Blob, urlJSon: "" });
+  const [currentDTE, setCurrentDTE] = useState<SVFE_FC_SEND>();
+  const [detailSale, setDetailSale] = useState({
+    box: 0,
+    codEmployee: 0,
+  });
   const [responseMH, setResponseMH] = useState<{
     respuestaMH: ResponseMHSuccess;
     firma: string;
@@ -119,8 +129,9 @@ const ElectronicInvoice = ({
   //     });
   //   })();
   // }, []);
-
+  console.log(errorMessage, title);
   const generateFactura = async () => {
+    console.log("333");
     if (!conditionPayment) {
       ToastAndroid.show("Debes seleccionar una condición", ToastAndroid.SHORT);
       return;
@@ -130,6 +141,7 @@ const ElectronicInvoice = ({
         "No se puede facturar un descuento negativo",
         ToastAndroid.LONG
       );
+      return;
     }
     const tipo_pago = pays.filter((type) => {
       if (conditionPayment === 1) {
@@ -188,7 +200,7 @@ const ElectronicInvoice = ({
       ToastAndroid.show("No se encontró el usuario", ToastAndroid.SHORT);
       return;
     }
-    const correlatives = await OnGetCorrelativesByDte(user.id, "F");
+    const correlatives = await OnGetCorrelativesByDte(user.id, "FE");
 
     if (!correlatives) {
       ToastAndroid.show("No se encontraron correlativos", ToastAndroid.SHORT);
@@ -200,10 +212,8 @@ const ElectronicInvoice = ({
       ToastAndroid.show("No se encontró la caja", ToastAndroid.SHORT);
       return;
     }
-
-    const codeEmployee = await get_employee_id();
-
-    if (!codeEmployee) {
+    console.log("555s");
+    if (!employee) {
       ToastAndroid.show("No se encontró el empleado", ToastAndroid.SHORT);
       return;
     }
@@ -234,9 +244,14 @@ const ElectronicInvoice = ({
         conditionPayment,
         onePercentRetention
       );
+      console.log("66");
       setLoadingSave(true);
       setMessage("Estamos firmando tu documento...");
-
+      setCurrentDTE(generate);
+      setDetailSale({
+        box: box.id,
+        codEmployee: employee.id,
+      });
       firmarDocumentoFactura(generate)
         .then(async (firma) => {
           if (firma.data.status === "ERROR") {
@@ -244,6 +259,7 @@ const ElectronicInvoice = ({
 
             setTitle("Error en el firmador " + new_data.body.codigo);
             setErrorMessage(new_data.body.mensaje);
+            setModalError(true);
             setLoadingSave(false);
             return;
           }
@@ -260,12 +276,13 @@ const ElectronicInvoice = ({
               generate,
               firma.data.body,
               box,
-              codeEmployee
+              String(employee.id)
             );
             setMessage("Se ah enviado a hacienda, esperando respuesta...");
           } else {
             setTitle("Error en el firmador");
             setErrorMessage("Error al firmar el documento");
+            setModalError(true);
             setLoadingSave(false);
             return;
           }
@@ -275,6 +292,7 @@ const ElectronicInvoice = ({
             "Error al firmar el documento",
             "Intenta firmar el documento mas tarde o contacta al equipo de soporte"
           );
+          setModalError(true);
           setLoadingSave(false);
         });
     } catch (error) {
@@ -293,9 +311,10 @@ const ElectronicInvoice = ({
     const timeout = setTimeout(() => {
       source.cancel("El tiempo de espera ha expirado");
     }, 25000);
-    console.log("first");
+
     const token_mh = await return_token_mh();
-    console.log("12", token_mh);
+        console.log("323", token_mh)
+
     if (!token_mh) {
       setLoadingSave(false);
       ToastAndroid.show(
@@ -304,38 +323,50 @@ const ElectronicInvoice = ({
       );
       return;
     }
-    send_to_mh(data, token_mh!, source)
-      .then(({ data }) => {
+    console.log("323")
+    Promise.race([
+      send_to_mh(data, token_mh!, source).then(({ data }) => {
+        clearTimeout(timeout);
         setMessage("Estamos subiendo los archivos...");
         handleUploadFile(json, firma, data, box, codeEmployee);
-      })
-      .catch((error: AxiosError<SendMHFailed>) => {
-        clearTimeout(timeout);
-        if (axios.isCancel(error)) {
-          setTitle("Tiempo de espera agotado");
-          setErrorMessage("El tiempo limite de espera ha expirado");
+      }),
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("El tiempo de espera ha expirado"));
           setLoadingSave(false);
-        }
+          setModalError(true);
+        }, 25000);
+      }),
+    ]).catch((error: AxiosError<SendMHFailed>) => {
+      clearTimeout(timeout);
+      if (axios.isCancel(error)) {
+        setTitle("Tiempo de espera agotado");
+        setErrorMessage("El tiempo limite de espera ha expirado");
+        setLoadingSave(false);
+        setModalError(true);
+      }
 
-        if (error.response?.data) {
-          setErrorMessage(
-            error.response.data.observaciones &&
-              error.response.data.observaciones.length > 0
-              ? error.response?.data.observaciones.join("\n\n")
-              : ""
-          );
-          setTitle(
-            error.response.data.descripcionMsg ?? "Error al procesar venta"
-          );
-          setLoadingSave(false);
-        } else {
-          setTitle("No se obtuvo respuesta de hacienda");
-          setErrorMessage(
-            "Al enviar la venta, no se obtuvo respuesta de hacienda"
-          );
-          setLoadingSave(false);
-        }
-      });
+      if (error.response?.data) {
+        setErrorMessage(
+          error.response.data.observaciones &&
+            error.response.data.observaciones.length > 0
+            ? error.response?.data.observaciones.join("\n\n")
+            : ""
+        );
+        setTitle(
+          error.response.data.descripcionMsg ?? "Error al procesar venta"
+        );
+        setModalError(true);
+        setLoadingSave(false);
+      } else {
+        setTitle("No se obtuvo respuesta de hacienda");
+        setErrorMessage(
+          "Al enviar la venta, no se obtuvo respuesta de hacienda"
+        );
+        setModalError(true);
+        setLoadingSave(false);
+      }
+    });
   };
   const handleUploadFile = async (
     json: SVFE_FC_SEND,
@@ -395,7 +426,6 @@ const ElectronicInvoice = ({
         s3Client
           .send(new PutObjectCommand(jsonUploadParams))
           .then(() => {
-            console.log("bueno");
             setMessage("Estamos guardando tus documentos...");
             handleSave(
               json_url,
@@ -671,8 +701,13 @@ const ElectronicInvoice = ({
     box: number,
     empleado: string
   ) => {
+    if (!DTE) {
+      ToastAndroid.show("No se obtuvo la venta", ToastAndroid.SHORT);
+      setLoadingSave(false);
+      return;
+    }
+
     setLoadingRevision(true);
-    const user = await get_user();
 
     if (DTE?.dteJson.identificacion && transmitter) {
       const payload = {
@@ -694,22 +729,6 @@ const ElectronicInvoice = ({
                 setMessage(
                   "El DTE se encontró en hacienda,\n se están generando los documentos..."
                 );
-                const doc = new jsPDF();
-                const QR = QR_URL(
-                  DTE_FORMED.identificacion.codigoGeneracion,
-                  DTE_FORMED.identificacion.fecEmi
-                );
-                const blobQR = await axios.get<ArrayBuffer>(QR, {
-                  responseType: "arraybuffer",
-                });
-                // const document_gen = generateFacturaComercial(
-                //   doc,
-                //   DTE_FORMED,
-                //   new Uint8Array(blobQR.data),
-                //   img_invalidation,
-                //   img_logo,
-                //   false
-                // );
                 if (DTE_FORMED) {
                   const JSON_uri =
                     FileSystem.documentDirectory +
@@ -731,36 +750,6 @@ const ElectronicInvoice = ({
                       DTE.dteJson.identificacion.codigoGeneracion
                     }/${DTE.dteJson.identificacion.numeroControl}.json`;
 
-                    // const pdf_url = `CLIENTES/${
-                    //   transmitter.nombre
-                    // }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
-                    //   DTE.dteJson.identificacion.codigoGeneracion
-                    // }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
-
-                    // const filePath = `${FileSystem.documentDirectory}example.pdf`;
-                    // await FileSystem.writeAsStringAsync(
-                    //   filePath,
-                    //   document_gen.replace(
-                    //     /^data:application\/pdf;filename=generated\.pdf;base64,/,
-                    //     ""
-                    //   ),
-                    //   {
-                    //     encoding: FileSystem.EncodingType.Base64,
-                    //   }
-                    // );
-                    // const response = await fetch(filePath);
-
-                    // if (!response) {
-                    //   setLoadingSave(false);
-                    //   return;
-                    // }
-
-                    // const blob = await response.blob();
-                    // const pdfUploadParams = {
-                    //   Bucket: SPACES_BUCKET,
-                    //   Key: pdf_url,
-                    //   Body: blob,
-                    // };
                     const blobJSON = await fetch(JSON_uri)
                       .then((res) => res.blob())
                       .catch(() => {
@@ -787,76 +776,55 @@ const ElectronicInvoice = ({
                         .send(new PutObjectCommand(jsonUploadParams))
                         .then((response) => {
                           if (response.$metadata) {
-                            // s3Client
-                            //   .send(new PutObjectCommand(pdfUploadParams))
-                            //   .then((response) => {
-                            //     if (response.$metadata) {
-                                  setMessage(
-                                    "Estamos guardando tus documentos"
-                                  );
+                            setMessage("Estamos guardando tus documentos");
 
-                                  const payload = {
-                                    pdf: "pdf_url",
-                                    dte: json_url,
-                                    cajaId: box,
-                                    codigoEmpleado: empleado,
-                                    sello: true,
-                                    clienteId: customer?.id,
-                                  };
-                                  return_token()
-                                    .then((token) => {
-                                      axios
-                                        .post(
-                                          API_URL + "/sales/factura-sale",
-                                          payload,
-                                          {
-                                            headers: {
-                                              Authorization: `Bearer ${token}`,
-                                            },
-                                          }
-                                        )
-                                        .then(() => {
-                                          Alert.alert(
-                                            "Éxito",
-                                            "Se completaron todos los procesos"
-                                          );
-                                          setLoadingSave(false);
-                                          setShowModalSale(false);
-                                          clearAllData();
-                                        })
-                                        .catch(() => {
-                                          ToastAndroid.show(
-                                            "Error al guarda la venta",
-                                            ToastAndroid.LONG
-                                          );
-                                          setMessage(
-                                            "Se produjo un error al guardar la venta en nuestra base de datos"
-                                          );
-                                          setLoadingSave(false);
-                                        });
-                                    })
-                                    .catch(() => {
-                                      setLoadingSave(false);
-                                      ToastAndroid.show(
-                                        "No tienes el acceso necesario",
-                                        ToastAndroid.LONG
-                                      );
-                                    });
-                              //   } else {
-                              //     setLoadingSave(false);
-                              //     ToastAndroid.show(
-                              //       "Error inesperado, contacte al equipo de soporte1",
-                              //       ToastAndroid.LONG
-                              //     );
-                              //   }
-                              // })
-                              // .catch(() => {
-                              //   setLoadingSave(false);
-                              //   ToastAndroid.show(
-                              //     "Ocurrió un error al subir el PDF",
-                              //     ToastAndroid.LONG
-                              //   );
-                              // });
+                            const payload = {
+                              pdf: "pdf_url",
+                              dte: json_url,
+                              cajaId: box,
+                              codigoEmpleado: empleado,
+                              sello: true,
+                              clienteId: customer?.id,
+                            };
+                            return_token()
+                              .then((token) => {
+                                axios
+                                  .post(
+                                    API_URL + "/sales/factura-sale",
+                                    payload,
+                                    {
+                                      headers: {
+                                        Authorization: `Bearer ${token}`,
+                                      },
+                                    }
+                                  )
+                                  .then(() => {
+                                    Alert.alert(
+                                      "Éxito",
+                                      "Se completaron todos los procesos"
+                                    );
+                                    setLoadingSave(false);
+                                    setShowModalSale(false);
+                                    clearAllData();
+                                  })
+                                  .catch(() => {
+                                    ToastAndroid.show(
+                                      "Error al guarda la venta",
+                                      ToastAndroid.LONG
+                                    );
+                                    setMessage(
+                                      "Se produjo un error al guardar la venta en nuestra base de datos"
+                                    );
+                                    setLoadingSave(false);
+                                  });
+                              })
+                              .catch(() => {
+                                setLoadingSave(false);
+                                ToastAndroid.show(
+                                  "No tienes el acceso necesario",
+                                  ToastAndroid.LONG
+                                );
+                              });
                           } else {
                             setLoadingSave(false);
                             ToastAndroid.show(
@@ -908,7 +876,8 @@ const ElectronicInvoice = ({
   return (
     <>
       {!focusButton && (
-        // <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <>
+          {/* // <View style={{ justifyContent: "center", alignItems: "center" }}>
         //   <Pressable
         //     onPress={generateFactura}
         //     style={{
@@ -931,15 +900,35 @@ const ElectronicInvoice = ({
         //       Generar la factura
         //     </Text>
         //   </Pressable>
-        // </View>
-        <View style={stylesGlobals.viewBotton}>
-          <Button
-            withB={390}
-            onPress={() => {}}
-            Title="Generar la factura"
-            color={theme.colors.dark}
+        // </View> */}
+          <ErrorAlert
+            visible={modalError}
+            onPressSendContingency={() =>
+              handleContigence(
+                currentDTE!,
+                detailSale.box,
+                String(detailSale.codEmployee)
+              )
+            }
+            onPressVerify={() =>
+              handleVerify(
+                currentDTE!,
+                detailSale.box,
+                String(detailSale.codEmployee)
+              )
+            }
+            onPressRetry={() => generateFactura()}
+            onClose={() => setModalError(false)}
           />
-        </View>
+          <View style={stylesGlobals.viewBotton}>
+            <Button
+              withB={390}
+              onPress={() => generateFactura()}
+              Title="Generar la factura"
+              color={theme.colors.dark}
+            />
+          </View>
+        </>
       )}
     </>
   );

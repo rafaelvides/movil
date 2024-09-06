@@ -33,6 +33,7 @@ import Button from "../Global/components_app/Button";
 import { ThemeContext } from "@/hooks/useTheme";
 import { useEmployeeStore } from "@/store/employee.store";
 import { IEmployee } from "@/types/employee/employee.types";
+import { formatCurrency } from "@/utils/dte";
 
 interface Props {
   customer: ICustomer | undefined;
@@ -167,7 +168,40 @@ const AddMakeSaleScreen = (props: Props) => {
       <StatusBar style="light" />
       {!details ? (
         <View style={{ width: "100%" }}>
-          <View style={{ width: "100%" }}>
+          <View style={{ flexDirection: "row" }}>
+            <View style={{ width: "50%" }}>
+              <Input
+                placeholder={
+                  typeDocument?.codigo === "01"
+                    ? totalUnformatted.toFixed(2)
+                    : totalPagarIva.toFixed(2)
+                }
+                onFocus={() => {
+                  setFocusButton(true);
+                }}
+                onChangeText={(text) => {
+                  handlePagoChange(text);
+                }}
+                handleBlur={() => {
+                  setFocusButton(false);
+                }}
+                keyboardType="numeric"
+                icon="currency-usd"
+              />
+            </View>
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                marginLeft: "5%",
+              }}
+            >
+              <Text>
+                Vuelto: {vuelto >= 0 ? formatCurrency(vuelto) : "$0.00"}
+              </Text>
+            </View>
+          </View>
+          <View style={{ width: "100%", marginTop: 20 }}>
             <Text style={stylesGlobals.textInput}>Cliente a facturar</Text>
             <SafeAreaView
               style={{
@@ -404,20 +438,19 @@ const AddMakeSaleScreen = (props: Props) => {
             </View>
           </>
         )} */}
-          <View style={{marginTop: 20, flexDirection: "row"}}>
-            <Input
-              placeholder="00.00"
-              //  onChangeText={handleChange("start")}
-              keyboardType="numeric"
-              //  values={String(values.start)}
-              //  handleBlur={handleBlur("start")}
-              icon="currency-usd"
-              
-            />
-            <Text>
-              Vuelto:
-            </Text>
-          </View>
+          {/* <View style={{ marginTop: 20, flexDirection: "row" }}>
+            <View style={{width: "5s0%"}}>
+              <Input
+                placeholder="00.00"
+                //  onChangeText={handleChange("start")}
+                keyboardType="numeric"
+                //  values={String(values.start)}
+                //  handleBlur={handleBlur("start")}
+                icon="currency-usd"
+              />
+            </View>
+            <Text>Vuelto:</Text>
+          </View> */}
           <View style={{ ...stylesGlobals.viewBotton, marginTop: 10 }}>
             <Button
               withB={390}

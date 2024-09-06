@@ -42,9 +42,6 @@ const Input = ({
   placeholderTextColor?: string | undefined
   withI?: number
 }) => {
-  const width2 = withI ? withI : 100
-  const screenWidth = Dimensions.get('window').width;
-  const width = screenWidth * width2;
   return (
     <View style={styles.inputWrapper}>
       <MaterialCommunityIcons
@@ -57,7 +54,7 @@ const Input = ({
        
         //   secureTextEntry
         defaultValue={defaultValue}
-        style={{...styles.input, width: `${width2}%`}}
+        style={styles.input}
         onChangeText={onChangeText}
         value={values}
         onFocus={onFocus}
@@ -80,6 +77,7 @@ const styles = StyleSheet.create({
     borderColor: "#D9D9DA",
     borderWidth: 1,
     borderRadius: 15,
+    width: "100%"
   },
   icon: {
     position: "absolute",

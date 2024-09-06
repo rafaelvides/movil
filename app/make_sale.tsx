@@ -480,6 +480,7 @@ const make_sale = () => {
                             setLoadingSave={setLoadingSaveSale}
                             setShowModalSale={setShowModalSale}
                             setMessage={setMessage}
+                            employee={employee}
                             customer={customer}
                             typeDocument={typeDocument}
                             transmitter={transmitter}
