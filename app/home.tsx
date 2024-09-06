@@ -4,7 +4,6 @@ import Card from "@/components/Global/components_app/Card";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
 import {
-  box_data,
   get_box_data,
   get_point_sale_Id,
 } from "@/plugins/async_storage";
@@ -40,6 +39,13 @@ function home() {
       get_box_data().then((data) => {
         setBox(data);
       });
+      const currentDate = formatDate();
+      if (box && box.date.toString() !== currentDate) {
+        setBoxCloseDate(true);
+      } else {
+        setBoxCloseDate(false);
+        handleVerifyBox()
+      }
     }, [])
   );
 
@@ -68,61 +74,57 @@ function home() {
     GetThemeConfiguration();
   }, []);
 
-  useEffect(() => {
-    const dateBoxClose = () => {
-      if (box && box.date !== new Date(currentDate)) {
-        setBoxCloseDate(true);
-      } else {
-        setBoxCloseDate(false);
-      }
-    };
-    dateBoxClose();
-  }, [box]);
+  // useEffect(() => {
+  //     console.log("ver si devuelve datos",box)
+  //     if (box && box?.date.toString() !== currentDate) {
+  //       console.log("datooos", box)
+  //       setBoxCloseDate(true);
+  //     } else {
+  //       handleVerifyBox();
+  //     }
 
-  const currentDate = formatDate();
+  //   handleVerifyBox()
+  // }, []);
 
-  useEffect(() => {
-    const handleVerifyBox = async () => {
-      try {
-        get_point_sale_Id()
-          .then(async (pointId) => {
-            if (pointId !== null || pointId !== "") {
-              await verify_box(Number(pointId)).then((res) => {
-                const boxStatus = res.data.box;
-                if (boxStatus && res.data.ok) {
-                  if (boxStatus.id) {
-                    setIsVisible(true);
-                    setIsShowModalClose(true);
-                    setBox(boxStatus);
-                  } else {
-                    setIsVisible(false);
-                    setIsShowModalClose(true);
-                  }
+  // useEffect(() => {
+  const handleVerifyBox = async () => {
+    try {
+      get_point_sale_Id()
+        .then(async (pointId) => {
+          if (pointId !== null || pointId !== "") {
+            await verify_box(Number(pointId)).then((res) => {
+              const boxStatus = res.data.box;
+              if (boxStatus && res.data.ok) {
+                if (boxStatus.id) {
+                  setIsVisible(true);
+                  setIsShowModalClose(true);
+                  setBox(boxStatus);
                 } else {
                   setIsVisible(false);
                   setIsShowModalClose(true);
                 }
-              });
-            } else {
-              ToastAndroid.show(
-                "Error en credenciales de ventas",
-                ToastAndroid.LONG
-              );
-            }
-          })
-          .catch(() => {
+              } else {
+                setIsVisible(false);
+                setIsShowModalClose(true);
+              }
+            });
+          } else {
             ToastAndroid.show(
-              "Error al obtener point sales",
+              "Error en credenciales de ventas",
               ToastAndroid.LONG
             );
-          });
-      } catch (error) {
-        ToastAndroid.show("Error al verificar la caja", ToastAndroid.LONG);
-      }
-    };
-    handleVerifyBox();
-    setRefreshing(false);
-  }, [refreshing]);
+          }
+        })
+        .catch(() => {
+          ToastAndroid.show("Error al obtener point sales", ToastAndroid.LONG);
+        });
+    } catch (error) {
+      ToastAndroid.show("Error al verificar la caja", ToastAndroid.LONG);
+    }
+  };
+  //   handleVerifyBox();
+  //   setRefreshing(false);
+  // }, [refreshing]);
 
   useEffect(() => {
     return_token().then((da) => console.log("home", da));
@@ -156,7 +158,7 @@ function home() {
           }}
         >
           <Text>Welcome home!</Text>
-          {boxCloseDate === true ? (
+          {boxCloseDate ? (
             <Modal
               visible={boxCloseDate}
               animationType="slide"
@@ -172,6 +174,7 @@ function home() {
               />
             </Modal>
           ) : (
+            // <Text>DATTAAAA DE PRUEBA PARA VALIDAR</Text>
             <Modal visible={showModalClose} animationType="slide">
               <View style={styles.centeredView}>
                 <Card
