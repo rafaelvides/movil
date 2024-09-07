@@ -19,6 +19,7 @@ import { es, registerTranslation } from "react-native-paper-dates";
 import ThemeProvider, { ThemeContext } from "@/hooks/useTheme";
 import { useDataBaseInitialize } from "@/hooks/useTypeOrm";
 import { createSocket } from "@/hooks/useSocket";
+import { AlertNotificationRoot } from "react-native-alert-notification";
 
 registerTranslation("es", es);
 SplashScreen.preventAutoHideAsync();
@@ -161,156 +162,158 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
   return (
     <>
       <StatusBar style="light" />
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        {isConnected === true ? (
-          <>
-            {is_authenticated ? (
-              <>
-                <Drawer
-                  screenOptions={{
-                    headerShown: true,
-                    headerStyle: { backgroundColor: "#fff", height: 75 },
-                    headerTitleStyle: {
-                      color: "#2c3377",
-                      textAlign: "center",
-                      fontWeight: "400",
-                      fontSize: 16,
-                    },
-                    headerLeft: () => <DrawerToggleButton />,
-                    headerTitleAlign: "center",
-                    headerTintColor: "#2c3377",
-                    drawerStyle: {
-                      width: "65%",
-                    },
-                  }}
-                  initialRouteName={is_authenticated ? "home" : "login"}
-                  drawerContent={(props) => <CustomDrawer {...props} />}
-                >
-                  <Drawer.Screen
-                    name="home"
-                    options={{
-                      drawerLabel: "Inicio",
-                      title: "Inicio",
+      <AlertNotificationRoot theme="light" dialogConfig={{autoClose: 10}}>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          {isConnected === true ? (
+            <>
+              {is_authenticated ? (
+                <>
+                  <Drawer
+                    screenOptions={{
+                      headerShown: true,
+                      headerStyle: { backgroundColor: "#fff", height: 75 },
+                      headerTitleStyle: {
+                        color: "#2c3377",
+                        textAlign: "center",
+                        fontWeight: "400",
+                        fontSize: 16,
+                      },
+                      headerLeft: () => <DrawerToggleButton />,
+                      headerTitleAlign: "center",
+                      headerTintColor: "#2c3377",
+                      drawerStyle: {
+                        width: "65%",
+                      },
                     }}
-                  />
-                  <Drawer.Screen
-                    name="customer"
-                    options={{
-                      drawerLabel: "Customer",
-                      title: "Clientes",
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="synchronize"
-                    options={{
-                      drawerLabel: "Ventas pendientes",
-                      title: "Ventas pendientes",
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="make_sale"
-                    options={{
-                      drawerLabel: "Realizar venta",
-                      title: "Realizar venta",
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="(sales)"
-                    options={{
-                      drawerLabel: "Reporte de ventas",
-                      title: "Reporte de ventas",
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="(inventory)"
-                    options={{
-                      drawerLabel: "Inventario",
-                      title: `Inventario`,
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="expenses"
-                    options={{
-                      drawerLabel: "Gastos",
-                      title: `Gastos`,
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="(maps)"
-                    options={{
-                      drawerLabel: "Ubicación",
-                      title: `Ubicación`,
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="settings"
-                    options={{
-                      drawerLabel: "Configuración",
-                      title: "Configuración",
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="(offline)"
-                    options={{
-                      drawerLabel: "Modo sin Conexión",
-                      title: "Modo sin Conexión",
-                    }}
-                  />
-                  <Drawer.Screen
-                    name="Box_close"
-                    options={{
-                      drawerLabel: "Cerrar Caja",
-                      title: "Cerrar Caja",
-                    }}
-                  />
-                </Drawer>
-              </>
-            ) : (
-              <>
-                <Stack>
-                  <Stack.Screen
-                    name="login"
-                    options={{ title: "Login", headerShown: false }}
-                  />
-                </Stack>
-              </>
-            )}
-          </>
-        ) : (
-          <>
-            <Drawer
-              screenOptions={{
-                headerShown: true,
-                headerStyle: { backgroundColor: "#fff", height: 75 },
-                headerTitleStyle: {
-                  color: "#2C3377",
-                  textAlign: "center",
-                  fontWeight: "400",
-                  fontSize: 16,
-                },
-                headerLeft: () => <DrawerToggleButton />,
-                headerTitleAlign: "center",
-                headerTintColor: "#2C3377",
-                drawerStyle: {
-                  width: "75%",
-                },
-              }}
-              initialRouteName={
-                is_authenticated_offline ? "offline_make_sales" : "login"
-              }
-              drawerContent={(props) => <CustomDrawer {...props} />}
-            >
-              <Drawer.Screen
-                name="(offline)"
-                options={{
-                  drawerLabel: "Modo sin conexión",
-                  title: "Modo sin conexión",
+                    initialRouteName={is_authenticated ? "home" : "login"}
+                    drawerContent={(props) => <CustomDrawer {...props} />}
+                  >
+                    <Drawer.Screen
+                      name="home"
+                      options={{
+                        drawerLabel: "Inicio",
+                        title: "Inicio",
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="customer"
+                      options={{
+                        drawerLabel: "Customer",
+                        title: "Clientes",
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="synchronize"
+                      options={{
+                        drawerLabel: "Ventas pendientes",
+                        title: "Ventas pendientes",
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="make_sale"
+                      options={{
+                        drawerLabel: "Realizar venta",
+                        title: "Realizar venta",
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="(sales)"
+                      options={{
+                        drawerLabel: "Reporte de ventas",
+                        title: "Reporte de ventas",
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="(inventory)"
+                      options={{
+                        drawerLabel: "Inventario",
+                        title: `Inventario`,
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="expenses"
+                      options={{
+                        drawerLabel: "Gastos",
+                        title: `Gastos`,
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="(maps)"
+                      options={{
+                        drawerLabel: "Ubicación",
+                        title: `Ubicación`,
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="settings"
+                      options={{
+                        drawerLabel: "Configuración",
+                        title: "Configuración",
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="(offline)"
+                      options={{
+                        drawerLabel: "Modo sin Conexión",
+                        title: "Modo sin Conexión",
+                      }}
+                    />
+                    <Drawer.Screen
+                      name="Box_close"
+                      options={{
+                        drawerLabel: "Cerrar Caja",
+                        title: "Cerrar Caja",
+                      }}
+                    />
+                  </Drawer>
+                </>
+              ) : (
+                <>
+                  <Stack>
+                    <Stack.Screen
+                      name="login"
+                      options={{ title: "Login", headerShown: false }}
+                    />
+                  </Stack>
+                </>
+              )}
+            </>
+          ) : (
+            <>
+              <Drawer
+                screenOptions={{
+                  headerShown: true,
+                  headerStyle: { backgroundColor: "#fff", height: 75 },
+                  headerTitleStyle: {
+                    color: "#2C3377",
+                    textAlign: "center",
+                    fontWeight: "400",
+                    fontSize: 16,
+                  },
+                  headerLeft: () => <DrawerToggleButton />,
+                  headerTitleAlign: "center",
+                  headerTintColor: "#2C3377",
+                  drawerStyle: {
+                    width: "75%",
+                  },
                 }}
-              />
-            </Drawer>
-          </>
-        )}
-      </GestureHandlerRootView>
+                initialRouteName={
+                  is_authenticated_offline ? "offline_make_sales" : "login"
+                }
+                drawerContent={(props) => <CustomDrawer {...props} />}
+              >
+                <Drawer.Screen
+                  name="(offline)"
+                  options={{
+                    drawerLabel: "Modo sin conexión",
+                    title: "Modo sin conexión",
+                  }}
+                />
+              </Drawer>
+            </>
+          )}
+        </GestureHandlerRootView>
+      </AlertNotificationRoot>
     </>
   );
 }
