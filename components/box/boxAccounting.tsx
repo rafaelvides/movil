@@ -1,94 +1,178 @@
 import { IGetBoxDetail } from "@/types/box/box.types";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 import { ScrollView, View, Text } from "react-native";
 import Card from "../Global/components_app/Card";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const BoxAccounting = ({
   idBox,
   boxPreview,
 }: {
   idBox?: number;
-  boxPreview: IGetBoxDetail | undefined;
+  boxPreview?: IGetBoxDetail | undefined;
 }) => {
   useEffect(() => {}, [boxPreview]);
 
+  const { theme } = useContext(ThemeContext);
   return (
     <>
-      <ScrollView style={{ marginBottom: 2 }}>
-        <View style={stylesGlobals.View}>
-          <Card style={stylesGlobals.card}>
-            <View>
-              <Text style={stylesGlobals.textContentInCard}>
-                Monto inicial de caja
+      <Card
+        style={{
+          width: "96%",
+          height: "24%",
+          borderRadius: 30,
+          // marginTop: 10,
+          marginBottom: 14,
+          left: 7,
+        }}
+      >
+        <ScrollView>
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              gap: 20,
+              justifyContent:"center"
+            }}
+          >
+            <View
+              style={{
+                width: 140,
+                height: 60
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.dark,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                }}
+              >
+                Monto inicial
               </Text>
-              <Text style={stylesGlobals.styleTextData}>
+              <Text style={{ fontSize: 16, color: "red", top: 6 }}>
                 ${boxPreview?.boxStart}
               </Text>
             </View>
-          </Card>
 
-          <Card style={{...stylesGlobals.card,marginLeft: 6}}>
-          <View style={{marginLeft:30}}>
-              <Text style={stylesGlobals.textContentInCard}>
+            <View
+              style={{
+                width: 140,
+                height: 60
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.dark,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                }}
+              >
                 Gastos
               </Text>
-              <Text style={{...stylesGlobals.styleTextData, color:"red"}}>
+              <Text style={{ fontSize: 16, color: "red", top: 6 }}>
                 ${boxPreview?.totalExpenses}
               </Text>
             </View>
-          </Card>
-          <Card style={{...stylesGlobals.card}}>
-          <View>
-              <Text style={stylesGlobals.textContentInCard}>
-                Total en ventas
+
+            <View
+              style={{
+                width: 140,
+                height: 60
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.dark,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                }}
+              >
+                Total en venta
               </Text>
-              <Text style={{...stylesGlobals.styleTextData, color:"green"}}>
+              <Text style={{ fontSize: 16, color: "green", top: 6 }}>
                 ${boxPreview?.totalSales}
               </Text>
             </View>
-          </Card>
-          <Card style={{...stylesGlobals.card,marginLeft: 6}}>
-          <View style={{marginLeft:30}}>
-          <Text style={stylesGlobals.textContentInCard}>
-                {boxPreview!.cost < 0 ? "Faltante" : "Excedente"}
+
+            <View
+              style={{
+                width: 140,
+                height: 60
+              }}
+            >
+              <Text
+                style={{
+                  fontWeight:"bold",
+                  fontSize: 16,
+                  color:
+                    boxPreview && boxPreview?.cost < 0
+                      ? "red"
+                      : theme.colors.dark,
+                }}
+              >
+                {boxPreview && boxPreview?.cost < 0 ? "Faltante" : "Excedente"}
               </Text>
               <Text
-                style={
-                  boxPreview!.cost < 0
-                    ? { color: "red", textAlign: "center" }
-                    : { color: "green", textAlign: "center" }
-                }
+                style={{
+                  fontSize: 16,
+                  color: boxPreview && boxPreview?.cost < 0 ? "red" : "green",
+                  top: 6,
+                }}
               >
                 $
                 {typeof boxPreview?.cost === "number"
                   ? boxPreview?.cost.toFixed(2)
-                  : ""}{" "}
+                  : ""}
               </Text>
             </View>
-          </Card>
-          <Card style={{...stylesGlobals.card}}>
-          <View>
-              <Text style={stylesGlobals.textContentInCard}>
-                Total de dinero
+
+            <View
+              style={{
+                width: 140,
+                height: 60
+         
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.dark,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                }}
+              >
+                Total dinero
               </Text>
-              <Text style={{...stylesGlobals.styleTextData, color:"green"}}>
+              <Text style={{ fontSize: 16, color: "red", top: 6 }}>
                 ${boxPreview?.totalMoney}
               </Text>
             </View>
-          </Card>
-          <Card style={{...stylesGlobals.card,marginLeft: 6}}>
-          <View style={{marginLeft:20}}>
-              <Text style={stylesGlobals.textContentInCard}>
+
+            <View
+              style={{
+                width: 140,
+                height: 60
+              }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.dark,
+                  fontWeight: "bold",
+                  fontSize: 16,
+                }}
+              >
                 Total en caja
               </Text>
-              <Text style={{...stylesGlobals.styleTextData, color:"red"}}>
+              <Text style={{ fontSize: 16, color: "green", top: 6 }}>
                 ${boxPreview?.totalBox}
               </Text>
             </View>
-          </Card>
-        </View>
-      </ScrollView>
+          </View>
+        </ScrollView>
+      </Card>
+
+      
     </>
   );
 };

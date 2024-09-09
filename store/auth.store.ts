@@ -41,10 +41,8 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   is_authenticated_offline: false,
   box: {} as IBox,
   OnMakeLogin: async (payload) => {
-    console.log("SE EJECUTA LA PETICION EN EL STOREEEEEEEEEEEEEEEEEEWEEEE", payload)
     return await make_login(payload)
       .then(async ({ data }) => {
-        console.log("ESTAAAAAAAAA RETORNAAAAAANDOOOOOOOOOOOOOOOOOO",data)
         console.log("toooo")
         console.log("auth store");
         get().GetConfigurationByTransmitter(data.user.transmitterId);

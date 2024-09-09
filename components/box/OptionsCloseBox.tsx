@@ -7,6 +7,7 @@ import { useContext, useState } from "react";
 import { View, Text, ToastAndroid, Modal } from "react-native";
 import { useTheme } from "react-native-paper";
 import Button from "../Global/components_app/Button";
+import { StatusBar } from "expo-status-bar";
 
 const OptionsCloseBox = ({
   box,
@@ -19,7 +20,7 @@ const OptionsCloseBox = ({
   const [showCloseModal, setShowModalClose] = useState(false);
   const { OnCloseBox, OnRemoveBox } = useBoxStore();
   const { theme } = useContext(ThemeContext);
-
+const [isModal, setIsModal] = useState(false)
   const handleCloseBoxId = () => {
     OnCloseBox(Number(box?.id));
     OnRemoveBox();
@@ -81,7 +82,9 @@ const OptionsCloseBox = ({
             >
               <Button
                 withB={300}
-                onPress={() => setShowModalClose(true)}
+                onPress={() => {setShowModalClose(true)
+                  setIsModal(true)
+                }}
                 Title="Cierre contabilizado"
               />
               <Button
@@ -118,7 +121,7 @@ const OptionsCloseBox = ({
         </View>
       </View>
       <Modal visible={showCloseModal} animationType="slide" transparent={false}>
-        <Box_close idBox={box?.id} closeModal={() => handleCloseAddBox()} />
+        <Box_close idBox={box?.id} closeModal={() => handleCloseAddBox()} isModal={isModal} />
       </Modal>
     </>
   );
