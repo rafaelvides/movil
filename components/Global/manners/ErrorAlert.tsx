@@ -60,78 +60,47 @@ const ErrorAlert = (props: Props) => {
           },
         ]}
       >
-        <View
-          style={{ justifyContent: "center", alignItems: "center", padding: 1 }}
-        >
-          <Text style={styles.alertText}>
-            {props.title ??
-              "[documentoRelacionado.numeroDocumento] NO EXISTE UN REGISTRO CON ESTE DATO"}
-          </Text>
-
-          <Text style={styles.alertMessage}>
-            {props.message ??
-              "Campo #/identificacion/numeroControl no cumple el tamaÃ±o mÃ­nimo  permitido Campo #/identificacion/numeroControl no cumple el formato requerido Campo #/emisor/codPuntoVentaMH no cumple el tamaÃ±o mÃ­nimo  permitido Campo #/emisor/codPuntoVentaMH contiene un valor invÃ¡lido"}
-          </Text>
-        </View>
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+        <View style={{ justifyContent: "center", alignItems: "center" }}>
           <MaterialCommunityIcons
             name="shield-alert-outline"
-            size={300}
+            size={90}
             color={"red"}
-            style={{ opacity: 0.08 }}
+            style={{ opacity: 0.7 }}
           />
-        </View>
-        <View style={{ flexDirection: "row", columnGap: 20, marginTop: 10 }}>
-          <View>
-            <Button
-              withB={180}
-              onPress={() => {
-                if (props.onPressRetry) {
-                  props.onPressRetry();
-                }
-                props.onClose();
-              }}
-              Title="Re-intentar"
-            />
-          </View>
-          <View>
-            <Button
-              withB={180}
-              onPress={() => {
-                props.onPressVerify?.(), props.onClose();
-              }}
-              Title="Verificar DTE"
-            />
-          </View>
-          {/* <View>
-            <Button
-              onPress={() => {
-                props.onPressSendContingency?.(), props.onClose();
-              }}
-              Title="Enviar a contingencia"
-            />
-          </View> */}
-        </View>
-        <View style={{ flexDirection: "row", columnGap: 20, marginTop: 10 }}>
-          <Button
-            withB={200}
-            onPress={() => {
-              props.onPressSendContingency?.(), props.onClose();
-            }}
-            Title="Enviar a contingencia"
-          />
+          <Text style={styles.alertText}>{props.title}</Text>
+          <Text style={styles.alertMessage}>{props.message}</Text>
         </View>
       </Animated.View>
+      <View style={{ justifyContent: "center", alignItems: "center" }}>
+        <Button
+          onPress={() => {
+            if (props.onPressRetry) {
+              props.onPressRetry();
+            }
+            props.onClose();
+          }}
+          color={theme.colors.warning}
+          Title="Re-intentar"
+        />
+        <Button
+          onPress={() => {
+            props.onPressVerify?.(), props.onClose();
+          }}
+          color={theme.colors.secondary}
+          Title="Verificar DTE"
+        />
+        <Button
+          onPress={() => {
+            props.onPressSendContingency?.(), props.onClose();
+          }}
+          Title="Enviar contingencia"
+        />
+        <Button
+          onPress={() => props.onClose()}
+          Title="Cancelar"
+          color={theme.colors.third}
+        />
+      </View>
     </View>
   );
 };
@@ -141,21 +110,18 @@ export default ErrorAlert;
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
     zIndex: 100,
   },
   alertBox: {
-    width: "98%",
-    padding: 10,
-    backgroundColor: "#fff",
-    borderRadius: 10,
-    alignItems: "center",
-    elevation: 5,
+    height: "50%",
+    marginTop: 40,
   },
   alertText: {
-    marginBottom: 4,
+    marginTop: 10,
+    marginBottom: 30,
     fontSize: 18,
     textAlign: "center",
     color: "red",

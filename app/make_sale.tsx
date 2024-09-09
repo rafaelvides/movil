@@ -31,6 +31,12 @@ import AnimatedButton from "@/components/Global/AnimatedButtom";
 import { useCustomerStore } from "@/store/customer.store";
 import { useEmployeeStore } from "@/store/employee.store";
 import { IEmployee } from "@/types/employee/employee.types";
+import {
+  ALERT_TYPE,
+  Dialog,
+  AlertNotificationRoot,
+  Toast,
+} from "react-native-alert-notification";
 
 const make_sale = () => {
   const [loading, setLoading] = useState(false);
