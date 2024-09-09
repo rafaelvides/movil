@@ -103,7 +103,7 @@ const stylesGlobals = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: 14,
-    // marginTop: 6,
+     marginLeft: 6,
   },
   inputSearchStyle: {
     fontSize: 16,
@@ -115,7 +115,7 @@ const stylesGlobals = StyleSheet.create({
     marginRight: 10,
   },
   renderLeftIcon: {
-    marginLeft: 10,
+   marginLeft: 10,
   },
   //ViewDetailsCustomers============================================
   materialIconsStyle: {

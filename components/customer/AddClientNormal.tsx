@@ -74,7 +74,15 @@ const AddClientsNormal = (props: Props) => {
         "Solo se permiten correos de Gmail, Hotmail y Outlook"
       ),
     telefono: yup.string().required("El teléfono es requerido"),
-
+    tipoDocumento: yup
+      .string()
+      .required("*El tipo de documento es requerido*")
+      .test((tipoDocumento) => {
+        // console.log("dataaa", tipoDocumento)
+        if (tipoDocumento) {
+          return true;
+        }
+      }),
     numDocumento: yup.string().when("tipoDocumento", {
       is: (tipoDocumento: string | undefined) =>
         tipoDocumento === "13" ||
@@ -100,9 +108,21 @@ const AddClientsNormal = (props: Props) => {
     }),
     departamento: yup
       .string()
-      .required("**Debes seleccionar el departamento**"),
-    municipio: yup.string().required("**Debes seleccionar el municipio**"),
-    complemento: yup.string().required("**El complemento es requerida**"),
+      .required("**Debes seleccionar el departamento**")
+      .test((departamento) => {
+        if (departamento) {
+          return true;
+        }
+      }),
+    municipio: yup
+      .string()
+      .required("**Debes seleccionar el municipio**")
+      .test((municipio) => {
+        if (municipio) {
+          return true;
+        }
+      }),
+    complemento: yup.string().required("**El complemento es requerido**"),
   });
 
   const [selectedCodeDep, setSelectedCodeDep] = useState(
@@ -204,7 +224,6 @@ const AddClientsNormal = (props: Props) => {
           touched,
         }) => (
           <>
-            
             <SafeAreaView style={stylesGlobals.safeAreaForm}>
               <View
                 style={{
@@ -303,6 +322,7 @@ const AddClientsNormal = (props: Props) => {
                           ? "Selecciona un tipo de documento"
                           : "..."
                       }
+                      searchPlaceholder="Escribe para buscar..."
                       value={values.tipoDocumento}
                       onFocus={() => setIsFocusDoc(true)}
                       onBlur={() => setIsFocusDoc(false)}
@@ -393,7 +413,11 @@ const AddClientsNormal = (props: Props) => {
                         />
                       )}
                     />
-
+                    {errors.departamento && touched.departamento && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.departamento}
+                      </Text>
+                    )}
                     <Text style={stylesGlobals.textInput}>
                       Municipios:
                       <Text style={{ color: "#EF4444" }}>*</Text>
@@ -440,6 +464,11 @@ const AddClientsNormal = (props: Props) => {
                         />
                       )}
                     />
+                    {errors.municipio && touched.municipio && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.municipio}
+                      </Text>
+                    )}
                     <Text style={stylesGlobals.textInput}>
                       Complemento <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
@@ -451,7 +480,11 @@ const AddClientsNormal = (props: Props) => {
                       values={values.directionCustomer?.complemento}
                       defaultValue={props.customer_direction?.complemento}
                     />
-
+                    {errors.complemento && touched.complemento && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.complemento}
+                      </Text>
+                    )}
                     <Button
                       Title="Marcar ubicación"
                       onPress={() => setShowModal(true)}

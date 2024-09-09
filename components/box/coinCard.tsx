@@ -7,7 +7,7 @@ import Input from "../Global/components_app/Input";
 import { ThemeContext } from "@/hooks/useTheme";
 
 const CoinCards = ({
-  boxValues,
+  boxValues, 
   setBoxValues,
 }: {
   boxValues: ICloseBox;

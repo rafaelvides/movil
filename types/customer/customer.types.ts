@@ -68,6 +68,9 @@ export interface IPayloadCustomer {
   tipoContribuyente?: string;
   latitude?: string;
   longitude?: string;
+  departamento?:string
+  municipio?:string
+  complemento?:string
 }
 
 export interface IGetCustomers {

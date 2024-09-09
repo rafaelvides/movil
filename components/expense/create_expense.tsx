@@ -163,6 +163,9 @@ const CreateExpense = (props: Props) => {
                       />
                     )}
                   />
+                  {errors.categoryExpenseId && touched.categoryExpenseId &&(
+                    <Text style={{ color: "#EF4444", marginBottom: 5 }}>{errors.categoryExpenseId}</Text>
+                  )}
                   <Text style={stylesGlobals.textInput}>
                     Total<Text style={{ color: "#EF4444" }}>*</Text>
                   </Text>

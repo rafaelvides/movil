@@ -10,9 +10,7 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
-  BackHandler,
-  ToastAndroid,
+  Image
 } from "react-native";
 import { Href, Link } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";

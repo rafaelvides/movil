@@ -41,8 +41,10 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   is_authenticated_offline: false,
   box: {} as IBox,
   OnMakeLogin: async (payload) => {
+    console.log("SE EJECUTA LA PETICION EN EL STOREEEEEEEEEEEEEEEEEEWEEEE", payload)
     return await make_login(payload)
       .then(async ({ data }) => {
+        console.log("ESTAAAAAAAAA RETORNAAAAAANDOOOOOOOOOOOOOOOOOO",data)
         console.log("toooo")
         console.log("auth store");
         get().GetConfigurationByTransmitter(data.user.transmitterId);
@@ -50,14 +52,16 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
         if (data.ok) {
           console.log("auth 3");
          save_toke(data.token)
-
           console.log("auth 4", data.token);
           console.log("auth 5");
           await save_user(data.user);
           console.log("auth 6");
           await save_point_sale_Id(String(data.user.pointOfSaleId));
           console.log("auth 7");
-
+          if (data.box) {
+            console.log("LOS DATOOOOOOOOOOS QUE VIENE DEL LOGIN", data.box)
+            box_data(data.box);
+          }
          save_login_data_biometric("authBiometric", {
             userName: payload.userName,
             password: payload.password,
@@ -84,9 +88,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           await get().OnLoginMH(data.user.transmitterId, data.token)
           await save_branch_id(String(data.user.branchId));
           console.log("auth 11");
-          if (data.box) {
-            box_data(data.box);
-          }
+          
         }
         return true;
       })
@@ -142,6 +144,8 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     });
     await AsyncStorage.clear();
     await delete_secure();
+    console.log("DATOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS ELIMINADOS")
+    
     return true;
   },
   OnSetInfo: async () => {

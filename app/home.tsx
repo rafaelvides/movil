@@ -3,10 +3,7 @@ import OptionsCloseBox from "@/components/box/OptionsCloseBox";
 import Card from "@/components/Global/components_app/Card";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
-import {
-  get_box_data,
-  get_point_sale_Id,
-} from "@/plugins/async_storage";
+import { get_box_data, get_point_sale_Id } from "@/plugins/async_storage";
 import { is_auth, return_token } from "@/plugins/secure_store";
 import { verify_box } from "@/services/box.service";
 import { get_theme_by_transmitter } from "@/services/personalization.service";
@@ -24,30 +21,15 @@ import {
 } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Box_close from "./Box_close";
-import { useFocusEffect } from "expo-router";
+
 
 function home() {
   const [refreshing, setRefreshing] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [showModalClose, setIsShowModalClose] = useState(false);
-  const [box, setBox] = useState<IBox>();
+  const [box, setBox] = useState<IBox | null>(null);
   const [boxCloseDate, setBoxCloseDate] = useState(false);
   const { toggleTheme } = useContext(ThemeContext);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      get_box_data().then((data) => {
-        setBox(data);
-      });
-      const currentDate = formatDate();
-      if (box && box.date.toString() !== currentDate) {
-        setBoxCloseDate(true);
-      } else {
-        setBoxCloseDate(false);
-        handleVerifyBox()
-      }
-    }, [])
-  );
 
   useEffect(() => {
     const GetThemeConfiguration = async () => {
@@ -74,19 +56,22 @@ function home() {
     GetThemeConfiguration();
   }, []);
 
-  // useEffect(() => {
-  //     console.log("ver si devuelve datos",box)
-  //     if (box && box?.date.toString() !== currentDate) {
-  //       console.log("datooos", box)
-  //       setBoxCloseDate(true);
-  //     } else {
-  //       handleVerifyBox();
-  //     }
+  useEffect(() => {
+    get_box_data().then((data) => {
+      if (data) {
+        setBox(data);
+        if (data.date.toString() !== formatDate()) {
+          setBoxCloseDate(true);
+        } else {
+          setBoxCloseDate(false);
+          handleVerifyBox();
+        }
+      } else {
+        handleVerifyBox();
+      }
+    });
+  }, []);
 
-  //   handleVerifyBox()
-  // }, []);
-
-  // useEffect(() => {
   const handleVerifyBox = async () => {
     try {
       get_point_sale_Id()
@@ -129,7 +114,8 @@ function home() {
   useEffect(() => {
     return_token().then((da) => console.log("home", da));
     is_auth().then((dat) => console.log("home", dat));
-  }, []);
+     setRefreshing(false);
+  }, [refreshing]);
 
   return (
     <>
@@ -174,7 +160,6 @@ function home() {
               />
             </Modal>
           ) : (
-            // <Text>DATTAAAA DE PRUEBA PARA VALIDAR</Text>
             <Modal visible={showModalClose} animationType="slide">
               <View style={styles.centeredView}>
                 <Card
@@ -187,7 +172,7 @@ function home() {
                 >
                   {isVisible ? (
                     <OptionsCloseBox
-                      box={box}
+                      box={box ?? undefined}
                       closeModal={() => {
                         setIsShowModalClose(false);
                       }}

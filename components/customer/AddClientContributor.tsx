@@ -3,6 +3,7 @@ import { useBillingStore } from "@/store/billing/billing.store";
 import { useCustomerStore } from "../../store/customer.store";
 import {
   CustomerDirection,
+  ICustomer,
   IPayloadCustomer,
 } from "@/types/customer/customer.types";
 import { AntDesign } from "@expo/vector-icons";
@@ -45,7 +46,7 @@ function AddClientContributor(props: Props) {
   const [isFocusType, setIsFocusType] = useState(false);
   const [location, setLocation] = useState<{ latitude: ""; longitude: "" }>();
   const { theme } = useContext(ThemeContext);
-  const { PostCustomer, UpdateCustomer } = useCustomerStore();
+  const { PostCustomer, UpdateCustomer , customers} = useCustomerStore();
 
   const initialValues = {
     nombre: props.customer?.nombre ?? "",
@@ -65,7 +66,7 @@ function AddClientContributor(props: Props) {
     nombreDepartamento: props.customer_direction?.nombreDepartamento ?? "",
     tipoContribuyente: props.customer?.tipoContribuyente ?? "",
     complemento: props.customer_direction?.complemento ?? "",
-  };
+  }
   const {
     OnGetCat012Departamento,
     cat_012_departamento,
@@ -87,13 +88,29 @@ function AddClientContributor(props: Props) {
       .required("**El correo es requerido**")
       .email("**El correo es invalido**"),
     telefono: yup.string().required("**El teléfono es requerido**"),
+    tipoDocumento: yup
+      .string()
+      .required("*El tipo de documento es requerido*")
+      .test((tipoDocumento) => {
+        // console.log("dataaa", tipoDocumento)
+        if (tipoDocumento) {
+          return true;
+        }
+      }),
+      tipoContribuyente: yup
+      .string()
+      .required("**El tipo de contribuyente es requerido**")
+      .test((tipoContribuyente)=>{
+        if(tipoContribuyente){
+          return true
+        }
+      }),
     numDocumento: yup.string().when("tipoDocumento", {
       is: (tipoDocumento: string | undefined) =>
         tipoDocumento === "13" ||
         tipoDocumento === "36" ||
         tipoDocumento === "03" ||
         tipoDocumento === "02",
-
       then: (schema) =>
         schema.required("El número de documento es requerido").test({
           name: "documentValidation",
@@ -105,7 +122,6 @@ function AddClientContributor(props: Props) {
             } else if (tipoDocumento === "36") {
               return /^[0-9]{14}$/.test(value || "");
             }
-
             return true;
           },
         }),
@@ -122,9 +138,19 @@ function AddClientContributor(props: Props) {
       .matches(/^[0-9]{2,6}$/, "**La actividad no es valida**"),
     departamento: yup
       .string()
-      .required("**Debes seleccionar el departamento**"),
-    municipio: yup.string().required("**Debes seleccionar el municipio**"),
-    complemento: yup.string().required("**Es requerido"),
+      .required("**Debes seleccionar el departamento**")
+      .test((departamento)=>{
+        if(departamento){
+          return true
+        }
+      }),
+    municipio: yup.string().required("**Debes seleccionar el municipio**")
+    .test((municipio)=>{
+      if(municipio){
+        return true
+      }
+    }),
+    complemento: yup.string().required("**El complemento es requerido"),
   });
 
   const [selectedCodeDep, setSelectedCodeDep] = useState(
@@ -138,8 +164,6 @@ function AddClientContributor(props: Props) {
       }
     }, [props.customer_direction?.municipio])
   );
-
-  
 
   useEffect(() => {
     OnGetCat012Departamento();
@@ -238,7 +262,6 @@ function AddClientContributor(props: Props) {
           touched,
         }) => (
           <>
-           
             <SafeAreaView style={stylesGlobals.safeAreaForm}>
               <View
                 style={{
@@ -456,11 +479,16 @@ function AddClientContributor(props: Props) {
                         />
                       )}
                     />
+                     {errors.tipoContribuyente && touched.tipoContribuyente && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.tipoContribuyente}
+                      </Text>
+                    )}
                     <Text style={stylesGlobals.textInput}>
                       Actividad económica:
                       <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
-                    <Dropdown
+                    <Dropdown 
                       style={[
                         isFocusDoc ? stylesGlobals.isFocusStyles : {},
                         { ...stylesGlobals.styleDropdown },
@@ -499,6 +527,10 @@ function AddClientContributor(props: Props) {
                         />
                       )}
                     />
+                  {errors.codActividad && touched.codActividad && (
+                    <Text style={{ color: "#EF4444", marginBottom: 5 }}>{errors.codActividad}</Text>
+                  )}
+                    
                     <Text style={stylesGlobals.textInput}>
                       Departamento:
                       <Text style={{ color: "#EF4444" }}>*</Text>
@@ -548,6 +580,11 @@ function AddClientContributor(props: Props) {
                         />
                       )}
                     />
+                     {errors.departamento && touched.departamento && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.departamento}
+                      </Text>
+                    )}
                     <Text style={stylesGlobals.textInput}>
                       Municipios:
                       <Text style={{ color: "#EF4444" }}>*</Text>
@@ -594,6 +631,11 @@ function AddClientContributor(props: Props) {
                         />
                       )}
                     />
+                     {errors.municipio && touched.municipio && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.municipio}
+                      </Text>
+                    )}
                     <Text style={stylesGlobals.textInput}>
                       Complemento <Text style={{ color: "#EF4444" }}>*</Text>
                     </Text>
@@ -605,6 +647,12 @@ function AddClientContributor(props: Props) {
                       values={values.directionCustomer?.complemento}
                       defaultValue={props.customer_direction?.complemento}
                     />
+                      {errors.complemento && touched.complemento && (
+                      <Text style={{ color: "#EF4444", marginBottom: 5 }}>
+                        {errors.complemento}
+                      </Text>
+                    )}
+
                     <Button
                       Title="Marcar ubicación"
                       onPress={() => setShowModalLocation(true)}
