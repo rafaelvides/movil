@@ -46,7 +46,7 @@ export const DetailsCustomerContributor = (props: Props) => {
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style="light" backgroundColor={theme.colors.dark} />
       <View
         style={{
           width: "100%",

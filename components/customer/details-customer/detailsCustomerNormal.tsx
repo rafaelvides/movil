@@ -48,7 +48,7 @@ export const DetailsCustomerNormal = (props: Props) => {
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style="light"  backgroundColor={theme.colors.dark}/>
       <View
         style={{
           width: "100%",

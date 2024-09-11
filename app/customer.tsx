@@ -59,6 +59,7 @@ const customer = () => {
   const [selectedId, setSelectedId] = useState<number>(0);
   const [typeClient, setTypeClient] = useState("normal");
   const [selectedTitle, setSelectedTitle] = useState("");
+  const [nameCustomer, setNameCustomer] = useState("")
 const animation = useRef(null)
   const { theme } = useContext(ThemeContext);
   useFocusEffect(
@@ -152,7 +153,7 @@ const animation = useRef(null)
  
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor={theme.colors.dark}/>
       {loading ? (
         <>
           <View style={stylesGlobals.viewSpinnerInit}>
@@ -318,6 +319,7 @@ const animation = useRef(null)
                                 onPress={() => {
                                   setIsModalCustomer(true);
                                   setCustomerId(customer.id);
+                                  setNameCustomer(customer.nombre)
                                 }}
                                 color={theme.colors.danger}
                                 icon={"delete"}
@@ -421,7 +423,8 @@ const animation = useRef(null)
             visible={isModalCustomer}
             onClose={handle}
             onPress={() => deleteCustomer(customerId)}
-            title="¿Estas seguro que deseas eliminar este registro?"
+            title={`¿Estas seguro que deseas eliminar este registro? * [${nameCustomer}] *`}
+
           />
 
           <Modal visible={showDetailNormal} animationType="slide">

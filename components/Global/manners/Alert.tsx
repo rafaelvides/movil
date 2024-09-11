@@ -1,5 +1,7 @@
-import React, { useRef, useEffect } from "react";
-import { View, Text, Animated, Button, StyleSheet } from "react-native";
+import { ThemeContext } from "@/hooks/useTheme";
+import React, { useRef, useEffect, useContext } from "react";
+import { View, Text, Animated, StyleSheet } from "react-native";
+import { Button } from "react-native-paper";
 
 const AlertWithAnimation = ({
   visible,
@@ -14,18 +16,18 @@ const AlertWithAnimation = ({
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
-
+  const { theme } = useContext(ThemeContext);
   useEffect(() => {
     if (visible) {
       Animated.parallel([
         Animated.timing(fadeAnim, {
           toValue: 1,
-          duration: 500,
+          duration: 300,
           useNativeDriver: true,
         }),
         Animated.timing(slideAnim, {
           toValue: 0,
-          duration: 500,
+          duration: 300,
           useNativeDriver: true,
         }),
       ]).start();
@@ -60,14 +62,18 @@ const AlertWithAnimation = ({
       >
         <Text style={styles.alertText}>{title}</Text>
         <View style={{ flexDirection: "row", gap: 40, marginTop: 20 }}>
-          <Button title="cancelar" onPress={onClose} />
+          <Button style={{ backgroundColor:theme.colors.dark, borderRadius:14 , width:140}} onPress={onClose}>
+            <Text style={{color:"white"}}>CANCELAR</Text>
+          </Button>
           <Button
-            title="eliminar"
+            style={{ backgroundColor: theme.colors.danger,borderRadius:14 , width:140}}
             onPress={() => {
-              onPress()
-              onClose()
+              onPress();
+              onClose();
             }}
-          />
+          >
+            <Text style={{color:"white"}}>ELIMINAR</Text>
+          </Button>
         </View>
       </Animated.View>
     </View>
@@ -82,9 +88,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.4)",
+
   },
   alertBox: {
-    width: 320,
+    width: 350,
     padding: 20,
     backgroundColor: "#fff",
     borderRadius: 10,

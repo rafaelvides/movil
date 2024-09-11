@@ -69,7 +69,6 @@ const Box_close = (props: Props) => {
     if (props.idBox) {
       save_detail_close_box(boxValues, props.idBox!)
         .then(({ data }) => {
-          console.log("data de la validacion", data)
           if (data.ok) {
             setBoxPreview(data);
             setIsGroupButton(true);
