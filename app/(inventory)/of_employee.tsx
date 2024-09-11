@@ -18,6 +18,7 @@ import noResult from "@/assets/gif_json/bx8ntOOR1D.json";
 import { ThemeContext } from "@/hooks/useTheme";
 import SpinLoading from "@/components/Global/SpinLoading";
 import { useEmployeeStore } from "@/store/employee.store";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 
 const of_customers = () => {
   const animation = useRef(null);
@@ -46,7 +47,6 @@ const of_customers = () => {
     //     branchId: employee.branchId,
     //   });
     // });
-
     // await Promise.all(promises).then(() => {
     //   ToastAndroid.show(
     //     "Todos los empleados se han guardado exitosamente",
@@ -84,84 +84,108 @@ const of_customers = () => {
             }}
           >
             <SafeAreaView>
-              
-              <ScrollView
+              {/* <ScrollView
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}
                     onRefresh={() => setRefreshing(true)}
                   />
                 }
-              >
-                {is_loading ? (
-                  <View
-                    style={{
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flex: 1,
-                      width: "100%",
-                      height: 650,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        marginBottom: 250,
-                        justifyContent: "center",
-                        alignItems: "center",
-                      }}
+              > */}
+              {is_loading ? (
+                <View style={stylesGlobals.viewSpinnerInit}>
+                  <SpinnerInitPage />
+                </View>
+              ) : (
+                <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
+                  {is_loading ? (
+                    <SpinLoading is_showing={is_loading} />
+                  ) : (
+                    <>
+                    <ScrollView 
+                    refreshControl={
+                      <RefreshControl
+                      refreshing={refreshing}
+                      onRefresh={() => setRefreshing(true)}
+                      />
+                    }
                     >
-                      <SpinLoading is_showing={is_loading} />
-                    </View>
-                  </View>
-                ) : (
-                  <View>
-                    <View
-                      style={{
-                        marginBottom: 125,
-                        backgroundColor: "#FFFFFF",
-                        height: "auto",
-                      }}
-                    >
-                      <ScrollView>
-                        {employee_list.length > 0 ? (
+                      <View style={stylesGlobals.viewScroll}>
+                        {employee_list && employee_list.length > 0 ?(
                           <>
-                            {!is_loading &&
-                              employee_list.map((employee, index) => (
-                                <></>
-                              ))}
+                          {!is_loading && employee_list.map((employee, index)=>{
+                            <>
+                            <Text>{employee.fullName}</Text>
+                            <View style={{
+                              backgroundColor:"red",
+                              height:100
+                            }}></View>
+                            </>
+                          })}
                           </>
-                        ) : (
-                          <>
-                            <View
-                              style={{
-                                padding: 40,
-                                width: "100%",
-                                height: "auto",
-                                flexDirection: "column",
-                                justifyContent: "center",
-                                alignItems: "center",
-                              }}
-                            >
-                              <LottieView
-                                autoPlay
-                                ref={animation}
-                                style={{
-                                  marginTop: 50,
-                                  width: 380,
-                                  height: 380,
-                                }}
-                                source={require("@/assets/gif_json/gif_global.json")}
-                              />
-                            </View>
-                          </>
+                        ):(
+                          <View style={stylesGlobals.viewLottie}>
+                        <LottieView
+                          autoPlay
+                          ref={animation}
+                          style={stylesGlobals.LottieStyle}
+                          source={require("@/assets/gif_json/gif_global.json")}
+                        />
+                      </View>
                         )}
-                      </ScrollView>
-                    </View>
-                  </View>
-                )}
-              </ScrollView>
+
+
+                      </View>
+                    </ScrollView>
+                    </>
+                  )}
+                </SafeAreaView>
+                // <View>
+                //   <View
+                //     style={{
+                //       marginBottom: 125,
+                //       backgroundColor: "#FFFFFF",
+                //       height: "auto",
+                //     }}
+                //   >
+                //     <ScrollView>
+                //       {employee_list.length > 0 ? (
+                //         <>
+                //           {!is_loading &&
+                //             employee_list.map((employee, index) => (
+                //               <></>
+                //             ))}
+                //         </>
+                //       ) : (
+                //         <>
+                //           <View
+                //             style={{
+                //               padding: 40,
+                //               width: "100%",
+                //               height: "auto",
+                //               flexDirection: "column",
+                //               justifyContent: "center",
+                //               alignItems: "center",
+                //             }}
+                //           >
+                //             <LottieView
+                //               autoPlay
+                //               ref={animation}
+                //               style={{
+                //                 marginTop: 50,
+                //                 width: 380,
+                //                 height: 380,
+                //               }}
+                //               source={require("@/assets/gif_json/gif_global.json")}
+                //             />
+                //           </View>
+                //         </>
+                //       )}
+                //     </ScrollView>
+                //   </View>
+                // </View>
+              )}
+              {/* </ScrollView> */}
             </SafeAreaView>
           </View>
         </>

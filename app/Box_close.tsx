@@ -69,6 +69,7 @@ const Box_close = (props: Props) => {
     if (props.idBox) {
       save_detail_close_box(boxValues, props.idBox!)
         .then(({ data }) => {
+          console.log("data de la validacion", data)
           if (data.ok) {
             setBoxPreview(data);
             setIsGroupButton(true);
@@ -181,6 +182,7 @@ const Box_close = (props: Props) => {
               <Button
                 onPress={() => {
                   preview_box();
+                  console.log("se precionaaaaa")
                 }}
                 color={theme.colors.dark}
                 Title="Cerrar caja"

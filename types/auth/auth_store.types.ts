@@ -1,4 +1,5 @@
 import { IBox } from "../box/box.types";
+import { IConfiguration } from "../configuration/configuration.types";
 import { UserLogin } from "../user/user.types";
 import { IAuthResponse, ILoginPayload } from "./auth.types";
 
@@ -8,6 +9,7 @@ export interface IAuthStore {
   is_authenticated_offline: boolean;
   user: UserLogin;
   box: IBox;
+  personalization: IConfiguration
   OnMakeLogin: (payload: ILoginPayload) => Promise<boolean>;
   OnMakeLoginOffline: (payload: ILoginPayload) => Promise<boolean>;
   OnMakeLogout: () => Promise<boolean>;

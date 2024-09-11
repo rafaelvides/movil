@@ -15,6 +15,7 @@ import {
 import {
   box_data,
   get_box_data,
+  get_configuration,
   get_user,
   save_branch_id,
   save_configuration,
@@ -40,27 +41,28 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   is_authenticated: false,
   is_authenticated_offline: false,
   box: {} as IBox,
+  personalization: {} as IConfiguration,
   OnMakeLogin: async (payload) => {
     return await make_login(payload)
       .then(async ({ data }) => {
-        console.log("toooo")
+        console.log("toooo");
         console.log("auth store");
-        get().GetConfigurationByTransmitter(data.user.transmitterId);
         console.log("auth 2");
         if (data.ok) {
           console.log("auth 3");
-         save_toke(data.token)
+          save_toke(data.token);
           console.log("auth 4", data.token);
           console.log("auth 5");
           await save_user(data.user);
           console.log("auth 6");
+          get().GetConfigurationByTransmitter(data.user.transmitterId);
           await save_point_sale_Id(String(data.user.pointOfSaleId));
           console.log("auth 7");
           if (data.box) {
-            console.log("LOS DATOOOOOOOOOOS QUE VIENE DEL LOGIN", data.box)
+            console.log("LOS DATOOOOOOOOOOS QUE VIENE DEL LOGIN", data.box);
             box_data(data.box);
           }
-         save_login_data_biometric("authBiometric", {
+          save_login_data_biometric("authBiometric", {
             userName: payload.userName,
             password: payload.password,
           });
@@ -83,10 +85,9 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
               );
             });
           console.log("auth 10", data.user.transmitterId);
-          await get().OnLoginMH(data.user.transmitterId, data.token)
+          await get().OnLoginMH(data.user.transmitterId, data.token);
           await save_branch_id(String(data.user.branchId));
           console.log("auth 11");
-          
         }
         return true;
       })
@@ -99,17 +100,17 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   async OnLoginMH(id, token) {
-    console.log(token)
+    console.log(token);
     get_transmitter(id, token)
       .then(({ data }) => {
-        console.log(data, "data")
+        console.log(data, "data");
         login_mh(data.transmitter.nit, data.transmitter.claveApi)
           .then(async (login_mh) => {
             if (login_mh.data.status === "OK") {
-              console.log("MH", login_mh.data.body.token)
+              console.log("MH", login_mh.data.body.token);
               await save_token_mh(login_mh.data.body.token).catch((er) => {
-                console.log(er)
-              })
+                console.log(er);
+              });
             } else {
               const data = login_mh as unknown as ILoginMHFailed;
               ToastAndroid.show(
@@ -120,7 +121,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
             }
           })
           .catch((error: AxiosError<ILoginMHFailed>) => {
-            console.log(error.response?.data.body, "1")
+            console.log(error.response?.data.body, "1");
             ToastAndroid.show(
               `Error ${error.response?.data.body.descripcionMsg}`,
               ToastAndroid.SHORT
@@ -129,7 +130,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           });
       })
       .catch((error) => {
-        console.log(error, "2")
+        console.log(error, "2");
         console.log("error", error);
         ToastAndroid.show(`Aun no tienes datos asignados`, ToastAndroid.SHORT);
         return;
@@ -142,8 +143,10 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     });
     await AsyncStorage.clear();
     await delete_secure();
-    console.log("DATOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS ELIMINADOS")
-    
+    console.log(
+      "DATOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS ELIMINADOS"
+    );
+
     return true;
   },
   OnSetInfo: async () => {
@@ -151,13 +154,15 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     const auth = await is_auth();
     const user = await get_user();
     const box = await get_box_data();
-    console.log("el onsetInfo", token, auth)
+    const personalization = await get_configuration();
+    console.log("el onsetInfo", token, auth);
     if (token && auth) {
       set({
         token,
         is_authenticated: true,
         user,
         box,
+        personalization,
       });
       return true;
     } else {
@@ -224,16 +229,20 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   GetConfigurationByTransmitter: async (id) => {
+    console.log("SE EJECUTAAAAaaaaaa", id)
     try {
       const { data } = await get_by_transmitter(id);
       if (data.personalization) {
-        const personalizationArray = Array.isArray(data.personalization)
-          ? data.personalization
-          : [data.personalization];
-        // set({
+        console.log("VER LA PERSONALIZACIIIIIOOOOON en el store", data.personalization)
+        // const personalizationArray = Array.isArray(data.personalization)
+        //   ? data.personalization
+        //   : [data.personalization];
+        // // set({
         //   personalization: personalizationArray,
         // });
         await save_configuration(data.personalization);
+        const perso = await get_configuration();
+        console.log("VER LA PERSONALIZACIIIIIOOOOON ALMACENADAAAAAAA", perso)
       }
     } catch (error) {
       set((state) => ({ ...state, config: {} as IConfiguration }));

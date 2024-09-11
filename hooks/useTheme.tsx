@@ -4,6 +4,7 @@ import { Props, Theme, ThemeContextType } from "./types/theme.types";
 import { defaultTheme } from "../utils/constants";
 import { useFocusEffect } from "expo-router";
 import { StatusBar } from "react-native";
+import { useAuthStore } from "@/store/auth.store";
 
 export const ThemeContext = React.createContext<ThemeContextType>({
   theme: {} as Theme,
@@ -26,13 +27,12 @@ function ThemeProvider(props: Props) {
         const storedTheme = await AsyncStorage.getItem("theme");
         if(storedTheme !== null){
           setThemeConfigured(storedTheme);
-
         }
       }
       fetchData()
     },[])
   )
-  
+
 
   const [theme, setTheme] = React.useState(themeConfigured ? JSON.parse(themeConfigured) : (defaultTheme as Theme) )
 
