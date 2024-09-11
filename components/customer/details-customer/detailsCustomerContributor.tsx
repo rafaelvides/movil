@@ -6,14 +6,11 @@ import {
   IPayloadCustomer,
 } from "@/types/customer/customer.types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { StatusBar } from "expo-status-bar";
-import { useContext, useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { useContext, useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import React from "react";
+
 
 interface Props {
   closeModal: () => void;
@@ -44,224 +41,186 @@ export const DetailsCustomerContributor = (props: Props) => {
     categoryDocument();
   }, [props.customer?.tipoDocumento, cat_022_tipo_de_documento_de_ide]);
 
+  useEffect(() => {
+    StatusBar.setBarStyle("light-content");
+    StatusBar.setBackgroundColor(theme.colors.dark);
+  }, [theme.colors.dark]);
+
   return (
     <>
-      <StatusBar style="light" backgroundColor={theme.colors.dark} />
-      <View
-        style={{
-          width: "100%",
-          height: "100%",
-          backgroundColor: theme.colors.dark,
-        }}
-      >
-        <MaterialCommunityIcons
-          name="close"
-          size={26}
-          onPress={() => props.closeModal()}
-          color={"white"}
-          style={stylesGlobals.materialIconsStyle}
+      <SafeAreaView>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor={theme.colors.dark}
         />
         <View
           style={{
-            flexDirection: "row",
+            width: "100%",
+            height: "100%",
+            backgroundColor: theme.colors.dark,
           }}
         >
-          <Text style={stylesGlobals.titleDetailsCustomer}>
-            Detalles cliente contribuyente
-          </Text>
-        </View>
-        <View style={stylesGlobals.viewContent}>
-          <ScrollView
+          <MaterialCommunityIcons
+            name="close"
+            size={26}
+            onPress={() => props.closeModal()}
+            color={"white"}
+            style={stylesGlobals.materialIconsStyle}
+          />
+          <View
             style={{
-              marginBottom: 50,
+              flexDirection: "row",
             }}
           >
-            <View
-              style={stylesGlobals.viewInMaterial}
+            <Text style={stylesGlobals.titleDetailsCustomer}>
+              Detalles cliente contribuyente
+            </Text>
+          </View>
+          <View style={stylesGlobals.viewContent}>
+            <ScrollView
+              style={{
+                marginBottom: 50,
+              }}
             >
-              <MaterialCommunityIcons
-                name="account"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer?.nombre}
-              </Text>
-            </View>
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="card-account-details"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer?.nombreComercial}
-              </Text>
-            </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="account"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer?.nombre}
+                </Text>
+              </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="card-account-details"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer?.nombreComercial}
+                </Text>
+              </View>
 
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="email-outline"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer?.correo}
-              </Text>
-            </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="email-outline"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer?.correo}
+                </Text>
+              </View>
 
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="phone"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer?.telefono}
-              </Text>
-            </View>
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="card-text"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {category}
-              </Text>
-            </View>
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="checkbook"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer?.numDocumento}
-              </Text>
-            </View>
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="card-bulleted"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {`NRC: ${props.customer?.nrc}`}
-              </Text>
-            </View>
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="book-open"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer?.descActividad}
-              </Text>
-            </View>
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="checkbox-marked"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer?.tipoContribuyente}
-              </Text>
-            </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="phone"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer?.telefono}
+                </Text>
+              </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="card-text"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>{category}</Text>
+              </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="checkbook"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer?.numDocumento}
+                </Text>
+              </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="card-bulleted"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {`NRC: ${props.customer?.nrc}`}
+                </Text>
+              </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="book-open"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer?.descActividad}
+                </Text>
+              </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="checkbox-marked"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer?.tipoContribuyente}
+                </Text>
+              </View>
 
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="card-bulleted-outline"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="card-bulleted-outline"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer_direction?.nombreDepartamento}
+                </Text>
+              </View>
+              <View style={stylesGlobals.viewInMaterial}>
+                <MaterialCommunityIcons
+                  name="bank"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer_direction?.nombreMunicipio}
+                </Text>
+              </View>
+              <View
+                style={{ ...stylesGlobals.viewInMaterial, marginBottom: 30 }}
               >
-                {props.customer_direction?.nombreDepartamento}
-              </Text>
-            </View>
-            <View
-              style={stylesGlobals.viewInMaterial}
-            >
-              <MaterialCommunityIcons
-                name="bank"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer_direction?.nombreMunicipio}
-              </Text>
-            </View>
-            <View
-              style={{...stylesGlobals.viewInMaterial, marginBottom:30}}
-            >
-              <MaterialCommunityIcons
-                name="clipboard-outline"
-                color={theme.colors.secondary}
-                size={30}
-                style={stylesGlobals.iconsStyles}
-              />
-              <Text
-                style={stylesGlobals.textIconStyle}
-              >
-                {props.customer_direction?.complemento}
-              </Text>
-            </View>
-          </ScrollView>
+                <MaterialCommunityIcons
+                  name="clipboard-outline"
+                  color={theme.colors.secondary}
+                  size={30}
+                  style={stylesGlobals.iconsStyles}
+                />
+                <Text style={stylesGlobals.textIconStyle}>
+                  {props.customer_direction?.complemento}
+                </Text>
+              </View>
+            </ScrollView>
+          </View>
         </View>
-      </View>
+      </SafeAreaView>
     </>
   );
 };

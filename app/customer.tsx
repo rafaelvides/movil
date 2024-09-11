@@ -17,7 +17,6 @@ import {
 } from "@/types/customer/customer.types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Modal,
@@ -26,6 +25,7 @@ import {
   Text,
   View,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import { SheetManager } from "react-native-actions-sheet";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
@@ -59,8 +59,8 @@ const customer = () => {
   const [selectedId, setSelectedId] = useState<number>(0);
   const [typeClient, setTypeClient] = useState("normal");
   const [selectedTitle, setSelectedTitle] = useState("");
-  const [nameCustomer, setNameCustomer] = useState("")
-const animation = useRef(null)
+  const [nameCustomer, setNameCustomer] = useState("");
+  const animation = useRef(null);
   const { theme } = useContext(ThemeContext);
   useFocusEffect(
     React.useCallback(() => {
@@ -71,6 +71,7 @@ const animation = useRef(null)
       }, 1000);
     }, [])
   );
+
   useEffect(() => {
     getCustomersPagination(currentPage, 5, name, correo);
     setRefreshing(false);
@@ -150,10 +151,10 @@ const animation = useRef(null)
     setIsModalCustomer(false);
   };
 
- 
   return (
     <>
-      <StatusBar style="light" backgroundColor={theme.colors.dark}/>
+      <StatusBar barStyle="dark-content"  />
+
       {loading ? (
         <>
           <View style={stylesGlobals.viewSpinnerInit}>
@@ -232,117 +233,106 @@ const animation = useRef(null)
                   <View style={stylesGlobals.viewScroll}>
                     {customers && customers.length > 0 ? (
                       <>
-                      {customers &&
-                        customers.map((customer, index) => (
-                          <Card key={index} style={stylesGlobals.styleCard}>
-                            <View style={stylesGlobals.ViewCard}>
-                              <MaterialCommunityIcons
-                                color={theme.colors.secondary}
-                                name="account"
-                                size={22}
-                                style={{
-                                  position: "absolute",
-                                  left: 7,
-                                }}
-                              />
-                              <Text style={stylesGlobals.textCard}>
-                                {customer.nombre}
-                              </Text>
-                            </View>
-                            <View style={stylesGlobals.ViewCard}>
-                              <MaterialCommunityIcons
-                                color={theme.colors.third}
-                                name="phone"
-                                size={22}
-                                style={{
-                                  position: "absolute",
-                                  left: 7,
-                                }}
-                              />
-                              <Text style={stylesGlobals.textCard}>
-                                {customer.telefono}
-                              </Text>
-                            </View>
-                            <View style={stylesGlobals.ViewCard}>
-                              <MaterialCommunityIcons
-                                color={theme.colors.third}
-                                name="map-marker"
-                                size={22}
-                                style={{
-                                  position: "absolute",
-                                  left: 7,
-                                }}
-                              />
-                              <Text style={stylesGlobals.textCard}>
-                                {`${customer.direccion.nombreDepartamento}/${customer.direccion.nombreMunicipio}`}
-                              </Text>
-                            </View>
-                            <View style={[stylesGlobals.ViewCard]}>
-                              <MaterialCommunityIcons
-                                color={theme.colors.dark}
-                                name="mail"
-                                size={22}
-                                style={{
-                                  position: "absolute",
-                                  left: 7,
-                                }}
-                              />
+                        {customers &&
+                          customers.map((customer, index) => (
+                            <Card key={index} style={stylesGlobals.styleCard}>
+                              <View style={stylesGlobals.ViewCard}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.secondary}
+                                  name="account"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
+                                <Text style={stylesGlobals.textCard}>
+                                  {customer.nombre}
+                                </Text>
+                              </View>
+                              <View style={stylesGlobals.ViewCard}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.third}
+                                  name="phone"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
+                                <Text style={stylesGlobals.textCard}>
+                                  {customer.telefono}
+                                </Text>
+                              </View>
+                              <View style={stylesGlobals.ViewCard}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.third}
+                                  name="map-marker"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
+                                <Text style={stylesGlobals.textCard}>
+                                  {`${customer.direccion.nombreDepartamento}/${customer.direccion.nombreMunicipio}`}
+                                </Text>
+                              </View>
+                              <View style={[stylesGlobals.ViewCard]}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.dark}
+                                  name="mail"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
 
-                              <Text style={[stylesGlobals.textCard]}>
-                                {customer.correo}
-                              </Text>
-                            </View>
-                            <View style={stylesGlobals.ViewGroupButton}>
-                              <ButtonForCard
-                                onPress={() =>
-                                  handleChangeCustomer(
-                                    customer,
-                                    "edit",
-                                  )
-                                }
-                                icon={"pencil"}
-                              />
+                                <Text style={[stylesGlobals.textCard]}>
+                                  {customer.correo}
+                                </Text>
+                              </View>
+                              <View style={stylesGlobals.ViewGroupButton}>
+                                <ButtonForCard
+                                  onPress={() =>
+                                    handleChangeCustomer(customer, "edit")
+                                  }
+                                  icon={"pencil"}
+                                />
 
-                              <ButtonForCard
-                                onPress={() => {
-                                  handleChangeCustomer(
-                                    customer,
-                                    "details",
-                                  );
-                                  setShowDetailNormal(true);
-                                }}
-                                color={theme.colors.third}
-                                icon={"card-text"}
-                              />
+                                <ButtonForCard
+                                  onPress={() => {
+                                    handleChangeCustomer(customer, "details");
+                                    setShowDetailNormal(true);
+                                  }}
+                                  color={theme.colors.third}
+                                  icon={"card-text"}
+                                />
 
-                              <ButtonForCard
-                                onPress={() => {
-                                  setIsModalCustomer(true);
-                                  setCustomerId(customer.id);
-                                  setNameCustomer(customer.nombre)
-                                }}
-                                color={theme.colors.danger}
-                                icon={"delete"}
-                              />
-                            </View>
-                          </Card>
-                        ))}
-                    </>
-                    ):(
-                      <View 
-                      style={stylesGlobals.viewLottie}
-                      >
+                                <ButtonForCard
+                                  onPress={() => {
+                                    setIsModalCustomer(true);
+                                    setCustomerId(customer.id);
+                                    setNameCustomer(customer.nombre);
+                                  }}
+                                  color={theme.colors.danger}
+                                  icon={"delete"}
+                                />
+                              </View>
+                            </Card>
+                          ))}
+                      </>
+                    ) : (
+                      <View style={stylesGlobals.viewLottie}>
                         <LottieView
-                        autoPlay
-                        ref={animation}
-                        style={stylesGlobals.LottieStyle}
-                        source={require("@/assets/gif_json/gif_global.json")}
-
+                          autoPlay
+                          ref={animation}
+                          style={stylesGlobals.LottieStyle}
+                          source={require("@/assets/gif_json/gif_global.json")}
                         />
-
                       </View>
                     )}
-                    
                   </View>
                   {customers.length > 0 && (
                     <Pagination
@@ -378,7 +368,7 @@ const animation = useRef(null)
                     : "Editar cliente"
                   : "Nuevo cliente"}
               </Text>
-               <View style={{ position: "absolute", right: 0, top: -5 }}>
+              <View style={{ position: "absolute", right: 0, top: -5 }}>
                 <ButtonForCard
                   onPress={() => {
                     clearClose();
@@ -389,7 +379,7 @@ const animation = useRef(null)
                   iconColor="black"
                   sizeIcon={26}
                 />
-              </View> 
+              </View>
             </View>
             <View
               style={{
@@ -424,30 +414,35 @@ const animation = useRef(null)
             onClose={handle}
             onPress={() => deleteCustomer(customerId)}
             title={`¿Estas seguro que deseas eliminar este registro? * [${nameCustomer}] *`}
-
           />
 
           <Modal visible={showDetailNormal} animationType="slide">
             {typeClient === "contribuyente" ? (
-              <DetailsCustomerContributor
-                closeModal={() => {
-                  clearClose();
-                  setShowDetailNormal(false);
-                }}
-                customer={selectedCustomer}
-                customer_direction={selectedCustomerDirection}
-                id={selectedId}
-              />
+              <>
+             
+                <DetailsCustomerContributor
+                  closeModal={() => {
+                    clearClose();
+                    setShowDetailNormal(false);
+                  }}
+                  customer={selectedCustomer}
+                  customer_direction={selectedCustomerDirection}
+                  id={selectedId}
+                />
+              </>
             ) : (
-              <DetailsCustomerNormal
-                closeModal={() => {
-                  clearClose();
-                  setShowDetailNormal(false);
-                }}
-                customer={selectedCustomer}
-                customer_direction={selectedCustomerDirection}
-                id={selectedId}
-              />
+              <>
+               
+                <DetailsCustomerNormal
+                  closeModal={() => {
+                    clearClose();
+                    setShowDetailNormal(false);
+                  }}
+                  customer={selectedCustomer}
+                  customer_direction={selectedCustomerDirection}
+                  id={selectedId}
+                />
+              </>
             )}
           </Modal>
         </>

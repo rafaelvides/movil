@@ -77,7 +77,7 @@ const of_customers = () => {
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
       {isloading ? (
         <>
           <View style={stylesGlobals.viewSpinnerInit}>

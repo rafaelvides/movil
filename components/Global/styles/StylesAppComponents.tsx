@@ -215,6 +215,7 @@ const stylesGlobals = StyleSheet.create({
     padding: 10,
   },
   textSettings: {
+    margin:10,
     fontSize: 16,
     marginTop: 35,
     color: "#4B5563",

@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   Switch,
   PermissionsAndroid,
+  StatusBar,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -21,9 +22,9 @@ import {
 } from "../plugins/secure_store";
 import { Camera } from "expo-camera";
 import SpinnerInitPage from "@/components/Global/SpinnerInitPage";
-import { Divider } from "react-native-paper";
 import { ThemeContext } from "@/hooks/useTheme";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Card from "@/components/Global/components_app/Card";
 
 const Settings = () => {
   const { has_enabled, OnGetLocationDisponible, OnSetLocationDisponible } =
@@ -31,7 +32,7 @@ const Settings = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const [isBiometric, setIsBiometric] = useState(false);
   const [isReloadind, setIsReloading] = useState(false);
-
+  
   const { stopAllProcess } = useLocation();
 
   const { OnMakeLogout } = useAuthStore();
@@ -120,6 +121,7 @@ const Settings = () => {
 
   return (
     <>
+      <StatusBar barStyle="dark-content" />
       {isReloadind ? (
         <>
           <View
@@ -134,126 +136,325 @@ const Settings = () => {
           </View>
         </>
       ) : (
-        <SafeAreaView
-          style={{ ...stylesGlobals.safeAreaForm, paddingHorizontal: 10 }}
-        >
-          <ScrollView
+        <ScrollView>
+          <SafeAreaView
             style={{
-              marginBottom: 30,
+              backgroundColor: "white",
+              height: "100%",
+              marginBottom: 55,
             }}
           >
-            <Text style={stylesGlobals.textSettings}>Permisos</Text>
-            <Divider style={stylesGlobals.dividerStyle} />
-            <View style={stylesGlobals.viewMain}>
+            {/* <ScrollView style={{
+           
+          }}> */}
+            <Card
+              style={{
+                top: 10,
+                height: "20%",
+                width: "96%",
+                borderRadius: 15,
+                margin: 5,
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <MaterialCommunityIcons
+                  name="cog-outline"
+                  size={30}
+                  color={"#00c598"}
+                />
+                <Text
+                  style={{
+                    textAlign: "right",
+                    fontWeight: "bold",
+                    fontSize: 20,
+                  }}
+                >
+                  Permisos generales
+                </Text>
+              </View>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "black",
+                  margin: 5,
+                  textAlign: "left",
+                }}
+              >
+                Estos permisos son requeridos para el buen funcionamiento de la
+                aplicación.Para mayor información contactarse con los
+                desarrolladores.
+              </Text>
+            </Card>
+
+            <Card
+              style={{
+                top: 5,
+                height: "auto",
+                width: "96%",
+                borderRadius: 15,
+                margin: 5,
+              }}
+            >
               <View
                 style={{
-                  ...stylesGlobals.styleView,
-                  backgroundColor: isBiometric ? "transparent" : "#ccc",
-                  borderColor: isBiometric ? "#00c598" : "#fff",
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
                 <MaterialCommunityIcons
-                  size={35}
-                  color={isBiometric ? "#00c598" : "#fff"}
-                  name="fingerprint"
+                  size={40}
+                  color={isBiometric ? "#00c598" : "#ccc"}
+                  name={isBiometric ?"fingerprint": "fingerprint-off"}
+                />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "black",
+                    left: 10,
+                  }}
+                >
+                  Inicio biométrico
+                </Text>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  width: "100%",
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "left",
+                    margin: 5,
+                    fontSize: 14,
+                    width: "80%",
+                  }}
+                >
+                  Inicia sesión de forma rápida y segura con tu huella dactilar.
+                </Text>
+                <Switch
+                  style={stylesGlobals.styleSwitch}
+                  trackColor={{ false: "#767577", true: "#3D69B4" }}
+                  thumbColor={isBiometric ? "#f4f3f4" : "#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={() => {
+                    toggleBiometric();
+                    saveBiometric();
+                  }}
+                  value={isBiometric}
                 />
               </View>
-              <Text style={stylesGlobals.textComponent}>
-                Inicia sesión de forma rápida y segura con tu huella dactilar.
-              </Text>
-              <Switch
-                style={stylesGlobals.styleSwitch}
-                trackColor={{ false: "#767577", true: "#3D69B4" }}
-                thumbColor={isBiometric ? "#f4f3f4" : "#f4f3f4"}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={() => {
-                  toggleBiometric();
-                  saveBiometric();
-                }}
-                value={isBiometric}
-              />
-            </View>
-            <View style={{ ...stylesGlobals.viewMain, marginTop: 50 }}>
+            </Card>
+
+            <Card
+              style={{
+                top: 5,
+                height: "auto",
+                width: "96%",
+                borderRadius: 15,
+                margin: 5,
+              }}
+            >
               <View
                 style={{
-                  ...stylesGlobals.styleView,
-                  backgroundColor: hasCameraPermission ? "transparent" : "#ccc",
-                  borderColor: hasCameraPermission ? "#2be0b7" : "transparent",
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
                 <MaterialCommunityIcons
-                  size={34}
-                  color={hasCameraPermission ? "#2be0b7" : "#fff"}
+                  size={40}
+                  color={hasCameraPermission ? "#0da9d9" : "#ccc"}
                   name={hasCameraPermission ? "camera" : "camera-off"}
                 />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "black",
+                    left: 10,
+                  }}
+                >
+                  Acceso a cámara
+                </Text>
               </View>
-              <Text style={stylesGlobals.textComponent}>
-                Permite el acceso a la cámara para escanear códigos de barras de
-                productos.
-              </Text>
-              <Switch
-                style={stylesGlobals.styleSwitch}
-                trackColor={{
-                  false: "#767577",
-                  true: "#3D69B4",
-                }}
-                thumbColor={hasCameraPermission ? "#f4f3f4" : "#f4f3f4"}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={(camera) => setHasCameraPermission(camera)}
-                value={hasCameraPermission}
-              />
-            </View>
 
-            <View style={{ ...stylesGlobals.viewMain, marginTop: 50 }}>
               <View
                 style={{
-                  ...stylesGlobals.styleView,
-                  backgroundColor: has_enabled ? "transparent" : "#ccc",
-                  borderColor: has_enabled ? "#0da9d9" : "transparent",
+                  flexDirection: "row",
+                  width: "100%",
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "left",
+                    margin: 5,
+                    fontSize: 14,
+                    width: "80%",
+                  }}
+                >
+                  Permite el acceso a la cámara para escanear códigos de barras
+                  de productos.
+                </Text>
+                <Switch
+                  style={stylesGlobals.styleSwitch}
+                  trackColor={{
+                    false: "#767577",
+                    true: "#3D69B4",
+                  }}
+                  thumbColor={hasCameraPermission ? "#f4f3f4" : "#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={(camera) => setHasCameraPermission(camera)}
+                  value={hasCameraPermission}
+                />
+              </View>
+            </Card>
+
+            <Card
+              style={{
+                top: 5,
+                height: "auto",
+                width: "96%",
+                borderRadius: 15,
+                margin: 5,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
                 <MaterialCommunityIcons
-                  size={42}
-                  color={has_enabled ? "#0da9d9" : "#fff"}
+                  size={40}
+                  color={has_enabled ? "#09ae50" : "#ccc"}
                   name={"map-marker-account"}
                 />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "black",
+                    left: 10,
+                  }}
+                >
+                  Acceso a ubicación
+                </Text>
               </View>
-              <Text style={stylesGlobals.textComponent}>
-                Permite a la ubicación para marcar la ruta recorrida por unidad
-              </Text>
-              <Switch
-                style={stylesGlobals.styleSwitch}
-                trackColor={{
-                  false: "#767577",
-                  true: "#3D69B4",
-                }}
-                thumbColor={has_enabled ? "#f4f3f4" : "#f4f3f4"}
-                ios_backgroundColor="#3e3e3e"
-                onValueChange={(ubicación) => toggleUbication()}
-                value={has_enabled}
-              />
-            </View>
-            <View style={{ ...stylesGlobals.viewMain, marginTop: 50 }}>
               <View
                 style={{
-                  ...stylesGlobals.styleView,
-                  backgroundColor: "transparent",
-                  borderColor: "#009eff",
+                  flexDirection: "row",
+                  width: "100%",
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "left",
+                    margin: 5,
+                    fontSize: 14,
+                    width: "80%",
+                  }}
+                >
+                  Permite a la ubicación para marcar la ruta recorrida por
+                  unidad
+                </Text>
+                <Switch
+                  style={stylesGlobals.styleSwitch}
+                  trackColor={{
+                    false: "#767577",
+                    true: "#3D69B4",
+                  }}
+                  thumbColor={has_enabled ? "#f4f3f4" : "#f4f3f4"}
+                  ios_backgroundColor="#3e3e3e"
+                  onValueChange={(ubicación) => toggleUbication()}
+                  value={has_enabled}
+                />
+              </View>
+            </Card>
+            <Card
+              style={{
+                top: 5,
+                height: "auto",
+                width: "96%",
+                borderRadius: 15,
+                margin: 5,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
                 }}
               >
                 <MaterialCommunityIcons
-                  size={24}
-                  color={"#009eff"}
+                  size={40}
+                  color={"#00a08f"}
                   name={"folder"}
                 />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "black",
+                    left: 10,
+                  }}
+                >
+                  Acceso de almacenamiento
+                </Text>
               </View>
-              <Text style={stylesGlobals.textComponent}>
-                Permite el acceso a la los documentos, podrás seleccionar
-                archivos JSON de DTE para cargar los productos
-              </Text>
-            </View>
-            <View style={{ ...stylesGlobals.viewMain, marginTop: 40 }}>
               <View
+                style={{
+                  flexDirection: "row",
+                  width: "100%",
+                }}
+              >
+                <Text
+                  style={{
+                    textAlign: "left",
+                    margin: 5,
+                    fontSize: 14,
+                    width: "100%",
+                  }}
+                >
+                  Permite el acceso a la los documentos, podrás seleccionar
+                  archivos JSON de DTE para cargar los productos
+                </Text>
+              </View>
+            </Card>
+            <Card
+              style={{
+                top: 5,
+                height: "auto",
+                width: "96%",
+                borderRadius: 15,
+                margin: 5,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  size={40}
+                  color={"red"}
+                  name={"delete"}
+                  onPress={() => handleClear()}
+                />
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "bold",
+                    color: "black",
+                    left: 10,
+                  }}
+                >
+                  Restaurar configuración
+                </Text>
+              </View>
+              {/* <View style={{ ...stylesGlobals.viewMain, marginTop: 40 }}> */}
+              {/* <View
                 style={{
                   ...stylesGlobals.styleView,
                   backgroundColor: "transparent",
@@ -270,9 +471,10 @@ const Settings = () => {
               <Text style={{ ...stylesGlobals.textComponent, marginTop: 18 }}>
                 Restaurar datos
               </Text>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
+            </View> */}
+            </Card>
+          </SafeAreaView>
+        </ScrollView>
       )}
     </>
   );

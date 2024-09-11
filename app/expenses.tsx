@@ -24,7 +24,6 @@ import Pagination from "@/components/Global/Pagination";
 import { UpdateExpenses } from "@/components/expense/update_expenses";
 import { IExpensePayload } from "@/types/expenses/expense.types";
 import AlertWithAnimation from "@/components/Global/manners/Alert";
-import noResult from "@/assets/gif_json/bx8ntOOR1D.json";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
