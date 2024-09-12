@@ -491,12 +491,14 @@ const AddClientsNormal = (props: Props) => {
                     />
                     <View
                       style={{
-                        right: 10,
+                        width: "100%",
+                        justifyContent: "center",
+                        alignContent: "center",
                       }}
                     >
                       <Button
                         Title="Guardar"
-                        withB={340}
+                        // withB={340}
                         onPress={() => handleSubmit()}
                       />
                     </View>
@@ -516,58 +518,3 @@ const AddClientsNormal = (props: Props) => {
 
 export default AddClientsNormal;
 
-const styles = StyleSheet.create({
-  icon: {
-    marginRight: 5,
-    marginLeft: 10,
-  },
-  label: {
-    position: "absolute",
-    backgroundColor: "white",
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 16,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-    top: 10,
-    right: 5,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-  card: {
-    marginBottom: 25,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 5,
-    padding: 6,
-    margin: 3,
-  },
-  input: {
-    height: 45,
-    borderColor: "#D9D9DA",
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  inputWrapper: {
-    position: "relative",
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    marginBottom: 15,
-  },
-});

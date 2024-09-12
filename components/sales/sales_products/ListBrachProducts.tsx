@@ -136,16 +136,29 @@ const ListBrachProducts = ({ closeModal }: { closeModal: () => void }) => {
             {branch_products &&
               branch_products.map((brp, index) => (
                 <Card key={index} style={stylesGlobals.styleCard}>
-                  <View
-                    style={{ marginLeft: 280, position: "absolute", top: -5 }}
-                  >
+                  
+                  <View style={{flexDirection:"row", width:"100%", justifyContent:"space-between", top:10}}>
+                    <MaterialCommunityIcons
+                      color={theme.colors.secondary}
+                      name="inbox-full-outline"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+                    <Text style={{...stylesGlobals.textCard, top:10}}>
+                      {brp.product.name.length > 20
+                        ? `${brp.product.name.substring(0, 18)}...`
+                        : brp.product.name}
+                    </Text>
                     <Pressable
                       onPress={() => {
                         OnAddProductByCode(brp.product.code, brp.branch.id);
                       }}
                       style={{
-                        width: 40,
-                        height: 40,
+                         width: "14%",
+                         height: 40,
                         backgroundColor: theme.colors.dark,
                         borderRadius: 10,
                         justifyContent: "center",
@@ -158,22 +171,6 @@ const ListBrachProducts = ({ closeModal }: { closeModal: () => void }) => {
                         size={25}
                       />
                     </Pressable>
-                  </View>
-                  <View style={stylesGlobals.ViewCard}>
-                    <MaterialCommunityIcons
-                      color={theme.colors.secondary}
-                      name="inbox-full-outline"
-                      size={30}
-                      style={{
-                        position: "absolute",
-                        left: 7,
-                      }}
-                    />
-                    <Text style={stylesGlobals.textCard}>
-                      {brp.product.name.length > 20
-                        ? `${brp.product.name.substring(0, 18)}...`
-                        : brp.product.name}
-                    </Text>
                   </View>
 
                   <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
