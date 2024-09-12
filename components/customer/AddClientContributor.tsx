@@ -659,12 +659,14 @@ function AddClientContributor(props: Props) {
                     />
                     <View
                       style={{
-                        right: 10,
+                        width: '100%',
+                        justifyContent: 'center',
+                        alignContent: 'center',
                       }}
                     >
                       <Button
                         Title="Guardar"
-                        withB={340}
+                        // withB={340}
                         onPress={() => handleSubmit()}
                       />
                     </View>
