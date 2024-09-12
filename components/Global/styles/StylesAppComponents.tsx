@@ -172,16 +172,18 @@ const stylesGlobals = StyleSheet.create({
 
   // box_close============================================
   CardBox: {
-    width: 170,
-    height: 160,
-    marginRight: 10,
+    width: 168,
+    height:160,
+    // height: "17%",
+    // marginRight: 10,
     backgroundColor: "white",
     borderRadius: 20,
+  justifyContent:"center",
+  alignContent:"center"
   },
   ViewBox: {
     height: 60,
     marginTop: 40,
-    marginLeft: 5,
     justifyContent: "center",
   },
   textCardBox: {
