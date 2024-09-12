@@ -122,7 +122,7 @@ const of_products = () => {
   return (
     <>
       <StatusBar style="dark" />
-      {loading ? (
+      {is_loading_list ? (
         <>
           <View style={stylesGlobals.viewSpinnerInit}>
             <SpinnerInitPage />

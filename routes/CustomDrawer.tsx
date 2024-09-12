@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   DrawerContentComponentProps,
   DrawerContentScrollView,
@@ -15,8 +15,6 @@ import {
 import { Href, Link } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuthStore } from "../store/auth.store";
-import { get_configuration } from "@/plugins/async_storage";
-import { IConfiguration } from "@/types/configuration/configuration.types";
 import { ThemeContext } from "@/hooks/useTheme";
 import { StatusBar } from "expo-status-bar";
 import { useLocation } from "@/hooks/useLocation";
@@ -24,7 +22,6 @@ import { useIsConnected } from "react-native-offline";
 import { Divider } from "react-native-paper";
 const CustomDrawer = (props: DrawerContentComponentProps) => {
   const currentRoute = props.state.routes[props.state.index];
-  const [config, setConfig] = useState<IConfiguration | undefined>(undefined);
   const [index, setIndex] = useState(0);
   const { OnMakeLogout } = useAuthStore();
   const { stopAllProcess } = useLocation();
@@ -52,14 +49,8 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
     );
   };
 
-  const fetchConfig = async () => {
-    const fetchedConfig = await get_configuration();
-    setConfig(fetchedConfig);
-  };
+const {personalization} = useAuthStore()
 
-  useEffect(() => {
-    fetchConfig();
-  }, []);
 
   return (
     <>
@@ -75,7 +66,7 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
           style={{
             height: 80,
             borderRadius: 40,
-            backgroundColor: "#fff",
+            backgroundColor: personalization.logo ? "transparent" : "white",
             width: 80,
             marginTop: 30,
             justifyContent: "center",
@@ -91,11 +82,11 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
               alignSelf: "center",
             }}
             source={
-              config && config.logo
-                ? { uri: config.logo }
+              
+              personalization.logo ? { uri: personalization.logo }
                 : require("../assets/images/react-logo.png")
             }
-            alt={config && config.name ? config.name : "Logo Default"}
+            alt={personalization && personalization.name ? personalization.name: "Logo Default"}
           />
         </View>
         <Text
@@ -106,7 +97,7 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
             alignSelf: "center",
           }}
         >
-          {config && config.name ? config.name : "ERP APP"}
+          {personalization && personalization.name ? personalization.name : "ERP APP"}
         </Text>
       </View>
       <View

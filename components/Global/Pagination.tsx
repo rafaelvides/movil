@@ -23,31 +23,36 @@ const Pagination = ({
   const renderPageNumbers = () => {
     const pageNumbers = [];
 
-    // Always show the first page button if the current page is greater than 3
-    if (currentPage > 8 && totalPages > 9) {
+    if (currentPage > 2) {
       pageNumbers.push(
         <TouchableOpacity
           key={1}
           style={[
             styles.pageButton,
             {
-              backgroundColor: currentPage === 1 ? theme.colors.secondary : theme.colors.primary,
+              backgroundColor:
+                currentPage === 1
+                  ? theme.colors.secondary
+                  : theme.colors.primary,
             },
           ]}
           onPress={() => handlePageChange(1)}
         >
-          <Text style={[
-            styles.pageButtonText,
-            {
-              color: currentPage === 1 ? theme.colors.primary : theme.colors.dark,
-            }
-          ]}>
+          <Text
+            style={[
+              styles.pageButtonText,
+              {
+                color:
+                  currentPage === 1 ? theme.colors.primary : theme.colors.dark,
+              },
+            ]}
+          >
             1
           </Text>
         </TouchableOpacity>
       );
 
-      if (currentPage > 8) {
+      if (currentPage > 3) {
         pageNumbers.push(
           <Text key="start-ellipsis" style={styles.ellipsisText}>
             ...
@@ -56,63 +61,68 @@ const Pagination = ({
       }
     }
 
-    const startPage = Math.max(1, currentPage - 1);
-    const endPage = Math.min(totalPages, currentPage + 1);
-
-    for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(
-        <TouchableOpacity
-          key={i}
+    pageNumbers.push(
+      <TouchableOpacity
+        key={currentPage}
+        style={[
+          styles.pageButton,
+          {
+            backgroundColor: theme.colors.secondary,
+          },
+        ]}
+        onPress={() => handlePageChange(currentPage)}
+      >
+        <Text
           style={[
-            styles.pageButton,
-            {
-              backgroundColor: currentPage === i ? theme.colors.secondary : theme.colors.primary,
-            },
-          ]}
-          onPress={() => handlePageChange(i)}
-        >
-          <Text style={[
             styles.pageButtonText,
             {
-              color: currentPage === i ? theme.colors.primary : theme.colors.dark,
-            }
-          ]}>
-            {i}
-          </Text>
-        </TouchableOpacity>
-      );
-    }
+              color: theme.colors.primary,
+            },
+          ]}
+        >
+          {currentPage}
+        </Text>
+      </TouchableOpacity>
+    );
 
-    if (currentPage < totalPages - 2 && totalPages > 4) {
+    if (currentPage < totalPages - 2) {
       pageNumbers.push(
         <Text key="end-ellipsis" style={styles.ellipsisText}>
           ...
         </Text>
       );
+    }
 
-      if (currentPage < totalPages - 1) {
-        pageNumbers.push(
-          <TouchableOpacity
-            key={totalPages}
+    if (currentPage < totalPages) {
+      pageNumbers.push(
+        <TouchableOpacity
+          key={totalPages}
+          style={[
+            styles.pageButton,
+            {
+              backgroundColor:
+                currentPage === totalPages
+                  ? theme.colors.secondary
+                  : theme.colors.primary,
+            },
+          ]}
+          onPress={() => handlePageChange(totalPages)}
+        >
+          <Text
             style={[
-              styles.pageButton,
-              {
-                backgroundColor: currentPage === totalPages ? theme.colors.secondary : theme.colors.primary,
-              },
-            ]}
-            onPress={() => handlePageChange(totalPages)}
-          >
-            <Text style={[
               styles.pageButtonText,
               {
-                color: currentPage === totalPages ? theme.colors.primary : theme.colors.dark,
-              }
-            ]}>
-              {totalPages}
-            </Text>
-          </TouchableOpacity>
-        );
-      }
+                color:
+                  currentPage === totalPages
+                    ? theme.colors.primary
+                    : theme.colors.dark,
+              },
+            ]}
+          >
+            {totalPages}
+          </Text>
+        </TouchableOpacity>
+      );
     }
 
     return pageNumbers;
@@ -129,6 +139,7 @@ const Pagination = ({
           name={"chevron-left"}
           color={"white"}
           size={25}
+          left={-3}
         />
       </TouchableOpacity>
       {renderPageNumbers()}
@@ -141,6 +152,7 @@ const Pagination = ({
           name={"chevron-right"}
           color={"white"}
           size={25}
+          left={-2}
         />
       </TouchableOpacity>
     </View>
@@ -158,6 +170,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginHorizontal: 5,
     borderRadius: 15,
+    width:40
   },
   pageButton: {
     padding: 12,

@@ -2,13 +2,7 @@ import { save_detail_close_box, verify_box } from "@/services/box.service";
 import { useBoxStore } from "@/store/box.store";
 import { IBox, ICloseBox, IGetBoxDetail } from "@/types/box/box.types";
 import React, { useContext, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ToastAndroid,
-  Alert,
-  SafeAreaView,
-} from "react-native";
+import { View, Text, ToastAndroid, Alert, SafeAreaView } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { get_box_data, get_point_sale_Id } from "@/plugins/async_storage";
 import { ThemeContext } from "@/hooks/useTheme";
@@ -17,10 +11,14 @@ import CoinCards from "@/components/box/coinCard";
 import BoxAccounting from "@/components/box/boxAccounting";
 import Button from "@/components/Global/components_app/Button";
 import { StatusBar } from "expo-status-bar";
+import Card from "@/components/Global/components_app/Card";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 interface Props {
   idBox?: number | undefined;
   closeModal: () => void;
   validation?: boolean;
+  isModal?:boolean;
 }
 
 const Box_close = (props: Props) => {
@@ -150,77 +148,123 @@ const Box_close = (props: Props) => {
   };
   return (
     <>
-      <StatusBar style="dark" />
-      <SafeAreaView
-        style={{
-          width: "102%",
-          height: 100,
-          flexGrow: 2,
-          columnGap: 20,
-          justifyContent: "center",
-          alignItems: "center",
-          backgroundColor: "white",
-          borderColor: "green",
-        }}
-      >
-        {props.validation && (
-          <Text
-            style={{
-              fontSize: 14,
-              margin: 10,
-            }}
-          >
-            Para continuar necesitas cerrar la caja con fecha:{" "}
-            <Text style={{ fontSize: 14, fontWeight: "bold", color: "red" }}>
-              {box?.date.toString()}
-            </Text>
-          </Text>
-        )}
-        <ScrollView
+      <StatusBar style="inverted" />
+      {!boxPreview ? (
+        <View
           style={{
-            marginBottom: 14,
-            borderRadius: 1,
-            borderColor: "green",
+            backgroundColor: "white",
+            width: "100%",
           }}
         >
-          <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
-        </ScrollView>
-        {boxPreview && <BoxAccounting boxPreview={boxPreview} />}
-        <View style={{ alignContent: "center", borderBlockColor: "#33C1FF" }}>
-          {isGroupButton ? (
+          {props.validation && (
+            <Text
+              style={{
+                fontSize: 14,
+                margin: 10,
+              }}
+            >
+              Para continuar necesitas cerrar la caja con fecha:{" "}
+              <Text style={{ fontSize: 16, fontWeight: "bold", color: "red" }}>
+                {box?.date.toString()}
+              </Text>
+            </Text>
+          )}
+          <ScrollView style={{}}>
+            <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
             <View
               style={{
-                right: 6,
+                marginLeft: 40,
+
+                marginBottom: props.validation ? 50 : 0,
               }}
             >
               <Button
-                Title="Cuadrar caja"
-                color={theme.colors.dark}
-                onPress={() => preview_box()}
-              />
-
-              <Button
                 onPress={() => {
-                  completeBox();
-                  console.log("se preciooooona");
+                  preview_box();
+                  console.log("se precionaaaaa")
                 }}
-                color={theme.colors.warning}
+                color={theme.colors.dark}
                 Title="Cerrar caja"
               />
             </View>
-          ) : (
-            <>
-              <View style={{}}>
-                <Button
-                  color={theme.colors.dark}
-                  Title="Cerrar caja"
-                  onPress={() => preview_box()}
-                />
-              </View>
-            </>
-          )}
+          </ScrollView>
         </View>
-      </SafeAreaView>
+      ) : (
+        <>
+          <View
+            style={{
+              backgroundColor: theme.colors.dark,
+              width: "100%",
+              height: "100%",
+            }}
+          >
+            {props.validation && (
+              <Text
+                style={{
+                  fontSize: 14,
+                  margin: 10,
+                  color: "white",
+                }}
+              >
+                Para continuar necesitas cerrar la caja con fecha:{" "}
+                <Text
+                  style={{ fontSize: 16, fontWeight: "bold", color: "white" }}
+                >
+                  {box?.date.toString()}
+                </Text>
+              </Text>
+            )}
+
+            <BoxAccounting boxPreview={boxPreview} />
+            <View
+              style={{
+                backgroundColor: "white",
+                width: "100%",
+                height: props.isModal ? 540 : 500,
+
+                // borderBottomLeftRadius: 30,
+                // borderBottomRightRadius: 30,
+                borderTopStartRadius: 30,
+                borderTopEndRadius: 30,
+                position: "absolute",
+                bottom: 0,
+              }}
+            >
+              <ScrollView
+                style={{
+                  marginTop: 10,
+                  
+                }}
+              >
+                <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
+                <View
+                  style={{
+                    // right: 6,
+                    top: 6,
+                    alignItems: "center",
+                  }}
+                >
+                  <Button
+                    Title="Cuadrar caja"
+                    color={theme.colors.third}
+                    onPress={() => preview_box()}
+                  />
+
+                  <Button
+                    onPress={() => {
+                      completeBox();
+                      console.log("se preciooooona");
+                    }}
+                    color={theme.colors.danger}
+                    Title="Cerrar caja"
+                  />
+                </View>
+              </ScrollView>
+            </View>
+          </View>
+        </>
+      )}
+      
     </>
   );
 };

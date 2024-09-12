@@ -24,7 +24,6 @@ import Pagination from "@/components/Global/Pagination";
 import { UpdateExpenses } from "@/components/expense/update_expenses";
 import { IExpensePayload } from "@/types/expenses/expense.types";
 import AlertWithAnimation from "@/components/Global/manners/Alert";
-import noResult from "@/assets/gif_json/bx8ntOOR1D.json";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
@@ -41,6 +40,7 @@ const expenses = () => {
   const [category, setCategory] = useState("");
   const [idBox, setIdBox] = useState(0);
   const [isShowUpdate, setIsShowUpdate] = useState(false);
+  const [description,setDescription] = useState("")
   const {
     delete_expense,
     expenses,
@@ -51,6 +51,7 @@ const expenses = () => {
   const totalPages = pagination_expenses?.totalPag ?? 1;
   const { theme } = useContext(ThemeContext);
   const animation = useRef(null);
+  
   // --------useFocusEffect-----------
   useFocusEffect(
     React.useCallback(() => {
@@ -185,7 +186,7 @@ const expenses = () => {
                                       left: 7,
                                     }}
                                   />
-                                  <Text style={stylesGlobals.textCard}>
+                                  <Text style={stylesGlobals.textCard} numberOfLines={1} ellipsizeMode="tail" >
                                     {expense.description}
                                   </Text>
                                 </View>
@@ -229,6 +230,7 @@ const expenses = () => {
                                     onPress={() => {
                                       setDeleteShow(true);
                                       setExpenseId(expense.id);
+                                      setDescription(expense.description)
                                     }}
                                     icon={"delete"}
                                     color={theme.colors.danger}
@@ -267,7 +269,7 @@ const expenses = () => {
             visible={deleteShow}
             onClose={() => setDeleteShow(false)}
             onPress={() => deleteExpense(expenseId)}
-            title="¿Estas seguro que deseas eliminar este registro?"
+            title={`¿Estas seguro que deseas eliminar este registro?  *[ ${description} ]`}
           />
           <View style={styles.centeredView}>
             <Modal visible={showModal} animationType="slide">

@@ -14,6 +14,7 @@ import {
 import {
   box_data,
   get_box_data,
+  get_configuration,
   get_user,
   save_branch_id,
   save_configuration,
@@ -44,11 +45,11 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   is_authenticated: false,
   is_authenticated_offline: false,
   box: {} as IBox,
+  personalization: {} as IConfiguration,
   OnMakeLogin: async (payload) => {
     return await make_login(payload)
       .then(async ({ data }) => {
         console.log("auth store");
-        get().GetConfigurationByTransmitter(data.user.transmitterId);
         console.log("auth 2");
         if (data.ok) {
           await get().OnLoginMH(data.user.transmitterId, data.token);
@@ -59,6 +60,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           console.log("auth 5");
           await save_user(data.user);
           console.log("auth 6");
+          get().GetConfigurationByTransmitter(data.user.transmitterId);
           await save_point_sale_Id(String(data.user.pointOfSaleId));
           console.log("auth 7");
           if (data.box) {
@@ -153,6 +155,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     const auth = await is_auth();
     const user = await get_user();
     const box = await get_box_data();
+    const personalization = await get_configuration();
     console.log("el onsetInfo", token, auth);
     if (token && auth) {
       set({
@@ -160,6 +163,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
         is_authenticated: true,
         user,
         box,
+        personalization,
       });
       return true;
     } else {
@@ -227,16 +231,20 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   GetConfigurationByTransmitter: async (id) => {
+    console.log("SE EJECUTAAAAaaaaaa", id)
     try {
       const { data } = await get_by_transmitter(id);
       if (data.personalization) {
-        const personalizationArray = Array.isArray(data.personalization)
-          ? data.personalization
-          : [data.personalization];
-        // set({
+        console.log("VER LA PERSONALIZACIIIIIOOOOON en el store", data.personalization)
+        // const personalizationArray = Array.isArray(data.personalization)
+        //   ? data.personalization
+        //   : [data.personalization];
+        // // set({
         //   personalization: personalizationArray,
         // });
         await save_configuration(data.personalization);
+        const perso = await get_configuration();
+        console.log("VER LA PERSONALIZACIIIIIOOOOON ALMACENADAAAAAAA", perso)
       }
     } catch (error) {
       set((state) => ({ ...state, config: {} as IConfiguration }));

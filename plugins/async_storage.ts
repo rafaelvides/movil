@@ -98,6 +98,7 @@ export const save_configuration = (personalization: IConfiguration) => {
 export const get_configuration = async () => {
   try {
     const personalization = await AsyncStorage.getItem("personalization");
+    console.log("VER PERSONALIZACION EN ARCHIVO DE ASYNC STORAGE", personalization);
     if (personalization) {
       return JSON.parse(personalization) as IConfiguration;
       

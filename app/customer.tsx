@@ -17,7 +17,6 @@ import {
 } from "@/types/customer/customer.types";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useFocusEffect } from "expo-router";
-import { StatusBar } from "expo-status-bar";
 import React, { useContext, useEffect, useRef, useState } from "react";
 import {
   Modal,
@@ -26,6 +25,7 @@ import {
   Text,
   View,
   ScrollView,
+  StatusBar,
 } from "react-native";
 import { SheetManager } from "react-native-actions-sheet";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
@@ -58,6 +58,7 @@ const customer = () => {
   const [selectedId, setSelectedId] = useState<number>(0);
   const [typeClient, setTypeClient] = useState("normal");
   const [selectedTitle, setSelectedTitle] = useState("");
+  const [nameCustomer, setNameCustomer] = useState("");
   const animation = useRef(null);
   const { theme } = useContext(ThemeContext);
   useFocusEffect(
@@ -69,6 +70,7 @@ const customer = () => {
       }, 1000);
     }, [])
   );
+
   useEffect(() => {
     getCustomersPagination(currentPage, 5, name, correo);
     setRefreshing(false);
@@ -150,7 +152,8 @@ const customer = () => {
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar barStyle="dark-content"  />
+
       {loading ? (
         <>
           <View style={stylesGlobals.viewSpinnerInit}>
@@ -310,6 +313,7 @@ const customer = () => {
                                   onPress={() => {
                                     setIsModalCustomer(true);
                                     setCustomerId(customer.id);
+                                    setNameCustomer(customer.nombre);
                                   }}
                                   color={theme.colors.danger}
                                   icon={"delete"}
@@ -408,30 +412,36 @@ const customer = () => {
             visible={isModalCustomer}
             onClose={handle}
             onPress={() => deleteCustomer(customerId)}
-            title="¿Estas seguro que deseas eliminar este registro?"
+            title={`¿Estas seguro que deseas eliminar este registro? * [${nameCustomer}] *`}
           />
 
           <Modal visible={showDetailNormal} animationType="slide">
             {typeClient === "contribuyente" ? (
-              <DetailsCustomerContributor
-                closeModal={() => {
-                  clearClose();
-                  setShowDetailNormal(false);
-                }}
-                customer={selectedCustomer}
-                customer_direction={selectedCustomerDirection}
-                id={selectedId}
-              />
+              <>
+             
+                <DetailsCustomerContributor
+                  closeModal={() => {
+                    clearClose();
+                    setShowDetailNormal(false);
+                  }}
+                  customer={selectedCustomer}
+                  customer_direction={selectedCustomerDirection}
+                  id={selectedId}
+                />
+              </>
             ) : (
-              <DetailsCustomerNormal
-                closeModal={() => {
-                  clearClose();
-                  setShowDetailNormal(false);
-                }}
-                customer={selectedCustomer}
-                customer_direction={selectedCustomerDirection}
-                id={selectedId}
-              />
+              <>
+               
+                <DetailsCustomerNormal
+                  closeModal={() => {
+                    clearClose();
+                    setShowDetailNormal(false);
+                  }}
+                  customer={selectedCustomer}
+                  customer_direction={selectedCustomerDirection}
+                  id={selectedId}
+                />
+              </>
             )}
           </Modal>
         </>
