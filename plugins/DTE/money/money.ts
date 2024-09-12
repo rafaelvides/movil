@@ -82,7 +82,6 @@ export function convertCurrencyFormat(input: string) {
   return `${amountInWords} ${centsFormatted}/100 DOLARES AMERICANOS`;
 }
 export function calcularDescuento(precioOriginal:number, precioDeseado:number) {
-  console.log(precioOriginal,precioDeseado)
   const montoDescuento = precioOriginal - precioDeseado;
   const porcentajeDescuento = (montoDescuento / precioOriginal) * 100;
   return { montoDescuento, porcentajeDescuento };

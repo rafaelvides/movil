@@ -1,7 +1,7 @@
 import { API_URL } from "@/utils/constants";
 import axios from "axios";
 import { IGetSaleDetails, IGetSalePagination } from "@/types/sale/sale.types";
-import { return_token } from "../plugins/secure_store";
+import { return_token } from "@/plugins/async_storage";
 import { IRessponseInvalidation } from "@/types/svf_dte/invalidation.types";
 export const get_paginated_sales = async (
   id: number,

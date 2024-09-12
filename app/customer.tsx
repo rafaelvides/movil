@@ -204,8 +204,8 @@ const customer = () => {
                     }}
                     iconName="plus"
                     buttonColor={theme.colors.third}
-                    width={42}
-                    height={42}
+                    width={40}
+                    height={40}
                     right={10}
                     size={25}
                     top={0}
@@ -251,7 +251,7 @@ const customer = () => {
                               </View>
                               <View style={stylesGlobals.ViewCard}>
                                 <MaterialCommunityIcons
-                                  color={theme.colors.third}
+                                  color={theme.colors.secondary}
                                   name="phone"
                                   size={22}
                                   style={{
@@ -265,7 +265,7 @@ const customer = () => {
                               </View>
                               <View style={stylesGlobals.ViewCard}>
                                 <MaterialCommunityIcons
-                                  color={theme.colors.third}
+                                  color={theme.colors.secondary}
                                   name="map-marker"
                                   size={22}
                                   style={{
@@ -277,9 +277,9 @@ const customer = () => {
                                   {`${customer.direccion.nombreDepartamento}/${customer.direccion.nombreMunicipio}`}
                                 </Text>
                               </View>
-                              <View style={[stylesGlobals.ViewCard]}>
+                              <View style={stylesGlobals.ViewCard}>
                                 <MaterialCommunityIcons
-                                  color={theme.colors.dark}
+                                  color={theme.colors.secondary}
                                   name="mail"
                                   size={22}
                                   style={{

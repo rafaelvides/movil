@@ -36,42 +36,22 @@ const SheetCustomerOfflineFilters = ({
             width: "100%",
           }}
         >
-          <Text style={{ marginLeft: "3%", fontWeight: "500" }}>Nombre</Text>
-          <View style={stylesGlobals.safeAreaViewStyle}>
-            {/* <Input
-              className="rounded-3xl"
-              style={styles.input}
-              placeholder="Nombre del cliente..."
-              defaultValue={payload?.name}
-              onChangeText={payload?.onChangeValueName}
-              aria-labelledby="inputLabel"
-              aria-errormessage="inputError"
-            /> */}
+          <Text style={stylesGlobals.textInput}>Nombre</Text>
+          <View style={stylesGlobals.inputFilter}>
             <Input
               placeholder="Nombre del cliente..."
               onChangeText={payload?.onChangeValueName}
               defaultValue={payload?.name}
-              icon="currency-usd"
+              icon="account"
             />
           </View>
-          <Text style={{ marginLeft: "3%", fontWeight: "500" }}>
-            Num Documento
-          </Text>
-          <View style={stylesGlobals.safeAreaViewStyle}>
-            {/* <Input
-              className="rounded-3xl"
-              style={styles.input}
-              placeholder="000000000/-0"
-              defaultValue={payload?.numDocumento}
-              onChangeText={payload?.onChangeValueNuD}
-              aria-labelledby="inputLabel"
-              aria-errormessage="inputError"
-            /> */}
+          <Text style={stylesGlobals.textInput}>Num Documento</Text>
+          <View style={stylesGlobals.inputFilter}>
             <Input
               placeholder="000000000/-0"
               onChangeText={payload?.onChangeValueNuD}
               defaultValue={payload?.numDocumento}
-              icon="currency-usd"
+              icon="card-account-details"
             />
           </View>
         </View>
@@ -133,17 +113,4 @@ const SheetCustomerOfflineFilters = ({
 
 export default SheetCustomerOfflineFilters;
 
-const styles = StyleSheet.create({
-  icon: {
-    position: "absolute",
-    right: 20,
-    top: "50%",
-    transform: [{ translateY: -15 }],
-  },
-  input: {
-    height: "100%",
-    paddingLeft: 15,
-    borderColor: "#D9D9DA",
-    fontSize: 16,
-  },
-});
+const styles = StyleSheet.create({});

@@ -18,7 +18,7 @@ interface Props {
   idBox?: number | undefined;
   closeModal: () => void;
   validation?: boolean;
-  isModal?:boolean;
+  isModal?: boolean;
 }
 
 const Box_close = (props: Props) => {
@@ -181,7 +181,6 @@ const Box_close = (props: Props) => {
               <Button
                 onPress={() => {
                   preview_box();
-                  console.log("se precionaaaaa")
                 }}
                 color={theme.colors.dark}
                 Title="Cerrar caja"
@@ -233,7 +232,6 @@ const Box_close = (props: Props) => {
               <ScrollView
                 style={{
                   marginTop: 10,
-                  
                 }}
               >
                 <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
@@ -253,7 +251,6 @@ const Box_close = (props: Props) => {
                   <Button
                     onPress={() => {
                       completeBox();
-                      console.log("se preciooooona");
                     }}
                     color={theme.colors.danger}
                     Title="Cerrar caja"
@@ -264,7 +261,6 @@ const Box_close = (props: Props) => {
           </View>
         </>
       )}
-      
     </>
   );
 };

@@ -334,7 +334,6 @@ const routes_destination_customers = () => {
                       language="es"
                       onReady={(result) => {
                         // handleDirectionsReady(result);
-                        console.log(result);
                         setDetail(result);
                         const lastPoint =
                           result.coordinates[result.coordinates.length - 1];

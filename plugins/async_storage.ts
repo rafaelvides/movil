@@ -9,6 +9,7 @@ import { PayloadMH } from "@/types/dte/DTE.types";
 import { SVFE_FC_SEND } from "@/types/svf_dte/fc.types";
 import { IConfiguration } from "@/types/configuration/configuration.types";
 import { IBox } from "@/types/box/box.types";
+import { jwtDecode } from "jwt-decode";
 
 export const box_data = (box: IBox ) =>{
   return AsyncStorage.setItem("box_data", JSON.stringify(box))
@@ -29,6 +30,31 @@ export const get_employee_id = () => {
   return AsyncStorage.getItem("employee_id");
 }
 
+export const save_token = (token: string) => {
+  return AsyncStorage.setItem("token", token);
+}
+export const return_token = () => {
+  return AsyncStorage.getItem("token");
+}
+export const remove_token = async () => {
+  try {
+    await AsyncStorage.removeItem("token");
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+export const is_expired_token = (token: string) => {
+    const decoded = jwtDecode(token);
+    if (decoded && decoded.exp) {
+      return Date.now() >= decoded.exp * 1000;
+    }
+    return true;
+  };
+  export const is_auth = async () => {
+    const token = await return_token();
+    return token && !is_expired_token(token);
+  };
 export const delete_box = () => {
   AsyncStorage.removeItem("box_data");
 };

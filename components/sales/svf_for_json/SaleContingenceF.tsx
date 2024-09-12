@@ -8,7 +8,7 @@ import {
   ToastAndroid,
   Alert,
 } from "react-native";
-import React, { Dispatch, SetStateAction, useMemo } from "react";
+import React, { Dispatch, SetStateAction, useContext, useMemo } from "react";
 import { SVFE_FC } from "@/types/svf_dte/fc.types";
 import { StatusBar } from "expo-status-bar";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -20,8 +20,12 @@ import { s3Client } from "@/plugins/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { get_box_data, get_employee_id } from "@/plugins/async_storage";
 import { useCustomerStore } from "@/store/customer.store";
-import { return_token } from "@/plugins/secure_store";
+import { return_token } from "@/plugins/async_storage";
 import axios from "axios";
+import Button from "@/components/Global/components_app/Button";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import { ThemeContext } from "@/hooks/useTheme";
+import Card from "@/components/Global/components_app/Card";
 
 const SaleContingenceF = ({
   jsonSaleF,
@@ -35,6 +39,7 @@ const SaleContingenceF = ({
   setMessage: Dispatch<SetStateAction<string>>;
 }) => {
   const { customer_list } = useCustomerStore();
+  const { theme } = useContext(ThemeContext);
 
   const customer = useMemo(() => {
     if (jsonSaleF) {
@@ -367,33 +372,171 @@ const SaleContingenceF = ({
             height: "50%",
           }}
         >
-          {jsonSaleF.cuerpoDocumento.map((cd, index) => (
-           <></>
-          ))}
+          <View style={stylesGlobals.viewScroll}>
+            {jsonSaleF.cuerpoDocumento.map((cd, index) => (
+              <Card key={index} style={stylesGlobals.styleCard}>
+                <View
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginBottom: "5%",
+                    width: "100%",
+                  }}
+                >
+                  <Text>Index: #{index}</Text>
+                </View>
+                <View
+                  style={{
+                    width: "100%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginTop: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      width: "100%",
+                    }}
+                  >
+                    <Text>Nombre:</Text>
+                    <Text
+                      style={{
+                        marginLeft: 44,
+                        fontWeight: "400",
+                        color: "#4B5563",
+                      }}
+                    >
+                      {cd.descripcion.slice(0, 30)}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 12,
+                      width: "100%",
+                    }}
+                  >
+                    <Text>Código:</Text>
+                    <Text
+                      style={{
+                        marginLeft: 44,
+                        fontWeight: "400",
+                        color: "#4B5563",
+                      }}
+                    >
+                      {cd.codigo}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 12,
+                      width: "100%",
+                    }}
+                  >
+                    <Text>Descuento:</Text>
+                    <Text
+                      style={{
+                        marginLeft: 44,
+                        fontWeight: "400",
+                        color: "#4B5563",
+                      }}
+                    >
+                      {cd.montoDescu}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 12,
+                      width: "100%",
+                    }}
+                  >
+                    <Text>Precio:</Text>
+                    <Text
+                      style={{
+                        marginLeft: 44,
+                        fontWeight: "400",
+                        color: "#4B5563",
+                      }}
+                    >
+                      {formatCurrency(cd.precioUni)}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 12,
+                      width: "100%",
+                    }}
+                  >
+                    <Text>Código:</Text>
+                    <Text
+                      style={{
+                        marginLeft: 44,
+                        fontWeight: "400",
+                        color: "#4B5563",
+                      }}
+                    >
+                      {cd.codigo}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 12,
+                      width: "100%",
+                    }}
+                  >
+                    <Text>Descuento:</Text>
+                    <Text
+                      style={{
+                        marginLeft: 44,
+                        fontWeight: "400",
+                        color: "#4B5563",
+                      }}
+                    >
+                      {cd.montoDescu}
+                    </Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginTop: 12,
+                      width: "100%",
+                    }}
+                  >
+                    <Text>Precio:</Text>
+                    <Text
+                      style={{
+                        marginLeft: 44,
+                        fontWeight: "400",
+                        color: "#4B5563",
+                      }}
+                    >
+                      {formatCurrency(cd.precioUni)}
+                    </Text>
+                  </View>
+                </View>
+              </Card>
+            ))}
+          </View>
         </ScrollView>
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Pressable
+        <View style={stylesGlobals.viewBotton}>
+          <Button
+            withB={390}
             onPress={handleProgressJson}
-            style={{
-              marginTop: "5%",
-              width: "84%",
-              padding: 16,
-              borderRadius: 4,
-              backgroundColor: "#1d4ed8",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-            >
-              Procesar la venta
-            </Text>
-          </Pressable>
+            Title="Filtrar"
+            color={theme.colors.dark}
+          />
         </View>
       </View>
     </SafeAreaView>

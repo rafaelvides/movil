@@ -219,15 +219,12 @@ const DebitNote = (props: Props) => {
 
     return quantity && price;
   };
-  console.log("Errores", title, errorMessage);
   const handleDebitNote = async () => {
-    console.log("nota");
     if (json_sale) {
       if (json_sale.cuerpoDocumento.length > 0) {
         const editedItems = json_sale.cuerpoDocumento.filter((item) =>
           json_sale.indexEdited.includes(item.numItem)
         );
-        console.log("nota2");
         if (editedItems.length === 0) {
           ToastAndroid.show(
             "No se encontraron items editados o tines errores sin resolver",
@@ -235,7 +232,6 @@ const DebitNote = (props: Props) => {
           );
           return;
         }
-        console.log("nota3");
         if (!validationBeforeSend()) {
           ToastAndroid.show(
             "No se encontraron items editados o tines errores sin resolver",
@@ -243,13 +239,11 @@ const DebitNote = (props: Props) => {
           );
           return;
         }
-        console.log("nota4");
         const user = await get_user();
         if (!user) {
           ToastAndroid.show("No se encontró el usuario", ToastAndroid.SHORT);
           return;
         }
-        console.log("nota5");
         const correlatives = await OnGetCorrelativesByDte(user.id, "ND");
         if (!correlatives) {
           ToastAndroid.show(
@@ -258,7 +252,6 @@ const DebitNote = (props: Props) => {
           );
           return;
         }
-        console.log("nota6");
         setsCreenChange(true);
         const debit_note = generateNotaDebito(
           transmitter,
@@ -267,15 +260,12 @@ const DebitNote = (props: Props) => {
           editedItems,
           json_sale.identificacion
         );
-        console.log(JSON.stringify(debit_note, null, 2));
         setMessage("Estamos firmando tu DTE...");
         setCurrentDTE(debit_note);
-        console.log("nota8");
         firmarDocumentoNotaDebito(debit_note)
           .then((firma) => {
             if (firma.data.status === "ERROR") {
               const new_data = firma.data as unknown as ErrorFirma;
-              console.log(new_data.body.mensaje);
               setTitle("Error en el firmador " + new_data.body.codigo);
               setErrorMessage(new_data.body.mensaje);
               setsCreenChange(false);
@@ -289,7 +279,6 @@ const DebitNote = (props: Props) => {
                 tipoDte: "06",
                 documento: firma.data.body,
               };
-              console.log("note12");
               handleSendToMh(data_send, debit_note, firma.data.body);
               setMessage("Se ah enviado a hacienda, esperando respuesta...");
             } else {
@@ -742,7 +731,6 @@ const DebitNote = (props: Props) => {
         s3Client
           .send(new PutObjectCommand(jsonUploadParams))
           .then(() => {
-            console.log("bueno");
             setMessage("Estamos guardando tus documentos...");
             handleSave(
               json_url,
@@ -755,8 +743,7 @@ const DebitNote = (props: Props) => {
             //   pdf: "",
             // });
           })
-          .catch((error) => {
-            console.log(error);
+          .catch(() => {
             ToastAndroid.show(
               "Error al subir el archivo JSON",
               ToastAndroid.LONG
@@ -768,7 +755,7 @@ const DebitNote = (props: Props) => {
               [
                 {
                   text: "Cancelar",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel",
                 },
                 {
@@ -791,7 +778,7 @@ const DebitNote = (props: Props) => {
           [
             {
               text: "Cancelar",
-              onPress: () => console.log("Cancel Pressed"),
+              onPress: () => {},
               style: "cancel",
             },
             {
@@ -830,7 +817,6 @@ const DebitNote = (props: Props) => {
             setsCreenChange(false);
           })
           .catch((error) => {
-            console.log("el error", error);
             ToastAndroid.show("Error al guarda la venta", ToastAndroid.LONG);
             setsCreenChange(false);
             Alert.alert(
@@ -839,7 +825,7 @@ const DebitNote = (props: Props) => {
               [
                 {
                   text: "Cancelar",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel",
                 },
                 {

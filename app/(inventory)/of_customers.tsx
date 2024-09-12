@@ -19,6 +19,7 @@ import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import AnimatedButton from "@/components/Global/AnimatedButtom";
 import LottieView from "lottie-react-native";
+import Not_data from "@/components/Global/Global_Animation/Not_data";
 
 const of_customers = () => {
   const [isloading, setIsLoading] = useState(false);
@@ -39,7 +40,7 @@ const of_customers = () => {
   const handleSaveClients = async () => {
     const promises = customer_list.map(async (client) => {
       return await OnSaveClient({
-        clienteId: client.id,
+        customerId: client.id,
         nombre: client.nombre,
         nombreComercial: client.nombreComercial,
         nrc: client.nrc,
@@ -134,7 +135,7 @@ const of_customers = () => {
                               </View>
                               <View style={stylesGlobals.ViewCard}>
                                 <MaterialCommunityIcons
-                                  color={theme.colors.third}
+                                  color={theme.colors.secondary}
                                   name="phone"
                                   size={22}
                                   style={{
@@ -148,7 +149,7 @@ const of_customers = () => {
                               </View>
                               <View style={stylesGlobals.ViewCard}>
                                 <MaterialCommunityIcons
-                                  color={theme.colors.third}
+                                  color={theme.colors.secondary}
                                   name="map-marker"
                                   size={22}
                                   style={{
@@ -160,9 +161,9 @@ const of_customers = () => {
                                   {`${customer.direccion.nombreDepartamento}/${customer.direccion.nombreMunicipio}`}
                                 </Text>
                               </View>
-                              <View style={[stylesGlobals.ViewCard]}>
+                              <View style={stylesGlobals.ViewCard}>
                                 <MaterialCommunityIcons
-                                  color={theme.colors.dark}
+                                  color={theme.colors.secondary}
                                   name="mail"
                                   size={22}
                                   style={{
@@ -179,14 +180,7 @@ const of_customers = () => {
                           ))}
                       </>
                     ) : (
-                      <View style={stylesGlobals.viewLottie}>
-                        <LottieView
-                          autoPlay
-                          ref={animation}
-                          style={stylesGlobals.LottieStyle}
-                          source={require("@/assets/gif_json/gif_global.json")}
-                        />
-                      </View>
+                      <Not_data/>
                     )}
                   </View>
                 </ScrollView>

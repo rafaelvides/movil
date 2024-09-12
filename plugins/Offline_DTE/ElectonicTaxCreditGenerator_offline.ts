@@ -7,9 +7,7 @@ import { convertCurrencyFormat } from "../DTE/money/money";
 import { Customer } from "@/offline/entity/customer.entity";
 import { Transmitter } from "@/offline/entity/transmitter.entity";
 import { ICartProductOffline } from "@/offline/types/branch_product_offline";
-import {
-  IPointOfSales,
-} from "@/types/point_of_sales/pointOfSales.types";
+import { IPointOfSales } from "@/types/point_of_sales/pointOfSales.types";
 
 export const generate_receptor_credit = (customer: Customer) => {
   return {
@@ -168,7 +166,7 @@ export const generate_emisor_credit = (
     nombreComercial: transmitter.nombreComercial,
     codActividad: transmitter.codActividad,
     descActividad: transmitter.descActividad,
-    tipoEstablecimiento: correlative!.tipoEstablecimiento ?? "N/A",
+    tipoEstablecimiento: correlative ? correlative!.tipoEstablecimiento : "N/A",
     direccion: {
       departamento: transmitter.departamento,
       municipio: transmitter.municipio,
@@ -176,16 +174,19 @@ export const generate_emisor_credit = (
     },
     telefono: transmitter.telefono,
     correo: transmitter.correo,
-    codEstable: correlative!.codEstable ?? "N/A",
-    codEstableMH:
-      correlative!.codEstableMH === "0" || correlative!.codEstableMH === "N/A"
+    codEstable: correlative ? correlative!.codEstable : "N/A",
+    codEstableMH: correlative
+      ? correlative!.codEstableMH === "0" || correlative!.codEstableMH === "N/A"
         ? null
-        : correlative!.codEstableMH,
-    codPuntoVenta: correlative!.codPuntoVenta ?? "N/A",
-    codPuntoVentaMH:
-      correlative!.codPuntoVentaMH === "0" ||
-      correlative!.codPuntoVentaMH === "N/A"
+        : correlative!.codEstableMH
+      : "N/A",
+    codPuntoVenta: correlative ? correlative!.codPuntoVenta : "N/A",
+    codPuntoVentaMH: correlative
+      ? correlative!.codPuntoVentaMH === "0" ||
+        correlative!.codPuntoVentaMH === "N/A" ||
+        !correlative
         ? null
-        : correlative!.codPuntoVentaMH,
+        : correlative!.codPuntoVentaMH
+      : "N/A",
   };
 };

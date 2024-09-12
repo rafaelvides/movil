@@ -34,6 +34,13 @@ const stylesGlobals = StyleSheet.create({
     borderBottomWidth: 0.5,
     height: 56,
   },
+  inputFilter: {
+    position: "relative",
+    width: "100%",
+    height: 50,
+    justifyContent: "center",
+    marginBottom: 15,
+  },
   //view inside the scroll===============
   viewScroll: {
     justifyContent: "center",
@@ -68,7 +75,7 @@ const stylesGlobals = StyleSheet.create({
   },
   textInput: {
     marginLeft: "3%",
-    fontWeight: "500",
+    fontWeight: "400",
     marginBottom: 5,
   },
   //Button======================================
@@ -103,7 +110,7 @@ const stylesGlobals = StyleSheet.create({
   },
   selectedTextStyle: {
     fontSize: 14,
-     marginLeft: 6,
+    marginLeft: 6,
   },
   inputSearchStyle: {
     fontSize: 16,
@@ -115,7 +122,7 @@ const stylesGlobals = StyleSheet.create({
     marginRight: 10,
   },
   renderLeftIcon: {
-   marginLeft: 10,
+    marginLeft: 10,
   },
   //ViewDetailsCustomers============================================
   materialIconsStyle: {

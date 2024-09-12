@@ -6,11 +6,10 @@ import { AxiosError } from "axios";
 import { ToastAndroid } from "react-native";
 import {
   save_login_data_biometric,
-  save_toke,
+  // save_toke,
   delete_secure,
   save_token_mh,
-  return_token,
-  is_auth,
+  // return_token,
 } from "@/plugins/secure_store";
 import {
   box_data,
@@ -21,6 +20,10 @@ import {
   save_configuration,
   save_point_sale_Id,
   save_user,
+  save_token,
+  return_token,
+  remove_token,
+  is_auth,
 } from "@/plugins/async_storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { get_transmitter } from "@/services/transmitter.service";
@@ -34,6 +37,7 @@ import {
 import { router } from "expo-router";
 import { get_by_transmitter } from "@/services/personalization.service";
 import { IConfiguration } from "@/types/configuration/configuration.types";
+import * as SecureStore from "expo-secure-store";
 
 export const useAuthStore = create<IAuthStore>((set, get) => ({
   user: {} as UserLogin,
@@ -45,30 +49,20 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   OnMakeLogin: async (payload) => {
     return await make_login(payload)
       .then(async ({ data }) => {
-        console.log("toooo");
-        console.log("auth store");
-        console.log("auth 2");
         if (data.ok) {
-          console.log("auth 3");
-          save_toke(data.token);
-          console.log("auth 4", data.token);
-          console.log("auth 5");
+          await get().OnLoginMH(data.user.transmitterId, data.token);
+          save_token(data.token);
           await save_user(data.user);
-          console.log("auth 6");
           get().GetConfigurationByTransmitter(data.user.transmitterId);
           await save_point_sale_Id(String(data.user.pointOfSaleId));
-          console.log("auth 7");
           if (data.box) {
-            console.log("LOS DATOOOOOOOOOOS QUE VIENE DEL LOGIN", data.box);
             box_data(data.box);
           }
           save_login_data_biometric("authBiometric", {
             userName: payload.userName,
             password: payload.password,
           });
-          console.log("auth 8");
           if (data.user) {
-            console.log("auth 9");
             set({
               user: data.user,
               token: data.token,
@@ -76,7 +70,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
               is_authenticated: true,
             });
           }
-          get()
+          await get()
             .OnSaveUserLocal(data, data.token, payload.password)
             .catch(() => {
               ToastAndroid.show(
@@ -84,8 +78,6 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
                 ToastAndroid.LONG
               );
             });
-          console.log("auth 10", data.user.transmitterId);
-          await get().OnLoginMH(data.user.transmitterId, data.token);
           await save_branch_id(String(data.user.branchId));
           console.log("auth 11");
         }
@@ -100,17 +92,12 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   async OnLoginMH(id, token) {
-    console.log(token);
     get_transmitter(id, token)
       .then(({ data }) => {
-        console.log(data, "data");
         login_mh(data.transmitter.nit, data.transmitter.claveApi)
           .then(async (login_mh) => {
             if (login_mh.data.status === "OK") {
-              console.log("MH", login_mh.data.body.token);
-              await save_token_mh(login_mh.data.body.token).catch((er) => {
-                console.log(er);
-              });
+              await save_token_mh(login_mh.data.body.token).catch((er) => {});
             } else {
               const data = login_mh as unknown as ILoginMHFailed;
               ToastAndroid.show(
@@ -121,7 +108,6 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
             }
           })
           .catch((error: AxiosError<ILoginMHFailed>) => {
-            console.log(error.response?.data.body, "1");
             ToastAndroid.show(
               `Error ${error.response?.data.body.descripcionMsg}`,
               ToastAndroid.SHORT
@@ -130,8 +116,6 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           });
       })
       .catch((error) => {
-        console.log(error, "2");
-        console.log("error", error);
         ToastAndroid.show(`Aun no tienes datos asignados`, ToastAndroid.SHORT);
         return;
       });
@@ -141,12 +125,10 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       token: "",
       is_authenticated: false,
     });
-    await AsyncStorage.clear();
-    await delete_secure();
-    console.log(
-      "DATOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS ELIMINADOS"
-    );
-
+    AsyncStorage.clear();
+    await remove_token();
+    //  SecureStore.deleteItemAsync("token");
+    await SecureStore.deleteItemAsync("token_mh");
     return true;
   },
   OnSetInfo: async () => {
@@ -155,7 +137,6 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     const user = await get_user();
     const box = await get_box_data();
     const personalization = await get_configuration();
-    console.log("el onsetInfo", token, auth);
     if (token && auth) {
       set({
         token,
@@ -218,7 +199,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
             departamento: data.transmitter.direccion.departamento,
             municipio: data.transmitter.direccion.municipio,
             complemento: data.transmitter.direccion.complemento,
-            emisorId: data.transmitter.id,
+            transmitterId: data.transmitter.id,
           },
           password
         );
@@ -229,15 +210,10 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   GetConfigurationByTransmitter: async (id) => {
-    console.log("SE EJECUTA", id)
     try {
       const { data } = await get_by_transmitter(id);
       if (data.personalization) {
-        console.log("VER LA PERSONALIZACIIIIIOOOOON en el store", data.personalization)
-      
         await save_configuration(data.personalization);
-        const perso = await get_configuration();
-        console.log("VER LA PERSONALIZACIIIIIOOOOON ALMACENADAAAAAAA", perso)
       }
     } catch (error) {
       set((state) => ({ ...state, config: {} as IConfiguration }));

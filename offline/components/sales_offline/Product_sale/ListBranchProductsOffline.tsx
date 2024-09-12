@@ -4,14 +4,26 @@ import { useBranchProductOfflineStore } from "@/offline/store/branch_product_off
 import { formatCurrency } from "@/utils/dte";
 // import { Card, CardContent } from "@/~/components/ui/card";
 import { useContext, useEffect, useState } from "react";
-import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  SafeAreaView,
+  RefreshControl,
+} from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 // import { Input } from "@/~/components/ui/input";
 import BarcodeScanner from "@/components/Global/BarcodeScanner";
 import AnimatedButton from "@/components/Global/AnimatedButtom";
 import { get_branch_id } from "@/plugins/async_storage";
+import { StatusBar } from "expo-status-bar";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Card from "@/components/Global/components_app/Card";
 
-const ListBranchProducts = () => {
+const ListBranchProducts = ({ closeModal }: { closeModal: () => void }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [nameProduct, setNameProduct] = useState("");
   const [refresh, setRefresh] = useState(false);
@@ -45,8 +57,8 @@ const ListBranchProducts = () => {
         }
       });
     })();
-    setRefresh(false)
-  }, [refresh]);
+    setRefresh(false);
+  }, [refresh, currentPage]);
 
   const onRead = (text: string) => {
     (async () => {
@@ -64,100 +76,77 @@ const ListBranchProducts = () => {
   };
   return (
     <>
-      <BarcodeScanner
-        setShowScanner={setShowScanner}
-        setScanned={setScanned}
-        showScanner={showScanner}
-        scanned={scanned}
-        setShowModal={setShowModalScanner}
-        showModal={showModalScanner}
-        search={onRead}
-      />
-      <AnimatedButton
-        handleClick={() => {
-          setShowScanner(true);
-          setShowModalScanner(true);
-        }}
-        iconName="barcode-scan"
-        buttonColor="#BF3131"
-        right={20}
-        size={23}
-        top={80}
-        width={36}
-        height={36}
-      />
+      <StatusBar style="dark" />
       <View
         style={{
-          marginTop: 1,
+          borderRadius: 25,
           width: "100%",
+          top: -5,
+          height: 130,
+          backgroundColor: theme.colors.third,
         }}
       >
-        <View style={styles.inputWrapper}>
-          {/* <Input
-            className="rounded-3xl"
-            style={styles.input}
-            placeholder="Nombre del producto..."
-            onChangeText={(text) => setNameProduct(text)}
-            aria-labelledbyledBy="inputLabel"
-            aria-errormessage="inputError"
-          /> */}
+        <Pressable
+          style={{
+            position: "absolute",
+            right: 15,
+            top: 15,
+          }}
+        >
           <MaterialCommunityIcons
-            color={"#1359"}
-            name="barcode-scan"
-            size={27}
+            color={"white"}
+            name="close"
+            size={34}
+            onPress={() => closeModal()}
+          />
+        </Pressable>
+
+        <View style={styles.inputWrapper}>
+          <MaterialCommunityIcons
+            color={"#fff"}
+            name={"magnify"}
+            size={23}
             style={styles.icon}
-            onPress={() => setRefresh(true)}
+          />
+          <TextInput
+            style={styles.input}
+            onChangeText={(text) => setNameProduct(text)}
+            placeholder={"Nombre del producto..."}
+            placeholderTextColor={"white"}
+          />
+          <MaterialCommunityIcons
+            color={"#fff"}
+            name={"barcode-scan"}
+            size={23}
+            style={styles.iconTwo}
+            onPress={() => {
+              setShowScanner(true);
+              setShowModalScanner(true);
+            }}
           />
         </View>
       </View>
-      {branchProducts && branchProducts.length > 0 && (
-        <Text style={{ fontSize: 20, marginTop: 25 }}>Carrito</Text>
-      )}
-      <ScrollView
-        style={{
-          marginBottom: 60,
-        }}
-      >
-        {branchProducts &&
-          branchProducts.map((brp, index) => (
-            <View
-              key={index}
-              style={{
-                height: "auto",
-                marginBottom: 25,
-                padding: 5,
-                margin: 5,
-                width: "95%",
-                alignItems: "center",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.3,
-                shadowRadius: 5,
-                elevation: 10,
-              }}
-            >
-              <View
-                style={{
-                  width: "100%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 10,
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    width: "100%",
-                  }}
-                >
-                  <View>
+      <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
+        <ScrollView
+          refreshControl={
+            <RefreshControl
+              refreshing={refresh}
+              onRefresh={() => setRefresh(true)}
+            />
+          }
+        >
+          <View style={stylesGlobals.viewScroll}>
+            {branchProducts &&
+              branchProducts.map((brp, index) => (
+                <Card key={index} style={stylesGlobals.styleCard}>
+                  <View
+                    style={{ marginLeft: 280, position: "absolute", top: -5 }}
+                  >
                     <Pressable
                       onPress={() => PostProductCart(brp)}
                       style={{
-                        flexDirection: "row",
                         width: 40,
                         height: 40,
-                        marginLeft: 250,
                         backgroundColor: theme.colors.dark,
                         borderRadius: 10,
                         justifyContent: "center",
@@ -171,149 +160,92 @@ const ListBranchProducts = () => {
                       />
                     </Pressable>
                   </View>
-                  <MaterialCommunityIcons
-                    color={theme.colors.secondary}
-                    name="inbox-full-outline"
-                    size={30}
-                    style={{
-                      position: "absolute",
-                      left: -21,
-                      top: "20%",
-                      transform: [{ translateY: -15 }],
-                    }}
-                  />
-                  <Text
-                    style={{
-                      marginLeft: -280,
-                    }}
-                  >
-                    Nombre:{" "}
-                  </Text>
-                  <Text style={{ fontWeight: "600", color: "#4B5563" }}>
-                    {brp.product.name.length > 20
-                      ? `${brp.product.name.substring(0, 18)}...`
-                      : brp.product.name}
-                  </Text>
-                </View>
 
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: 25,
-                    width: "100%",
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    color={theme.colors.secondary}
-                    name="focus-field-horizontal"
-                    size={30}
-                    style={{
-                      position: "absolute",
-                      left: -21,
-                      top: "20%",
-                      transform: [{ translateY: -15 }],
-                    }}
-                  />
-                  <Text
-                    style={{
-                      marginLeft: 15,
-                    }}
-                  >
-                    Código:{" "}
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#4B5563",
-                    }}
-                  >
-                    {brp.product.code}
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: 25,
-                    width: "100%",
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    color={theme.colors.secondary}
-                    name="currency-usd"
-                    size={30}
-                    style={{
-                      position: "absolute",
-                      left: -21,
-                      top: "20%",
-                      transform: [{ translateY: -15 }],
-                    }}
-                  />
-                  <Text
-                    style={{
-                      marginLeft: 15,
-                    }}
-                  >
-                    Precio:{" "}
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#4B5563",
-                    }}
-                  >
-                    {formatCurrency(Number(brp.price))}
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: 25,
-                    width: "100%",
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    color={theme.colors.secondary}
-                    name="mail"
-                    size={30}
-                    style={{
-                      position: "absolute",
-                      left: -21,
-                      top: "20%",
-                      transform: [{ translateY: -15 }],
-                    }}
-                  />
-                  <Text
-                    style={{
-                      marginLeft: 14,
-                    }}
-                  >
-                    Categoría:{" "}
-                  </Text>
-                  <Text
-                    style={{
-                      fontWeight: "600",
-                      color: "#4B5563",
-                    }}
-                  >
-                    {brp.product.nameCategory}
-                  </Text>
-                </View>
-              </View>
-            </View>
-          ))}
-      </ScrollView>
-      <View style={{ bottom: 50 }}>
-        {branchProducts.length > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
-        )}
-      </View>
+                  <View style={stylesGlobals.ViewCard}>
+                    <MaterialCommunityIcons
+                      color={"#AFB0B1"}
+                      name="inbox-full-outline"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+                    <Text style={stylesGlobals.textCard}>
+                      {brp.product.name.length > 20
+                        ? `${brp.product.name.substring(0, 18)}...`
+                        : brp.product.name}
+                    </Text>
+                  </View>
+
+                  <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
+                    <MaterialCommunityIcons
+                      color={"#AFB0B1"}
+                      name="barcode-scan"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+
+                    <Text style={stylesGlobals.textCard}>
+                      {brp.product.code}
+                    </Text>
+                  </View>
+                  <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
+                    <MaterialCommunityIcons
+                      color={"#AFB0B1"}
+                      name="currency-usd"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+                    <Text style={stylesGlobals.textCard}>
+                      {formatCurrency(Number(brp.price))}
+                    </Text>
+                  </View>
+                  <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
+                    <MaterialCommunityIcons
+                      color={"#AFB0B1"}
+                      name="mail"
+                      size={30}
+                      style={{
+                        position: "absolute",
+                        left: 7,
+                      }}
+                    />
+
+                    <Text style={stylesGlobals.textCard}>
+                      {brp.product.nameCategory}
+                    </Text>
+                  </View>
+                </Card>
+              ))}
+          </View>
+          <View style={{ marginBottom: 40 }}>
+            {branchProducts.length > 0 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+              />
+            )}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+
+      <BarcodeScanner
+        setShowScanner={setShowScanner}
+        setScanned={setScanned}
+        showScanner={showScanner}
+        scanned={scanned}
+        setShowModal={setShowModalScanner}
+        showModal={showModalScanner}
+        search={onRead}
+      />
     </>
   );
 };
@@ -322,11 +254,12 @@ export default ListBranchProducts;
 
 const styles = StyleSheet.create({
   inputWrapper: {
-    position: "relative",
-    width: "100%",
+    alignContent: "center",
+    position: "absolute",
+    width: "90%",
     height: 50,
-    justifyContent: "center",
-    marginBottom: 15,
+    left: 20,
+    top: 60,
   },
   input: {
     height: "100%",
@@ -334,11 +267,18 @@ const styles = StyleSheet.create({
     borderColor: "#D9D9DA",
     borderWidth: 1,
     borderRadius: 15,
+    color: "white",
   },
   icon: {
     position: "absolute",
-    left: 7,
+    left: 12,
     top: "50%",
     transform: [{ translateY: -15 }],
+  },
+  iconTwo: {
+    position: "absolute",
+    right: 12,
+    top: "50%",
+    transform: [{ translateY: -10 }],
   },
 });

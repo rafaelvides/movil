@@ -21,7 +21,7 @@ export const useUserAndTransmitterOfflineStore = create<IUserAndTransmitterOffli
                 .then((data) => {
                   set({ transmitter: data });
                 })
-                .catch((error) => {
+                .catch(() => {
                   ToastAndroid.show(
                     "No se encontró el emisor",
                     ToastAndroid.SHORT

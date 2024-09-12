@@ -57,7 +57,7 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
     );
   };
 
-
+// const { personalization } = useAuthStore()
   return (
     <>
       <StatusBar style="light" />
@@ -72,7 +72,7 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
           style={{
             height: 80,
             borderRadius: 40,
-            backgroundColor: props?.personalization?.logo ? "transparent" : "white",
+            backgroundColor: props?.personalization?.logo? "transparent" : "white",
             width: 80,
             marginTop: 30,
             justifyContent: "center",
@@ -88,13 +88,13 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
               alignSelf: "center",
             }}
             source={
-              props.personalization?.logo
-                ? { uri:props.personalization.logo }
+              props?.personalization?.logo
+                ? { uri:props?.personalization?.logo }
                 : require("../assets/images/react-logo.png")
             }
             alt={
-              props.personalization && props.personalization.name
-                ? props.personalization.name
+            props.personalization && props.personalization?.name
+                ? props.personalization?.name
                 : "Logo Default"
             }
           />
@@ -107,8 +107,8 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
             alignSelf: "center",
           }}
         >
-          {props.personalization && props.personalization.name
-            ? props.personalization.name
+          {props.personalization && props?.personalization?.name
+            ? props?.personalization?.name
             : "ERP APP"}
         </Text>
       </View>
@@ -608,9 +608,6 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
                     <View>
                       <Pressable
                         style={{
-                          backgroundColor: currentRoute.name.includes("offline")
-                            ? "#bae6fd"
-                            : "#fff",
                           ...styles.drawer_item,
                         }}
                         onPress={() => {

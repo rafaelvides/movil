@@ -8,10 +8,10 @@ import { Like } from "typeorm/browser";
 export async function save_client(client: IClientePayload): Promise<boolean> {
   try {
     const clientRepository = connection.getRepository(Customer);
+
     const existingClient = await clientRepository.findOne({
       where: {
-        customerId: client.clienteId,
-        numDocumento: client.numDocumento,
+        customerId: client.customerId,
       },
     });
     if (existingClient) {
@@ -27,7 +27,6 @@ export async function save_client(client: IClientePayload): Promise<boolean> {
       existingClient.tipoContribuyente = String(client.tipoContribuyente);
       existingClient.codActividad = String(client.codActividad);
       existingClient.descActividad = String(client.descActividad);
-
       const save_client = await clientRepository.save(existingClient);
       if (save_client) {
         return true;

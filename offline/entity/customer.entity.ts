@@ -5,7 +5,7 @@ export class Customer {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: "varchar" })
+  @Column({ type: "int" })
   customerId!: number;
 
   @Column({ type: "varchar" })

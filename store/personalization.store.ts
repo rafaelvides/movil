@@ -32,11 +32,8 @@ export const useConfigurationStore = create<IConfigurationStore>(
     //   }
     // },
     GetConfiguration: async (id) => {
-      console.log("SE EJECUTAAAAAA")
-      console.log("Ver el id de configuracion en el store", id);
       await get_by_transmitter(id)
         .then(async ({ data }) => {
-          console.log("ver los datos en que devuelve la configuracion", data);
           set((state) => ({ ...state, config: data.personalization }));
           await save_configuration(data.personalization);
         })

@@ -13,13 +13,13 @@ export function useDataBaseInitialize() {
             setReady(true);
           })
           .catch((error) => {
-            console.log(error)
             setReady(true);
             ToastAndroid.show(
               "Error al inicializar la base de datos",
               ToastAndroid.LONG
             );
           });
+          setReady(true);
       } else {
         setReady(true);
       }

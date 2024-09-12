@@ -12,7 +12,6 @@ export async function saveUserAndTransmitter(
   try {
     const userRepository = connection.getRepository(User);
     const transmitterRepository = connection.getRepository(Transmitter);
-
     const existingUser = await userRepository.findOne({
       where: {
         userId: data.user.id,
@@ -50,7 +49,7 @@ export async function saveUserAndTransmitter(
         const savedExistingUser = await userRepository.save(existingUser);
         return savedExistingUser;
       } else {
-        const newTransmitter = transmitterRepository.create(transmitter);
+        const newTransmitter = await transmitterRepository.save(transmitter);
         existingUser.rolId = data.user.roleId;
         existingUser.rolName = data.user.role.name;
         existingUser.userId = data.user.id;
@@ -61,21 +60,21 @@ export async function saveUserAndTransmitter(
         existingUser.transmitter = newTransmitter;
         existingUser.BoxId = data.box && data.box.id ? data.box.id : 0;
 
-        const savedExistingUser = await transmitterRepository.save(
+        const savedExistingUser = await userRepository.save(
           existingUser
         );
         return savedExistingUser;
       }
     } else if (existingTransmitter) {
-      const newUser = userRepository.save({
+      const newUser = await userRepository.save({
         userId: data.user.id,
         username: data.user.userName,
         password: password,
         token: data.token,
         rolId: data.user.roleId,
         rolName: data.user.role.name,
-        emisorId: existingTransmitter?.id,
-        emisor: existingTransmitter!,
+        transmitterId: existingTransmitter?.id,
+        transmitter: existingTransmitter!,
         BoxId: data.box && data.box.id ? data.box.id : 0,
       });
 
@@ -87,9 +86,10 @@ export async function saveUserAndTransmitter(
       username: data.user.userName,
       password: password,
       rolId: data.user.roleId,
+      token: data.token,
       rolName: data.user.role.name,
-      emisorId: newTransmitter.id,
-      emisor: newTransmitter,
+      transmitterId: newTransmitter.id,
+      transmitter: newTransmitter,
       BoxId: data.box && data.box.id ? data.box.id : 0,
     });
     return newUser;

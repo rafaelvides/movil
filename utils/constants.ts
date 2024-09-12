@@ -1,5 +1,5 @@
-export const API_URL = "http://192.168.0.09:8000/api";
-export const SOCKET = "http://192.168.0.26:8000/socket";
+export const API_URL = "http://192.168.0.6:8080/api";
+export const SOCKET = "http://192.168.0.3:8000/socket";
 // export const API_URL = "https://seedcode-api.erpseedcodeone.online/api";
 // export const SOCKET = "https://seedcode-api.erpseedcodeone.online/socket";
 export const MH_QUERY = "https://admin.factura.gob.sv/consultaPublicas";
@@ -7,7 +7,7 @@ export const ambiente = "00";
 export const version = 2;
 export const API_FIRMADOR =
   "https://firmador.erpseedcodeone.online/firmardocumento/";
-export const MH_DTE = "https://apitest.dtes.mh.gob.sv/fesv/recepciondtes";
+export const MH_DTE = "https://apitest.dtes.mh.gob.sv/fesv/recepciondte";
 export const MH_URL = "https://apitest.dtes.mh.gob.sv/fesv/";
 export const AUTH_MH = "https://apitest.dtes.mh.gob.sv/seguridad/auth";
 export const CHECK_URL =

@@ -3,7 +3,6 @@ import {
   Text,
   ScrollView,
   SafeAreaView,
-  Switch,
   PermissionsAndroid,
   StatusBar,
 } from "react-native";
@@ -25,6 +24,7 @@ import SpinnerInitPage from "@/components/Global/SpinnerInitPage";
 import { ThemeContext } from "@/hooks/useTheme";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
+import SwitchToggle from "@imcarlosguerrero/react-native-switch-toggle";
 
 const Settings = () => {
   const { has_enabled, OnGetLocationDisponible, OnSetLocationDisponible } =
@@ -32,7 +32,7 @@ const Settings = () => {
   const [hasCameraPermission, setHasCameraPermission] = useState(false);
   const [isBiometric, setIsBiometric] = useState(false);
   const [isReloadind, setIsReloading] = useState(false);
-  
+
   const { stopAllProcess } = useLocation();
 
   const { OnMakeLogout } = useAuthStore();
@@ -204,7 +204,7 @@ const Settings = () => {
                 <MaterialCommunityIcons
                   size={40}
                   color={isBiometric ? "#00c598" : "#ccc"}
-                  name={isBiometric ?"fingerprint": "fingerprint-off"}
+                  name={isBiometric ? "fingerprint" : "fingerprint-off"}
                 />
                 <Text
                   style={{
@@ -233,17 +233,27 @@ const Settings = () => {
                 >
                   Inicia sesión de forma rápida y segura con tu huella dactilar.
                 </Text>
-                <Switch
-                  style={stylesGlobals.styleSwitch}
-                  trackColor={{ false: "#767577", true: "#3D69B4" }}
-                  thumbColor={isBiometric ? "#f4f3f4" : "#f4f3f4"}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={() => {
-                    toggleBiometric();
-                    saveBiometric();
+                <SwitchToggle
+                  switchOn={isBiometric}
+                  onPress={() => setIsBiometric(!isBiometric)}
+                  circleColorOff="#fff"
+                  circleColorOn="#fff"
+                  backgroundColorOn="#3956C0"
+                  backgroundColorOff="#C4C4C4"
+                  containerStyle={{
+                    // marginTop: 10,
+                    width: 55,
+                    height: 28,
+                    borderRadius: 25,
+                    padding: 5,
                   }}
-                  value={isBiometric}
+                  circleStyle={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 20,
+                  }}
                 />
+               
               </View>
             </Card>
 
@@ -296,17 +306,28 @@ const Settings = () => {
                   Permite el acceso a la cámara para escanear códigos de barras
                   de productos.
                 </Text>
-                <Switch
-                  style={stylesGlobals.styleSwitch}
-                  trackColor={{
-                    false: "#767577",
-                    true: "#3D69B4",
+
+                <SwitchToggle
+                  switchOn={hasCameraPermission}
+                  onPress={() => setHasCameraPermission(!hasCameraPermission)}
+                  circleColorOff="#fff"
+                  circleColorOn="#fff"
+                  backgroundColorOn="#3956C0"
+                  backgroundColorOff="#C4C4C4"
+                  containerStyle={{
+                    // marginTop: 10,
+                    width: 55,
+                    height: 28,
+                    borderRadius: 25,
+                    padding: 5,
                   }}
-                  thumbColor={hasCameraPermission ? "#f4f3f4" : "#f4f3f4"}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={(camera) => setHasCameraPermission(camera)}
-                  value={hasCameraPermission}
+                  circleStyle={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 20,
+                  }}
                 />
+                
               </View>
             </Card>
 
@@ -358,17 +379,29 @@ const Settings = () => {
                   Permite a la ubicación para marcar la ruta recorrida por
                   unidad
                 </Text>
-                <Switch
-                  style={stylesGlobals.styleSwitch}
-                  trackColor={{
-                    false: "#767577",
-                    true: "#3D69B4",
+
+                <SwitchToggle
+                  switchOn={has_enabled}
+                  onPress={() => toggleUbication()}
+                  circleColorOff="#fff"
+                  circleColorOn="#fff"
+                  backgroundColorOn="#3956C0"
+                  backgroundColorOff="#C4C4C4"
+                  containerStyle={{
+                    // marginTop: 10,
+                    width: 55,
+                    height: 28,
+                    borderRadius: 25,
+                    padding: 5,
                   }}
-                  thumbColor={has_enabled ? "#f4f3f4" : "#f4f3f4"}
-                  ios_backgroundColor="#3e3e3e"
-                  onValueChange={(ubicación) => toggleUbication()}
-                  value={has_enabled}
+                  circleStyle={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 20,
+                  }}
                 />
+
+           
               </View>
             </Card>
             <Card
@@ -453,25 +486,6 @@ const Settings = () => {
                   Restaurar configuración
                 </Text>
               </View>
-              {/* <View style={{ ...stylesGlobals.viewMain, marginTop: 40 }}> */}
-              {/* <View
-                style={{
-                  ...stylesGlobals.styleView,
-                  backgroundColor: "transparent",
-                  borderColor: theme.colors.danger,
-                }}
-              >
-                <MaterialCommunityIcons
-                  size={24}
-                  color={theme.colors.danger}
-                  name={"delete"}
-                  onPress={() => handleClear()}
-                />
-              </View>
-              <Text style={{ ...stylesGlobals.textComponent, marginTop: 18 }}>
-                Restaurar datos
-              </Text>
-            </View> */}
             </Card>
           </SafeAreaView>
         </ScrollView>

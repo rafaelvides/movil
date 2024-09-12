@@ -1,12 +1,18 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Input from "@/components/Global/components_app/Input";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 // import { Input } from "@/~/components/ui/input";
 
 const SheetProductOfflineFilters = ({
   sheetId,
   payload,
 }: SheetProps<"product-offline-filters-sheet">) => {
+  const { theme } = useContext(ThemeContext);
+
   return (
     <ActionSheet
       id={sheetId}
@@ -27,36 +33,33 @@ const SheetProductOfflineFilters = ({
             width: "100%",
           }}
         >
-          <Text style={{ marginLeft: "3%", fontWeight: "500" }}>Nombre</Text>
-          <View style={styles.inputWrapper}>
-          
+          <Text style={stylesGlobals.textInput}>Nombre</Text>
+          <View style={stylesGlobals.inputFilter}>
+            <Input
+              placeholder="Nombre del producto..."
+              onChangeText={payload?.onChangeValueName}
+              defaultValue={payload?.name}
+              icon="shopping"
+            />
           </View>
-          <Text style={{ marginLeft: "3%", fontWeight: "500" }}>Código</Text>
-          <View style={styles.inputWrapper}>
-            
+          <Text style={stylesGlobals.textInput}>Código</Text>
+          <View style={stylesGlobals.inputFilter}>
+            <Input
+              placeholder="000000000"
+              onChangeText={payload?.onChangeValueCode}
+              defaultValue={payload?.code}
+              icon="barcode-scan"
+            />
           </View>
         </View>
-        <Pressable
-          onPress={() => payload?.handleConfirm()}
-          style={{
-            width: "100%",
-            padding: 12,
-            borderRadius: 4,
-            backgroundColor: "#1F91DC",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: 10,
-          }}
-        >
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: "bold",
-            }}
-          >
-            Filtrar
-          </Text>
-        </Pressable>
+        <View style={stylesGlobals.viewBotton}>
+          <Button
+            withB={390}
+            onPress={() => payload?.handleConfirm()}
+            Title="Filtrar"
+            color={theme.colors.dark}
+          />
+        </View>
       </View>
     </ActionSheet>
   );

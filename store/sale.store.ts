@@ -64,7 +64,6 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
     set({ is_loading: true });
     get_paginated_sales(id, page, limit, startDate, endDate, status)
       .then(({ data }) => {
-        console.log(data)
         set({
           sales: data.sales,
           pagination_sales: {

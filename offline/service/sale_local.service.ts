@@ -6,12 +6,12 @@ import { BranchProducts } from "../entity/branch_product.entity";
 import { Customer } from "../entity/customer.entity";
 import { PaymentSale } from "../entity/payment_sale.entity";
 import { Transmitter } from "../entity/transmitter.entity";
-import { Alert, ToastAndroid } from "react-native";
+import { ToastAndroid } from "react-native";
 import { TributeSale } from "../entity/sale_tribute.entity";
 import { SVFE_FC_SEND } from "@/types/svf_dte/fc.types";
 import { IGetSalesOfflinePag } from "../types/sale_offline.types";
 import { In, Like } from "typeorm/browser";
-
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 export const save_local_sale_tax_credit = async (
   dte_json: SVFE_CF_SEND,
   box_id: number,
@@ -24,7 +24,7 @@ export const save_local_sale_tax_credit = async (
     const clientRepository = connection.getRepository(Customer);
     const paySaleRepository = connection.getRepository(PaymentSale);
     const emisorRepository = connection.getRepository(Transmitter);
-
+    const tributesRepository = connection.getRepository(TributeSale);
     if (box_id === 0) return;
 
     const customer = await clientRepository.findOne({
@@ -56,6 +56,7 @@ export const save_local_sale_tax_credit = async (
     sale.subTotal = dte_json.dteJson.resumen.subTotal;
     sale.totalIva = dte_json.dteJson.resumen.tributos![0].valor;
     sale.montoTotalOperacion = dte_json.dteJson.resumen.montoTotalOperacion;
+    sale.condicionOperacion = dte_json.dteJson.resumen.condicionOperacion;
     sale.totalPagar = String(dte_json.dteJson.resumen.totalPagar);
     sale.totalLetras = dte_json.dteJson.resumen.totalLetras;
     sale.userId = userId;
@@ -66,7 +67,6 @@ export const save_local_sale_tax_credit = async (
     sale.customerId = customer.id;
     sale.transmitter = emisor!;
     sale.transmitterId = emisor!.id;
-
     new Promise(() => {
       saleRepository
         .save(sale)
@@ -78,7 +78,7 @@ export const save_local_sale_tax_credit = async (
             tribute.monto = tributo.valor;
             tribute.sale = sl;
             tribute.saleId = sl.id;
-            await saleDatilsRepository.save(tribute);
+            const tribute_save = await tributesRepository.save(tribute);
           }
 
           for (const pays of dte_json.dteJson.resumen.pagos!) {
@@ -92,6 +92,7 @@ export const save_local_sale_tax_credit = async (
             pay.saleId = sl.id;
             await paySaleRepository.save(pay);
           }
+
           dte_json.dteJson.cuerpoDocumento.forEach(async (cuerpo) => {
             const branch_product = await branchProductRepository.findOne({
               where: {
@@ -113,7 +114,9 @@ export const save_local_sale_tax_credit = async (
               details_sales.totalItem = cuerpo.precioUni * cuerpo.cantidad;
               details_sales.ventaGravada = cuerpo.ventaGravada;
               details_sales.cantidadItem = cuerpo.cantidad;
+              details_sales.tipoItem = cuerpo.tipoItem;
               details_sales.precio = cuerpo.precioUni;
+              details_sales.uniMedida = cuerpo.uniMedida;
               details_sales.ivaItem = Number(
                 cuerpo.ivaItem ? cuerpo.ivaItem : 0
               );
@@ -135,7 +138,11 @@ export const save_local_sale_tax_credit = async (
           });
         })
         .then(() => {
-          ToastAndroid.show("Venta guardada", ToastAndroid.SHORT);
+          Toast.show({
+            type: ALERT_TYPE.SUCCESS,
+            title: "Éxito",
+            textBody: "Se completaron todos los procesos",
+          });
           return true;
         })
         .catch(() => {
@@ -205,10 +212,12 @@ export const save_local_sale_invoice = async (
     sale.customerId = customer.id;
     sale.transmitter = emisor!;
     sale.transmitterId = emisor!.id;
+
     new Promise(() => {
       saleRepository
         .save(sale)
         .then(async (sl) => {
+
           for (const pays of dte_json.dteJson.resumen.pagos!) {
             const pay = new PaymentSale();
             pay.codigo = pays.codigo;
@@ -263,7 +272,11 @@ export const save_local_sale_invoice = async (
           });
         })
         .then(() => {
-          Alert.alert("Éxito", "Se completaron todos los procesos");
+          Toast.show({
+            type: ALERT_TYPE.SUCCESS,
+            title: "Éxito",
+            textBody: "Se completaron todos los procesos",
+          });
           return true;
         })
         .catch(() => {

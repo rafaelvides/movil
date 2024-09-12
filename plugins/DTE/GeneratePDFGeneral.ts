@@ -39,7 +39,7 @@ export const generate_json = async (
           Key: pathJso,
         })
       );
-      return axios
+      return await axios
         .get<SVFC_FC_Firmado>(url, {
           responseType: "json",
         })
@@ -84,7 +84,13 @@ export const generate_json = async (
             ok: true,
             message: "Se generó correctamente el pdf",
           };
-        });
+        })
+        .catch((error) => {
+          return {
+            ok: false,
+            message: "Error en la generación del pdf",
+          };
+        })
     } catch (error) {
       ToastAndroid.show(
         "Ocurrió un error al generar el pdf",

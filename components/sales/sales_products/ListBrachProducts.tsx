@@ -21,11 +21,7 @@ import Card from "@/components/Global/components_app/Card";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { useDebounce } from "@uidotdev/usehooks";
 
-interface Props {
-  closeModal: () => void;
-}
-
-const CartProductsList = (props: Props) => {
+const ListBrachProducts = ({ closeModal }: { closeModal: () => void }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [nameProduct, setNameProduct] = useState("");
   const [refresh, setRefresh] = useState(false);
@@ -47,23 +43,13 @@ const CartProductsList = (props: Props) => {
     (async () => {
       await get_branch_id().then(async (id) => {
         if (id !== null && id !== undefined) {
-          if (debouncedSearchTerm) {
-            await GetPaginatedBranchProducts(
-              Number(id),
-              currentPage,
-              5,
-              debouncedSearchTerm ?? "",
-              ""
-            );
-          } else {
-            await GetPaginatedBranchProducts(
-              Number(id),
-              currentPage,
-              5,
-              debouncedSearchTerm ?? "",
-              ""
-            );
-          }
+          await GetPaginatedBranchProducts(
+            Number(id),
+            currentPage,
+            5,
+            debouncedSearchTerm ?? "",
+            ""
+          );
         }
       });
     })();
@@ -108,7 +94,7 @@ const CartProductsList = (props: Props) => {
             color={"white"}
             name="close"
             size={34}
-            onPress={() => props.closeModal()}
+            onPress={() => closeModal()}
           />
         </Pressable>
 
@@ -193,7 +179,7 @@ const CartProductsList = (props: Props) => {
                   <View style={{ ...stylesGlobals.ViewCard, marginTop: 25 }}>
                     <MaterialCommunityIcons
                       color={theme.colors.secondary}
-                      name="focus-field-horizontal"
+                      name="barcode-scan"
                       size={30}
                       style={{
                         position: "absolute",
@@ -263,7 +249,7 @@ const CartProductsList = (props: Props) => {
   );
 };
 
-export default CartProductsList;
+export default ListBrachProducts;
 
 const styles = StyleSheet.create({
   inputWrapper: {

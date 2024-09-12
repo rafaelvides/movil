@@ -13,12 +13,14 @@ import {
   ScrollView,
   ToastAndroid,
 } from "react-native";
-import noResult from "@/assets/gif_json/bx8ntOOR1D.json";
-// import { useEmployeeStoreOffline } from "@/offline/store/employee.store";
+import { useEmployeeStoreOffline } from "@/offline/store/employee.store";
 import { ThemeContext } from "@/hooks/useTheme";
 import SpinLoading from "@/components/Global/SpinLoading";
 import { useEmployeeStore } from "@/store/employee.store";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import AnimatedButton from "@/components/Global/AnimatedButtom";
+import Card from "@/components/Global/components_app/Card";
+import Not_data from "@/components/Global/Global_Animation/Not_data";
 
 const of_customers = () => {
   const animation = useRef(null);
@@ -26,7 +28,7 @@ const of_customers = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { OnGetEmployeesList, employee_list, is_loading } = useEmployeeStore();
   const { theme } = useContext(ThemeContext);
-  // const { OnSaveEmployee } = useEmployeeStoreOffline();
+  const { OnSaveEmployee } = useEmployeeStoreOffline();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -39,20 +41,22 @@ const of_customers = () => {
   );
 
   const handleSaveClients = async () => {
-    // const promises = employee_list.map(async (employee) => {
-    //   return await OnSaveEmployee({
-    //     fullName: employee.fullName,
-    //     phone: employee.phone,
-    //     isActive: employee.isActive,
-    //     branchId: employee.branchId,
-    //   });
-    // });
-    // await Promise.all(promises).then(() => {
-    //   ToastAndroid.show(
-    //     "Todos los empleados se han guardado exitosamente",
-    //     ToastAndroid.SHORT
-    //   );
-    // });
+    const promises = employee_list.map(async (employee) => {
+      return await OnSaveEmployee({
+        employeeId: employee.id,
+        fullName: employee.fullName,
+        phone: employee.phone,
+        isActive: employee.isActive,
+        branchId: employee.branchId,
+      });
+    });
+
+    await Promise.all(promises).then(() => {
+      ToastAndroid.show(
+        "Todos los empleados se han guardado exitosamente",
+        ToastAndroid.SHORT
+      );
+    });
   };
   useEffect(() => {
     OnGetEmployeesList();
@@ -64,130 +68,114 @@ const of_customers = () => {
       <StatusBar style="dark" />
       {isloading ? (
         <>
-          <View
-            style={{
-              flex: 1,
-              height: "100%",
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#fff",
-            }}
-          >
+          <View style={stylesGlobals.viewSpinnerInit}>
             <SpinnerInitPage />
           </View>
         </>
       ) : (
         <>
-          <View
-            style={{
-              backgroundColor: "#fff",
-            }}
-          >
-            <SafeAreaView>
-              {/* <ScrollView
-                refreshControl={
-                  <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={() => setRefreshing(true)}
+          <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
+            {is_loading ? (
+              <SpinLoading is_showing={is_loading} />
+            ) : (
+              <>
+                <View style={stylesGlobals.filter}>
+                  <AnimatedButton
+                    handleClick={() => handleSaveClients()}
+                    buttonColor={theme.colors.third}
+                    iconName="download"
+                    width={40}
+                    height={40}
+                    left={10}
+                    size={25}
+                    top={0}
                   />
-                }
-              > */}
-              {is_loading ? (
-                <View style={stylesGlobals.viewSpinnerInit}>
-                  <SpinnerInitPage />
                 </View>
-              ) : (
-                <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
-                  {is_loading ? (
-                    <SpinLoading is_showing={is_loading} />
-                  ) : (
-                    <>
-                    <ScrollView 
-                    refreshControl={
-                      <RefreshControl
+                <ScrollView
+                  refreshControl={
+                    <RefreshControl
                       refreshing={refreshing}
                       onRefresh={() => setRefreshing(true)}
-                      />
-                    }
-                    >
-                      <View style={stylesGlobals.viewScroll}>
-                        {employee_list && employee_list.length > 0 ?(
-                          <>
-                          {!is_loading && employee_list.map((employee, index)=>{
-                            <>
-                            <Text>{employee.fullName}</Text>
-                            <View style={{
-                              backgroundColor:"red",
-                              height:100
-                            }}></View>
-                            </>
-                          })}
-                          </>
-                        ):(
-                          <View style={stylesGlobals.viewLottie}>
-                        <LottieView
-                          autoPlay
-                          ref={animation}
-                          style={stylesGlobals.LottieStyle}
-                          source={require("@/assets/gif_json/gif_global.json")}
-                        />
-                      </View>
-                        )}
+                    />
+                  }
+                >
+                  <View style={stylesGlobals.viewScroll}>
+                    {employee_list && employee_list.length > 0 ? (
+                      <>
+                        {!is_loading &&
+                          employee_list.map((employee, index) => (
+                            <Card key={index} style={stylesGlobals.styleCard}>
+                              <View style={stylesGlobals.ViewCard}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.secondary}
+                                  name="account"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
 
+                                <Text style={stylesGlobals.textCard}>
+                                  {employee.fullName.slice(0, 15)}
+                                </Text>
+                              </View>
+                              <View style={stylesGlobals.ViewCard}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.third}
+                                  name="phone"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
 
-                      </View>
-                    </ScrollView>
-                    </>
-                  )}
-                </SafeAreaView>
-                // <View>
-                //   <View
-                //     style={{
-                //       marginBottom: 125,
-                //       backgroundColor: "#FFFFFF",
-                //       height: "auto",
-                //     }}
-                //   >
-                //     <ScrollView>
-                //       {employee_list.length > 0 ? (
-                //         <>
-                //           {!is_loading &&
-                //             employee_list.map((employee, index) => (
-                //               <></>
-                //             ))}
-                //         </>
-                //       ) : (
-                //         <>
-                //           <View
-                //             style={{
-                //               padding: 40,
-                //               width: "100%",
-                //               height: "auto",
-                //               flexDirection: "column",
-                //               justifyContent: "center",
-                //               alignItems: "center",
-                //             }}
-                //           >
-                //             <LottieView
-                //               autoPlay
-                //               ref={animation}
-                //               style={{
-                //                 marginTop: 50,
-                //                 width: 380,
-                //                 height: 380,
-                //               }}
-                //               source={require("@/assets/gif_json/gif_global.json")}
-                //             />
-                //           </View>
-                //         </>
-                //       )}
-                //     </ScrollView>
-                //   </View>
-                // </View>
-              )}
-              {/* </ScrollView> */}
-            </SafeAreaView>
-          </View>
+                                <Text style={stylesGlobals.textCard}>
+                                  {employee.phone}
+                                </Text>
+                              </View>
+                              <View style={stylesGlobals.ViewCard}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.third}
+                                  name="map-marker"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
+
+                                <Text style={stylesGlobals.textCard}>
+                                  {employee.branch.name}
+                                </Text>
+                              </View>
+                              <View style={stylesGlobals.ViewCard}>
+                                <MaterialCommunityIcons
+                                  color={theme.colors.dark}
+                                  name="mail"
+                                  size={22}
+                                  style={{
+                                    position: "absolute",
+                                    left: 7,
+                                  }}
+                                />
+
+                                <Text style={stylesGlobals.textCard}>
+                                  {employee.branch.codEstable}?{" "}
+                                </Text>
+                              </View>
+                            </Card>
+                          ))}
+                      </>
+                    ) : (
+                      <Not_data/>
+                    )}
+                  </View>
+                </ScrollView>
+              </>
+            )}
+          </SafeAreaView>
         </>
       )}
     </>

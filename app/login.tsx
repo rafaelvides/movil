@@ -11,21 +11,24 @@ import {
   Image,
   TextInput,
 } from "react-native";
-// import { Card, CardTitle, CardContent } from "@/~/components/ui/card";
-// import { Input } from "@/~/components/ui/input";
-// import { Button } from "@/~/components/ui/button";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useEffect, useState } from "react";
 import AuthenticationTouch from "../components/Global/AuthenticationTouch";
 import { return_switch_biometric } from "@/plugins/secure_store";
+import { return_token } from "@/plugins/async_storage";
+
 import { useIsConnected } from "react-native-offline";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import Button from "@/components/Global/components_app/Button";
+import { useFocusEffect } from "expo-router";
+import React from "react";
 
 const login = () => {
-  const { OnMakeLogin, OnMakeLoginOffline, is_authenticated, token } =
-    useAuthStore();
+  const {
+    OnMakeLogin,
+    OnMakeLoginOffline,
+  } = useAuthStore();
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const validationsSchema = yup.object().shape({
@@ -37,13 +40,12 @@ const login = () => {
 
   const onSubmit = async (payload: ILoginPayload) => {
     if (isConnected) {
-      console.log("first");
       await OnMakeLogin(payload);
     } else {
       await OnMakeLoginOffline(payload);
     }
   };
-  console.log(is_authenticated, token);
+
   useEffect(() => {
     const loadVisable = async () => {
       try {

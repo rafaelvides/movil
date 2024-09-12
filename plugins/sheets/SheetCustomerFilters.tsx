@@ -34,7 +34,7 @@ const SheetCustomerFilters = ({
             }}
           >
             <Text style={stylesGlobals.textInput}>Nombre</Text>
-            <View style={styles.inputWrapper}>
+            <View style={stylesGlobals.inputFilter}>
               <Input
                 placeholder="Nombre del cliente..."
                 onChangeText={payload?.onChangeValueName}
@@ -43,7 +43,7 @@ const SheetCustomerFilters = ({
               />
             </View>
             <Text style={stylesGlobals.textInput}>Correo</Text>
-            <View style={styles.inputWrapper}>
+            <View style={stylesGlobals.inputFilter}>
               <Input
                 placeholder="example@gmail.com"
                 defaultValue={payload?.correo}
@@ -52,9 +52,7 @@ const SheetCustomerFilters = ({
               />
             </View>
           </View>
-          <View
-            style={stylesGlobals.viewBotton}
-          >
+          <View style={stylesGlobals.viewBotton}>
             <Button
               withB={390}
               onPress={() => payload?.handleConfirm()}
@@ -69,24 +67,4 @@ const SheetCustomerFilters = ({
 };
 export default SheetCustomerFilters;
 
-const styles = StyleSheet.create({
-  inputWrapper: {
-    position: "relative",
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    marginBottom: 15,
-  },
-  icon: {
-    position: "absolute",
-    right: 20,
-    top: "50%",
-    transform: [{ translateY: -15 }],
-  },
-  input: {
-    height: "100%",
-    paddingLeft: 15,
-    borderColor: "#D9D9DA",
-    fontSize: 16,
-  },
-});
+const styles = StyleSheet.create({});

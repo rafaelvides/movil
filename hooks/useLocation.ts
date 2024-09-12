@@ -74,7 +74,6 @@ export const useLocation = () => {
     (async () => {
       //Comprueba si el usuario ha habilitado los servicios de ubicación.
       const hasEnabled = await Location.hasServicesEnabledAsync();
-      console.log("hola", has_enabled, hasEnabled, is_authenticated);
       if (!has_enabled && !hasEnabled && !is_authenticated) {
         stopAllProcess();
         return;
