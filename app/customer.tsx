@@ -31,8 +31,8 @@ import { SheetManager } from "react-native-actions-sheet";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
-import Button from "@/components/Global/components_app/Button";
 import LottieView from "lottie-react-native";
+import Not_data from "@/components/Global/Global_Animation/Not_data";
 
 const customer = () => {
   const [showDetailNormal, setShowDetailNormal] = useState(false);
@@ -60,7 +60,6 @@ const customer = () => {
   const [typeClient, setTypeClient] = useState("normal");
   const [selectedTitle, setSelectedTitle] = useState("");
   const [nameCustomer, setNameCustomer] = useState("");
-  const animation = useRef(null);
   const { theme } = useContext(ThemeContext);
   useFocusEffect(
     React.useCallback(() => {
@@ -324,14 +323,7 @@ const customer = () => {
                           ))}
                       </>
                     ) : (
-                      <View style={stylesGlobals.viewLottie}>
-                        <LottieView
-                          autoPlay
-                          ref={animation}
-                          style={stylesGlobals.LottieStyle}
-                          source={require("@/assets/gif_json/gif_global.json")}
-                        />
-                      </View>
+                      <Not_data/>
                     )}
                   </View>
                   {customers.length > 0 && (

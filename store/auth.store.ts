@@ -229,17 +229,12 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   GetConfigurationByTransmitter: async (id) => {
-    console.log("SE EJECUTAAAAaaaaaa", id)
+    console.log("SE EJECUTA", id)
     try {
       const { data } = await get_by_transmitter(id);
       if (data.personalization) {
         console.log("VER LA PERSONALIZACIIIIIOOOOON en el store", data.personalization)
-        // const personalizationArray = Array.isArray(data.personalization)
-        //   ? data.personalization
-        //   : [data.personalization];
-        // // set({
-        //   personalization: personalizationArray,
-        // });
+      
         await save_configuration(data.personalization);
         const perso = await get_configuration();
         console.log("VER LA PERSONALIZACIIIIIOOOOON ALMACENADAAAAAAA", perso)
