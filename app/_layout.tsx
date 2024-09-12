@@ -159,6 +159,10 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
     return () => backHandler.remove();
   }, [loading, isConnected, backPressCount]);
 
+
+  const {personalization} = useAuthStore()
+  console
+
   return (
     <>
       <StatusBar style="light" />
@@ -186,7 +190,12 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
                       },
                     }}
                     initialRouteName={is_authenticated ? "home" : "login"}
-                    drawerContent={(props) => <CustomDrawer {...props} />}
+                    drawerContent={(props) =>(
+                       <CustomDrawer 
+                       {...props}
+                      personalization={personalization}
+                       />
+                      )}
                   >
                     <Drawer.Screen
                       name="home"

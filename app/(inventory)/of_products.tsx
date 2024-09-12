@@ -21,6 +21,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AnimatedButton from "@/components/Global/AnimatedButtom";
 import { get_branch_id } from "@/plugins/async_storage";
 import Pagination from "@/components/Global/Pagination";
+import Not_data from "@/components/Global/Global_Animation/Not_data";
 const of_products = () => {
   const [loading, setLoading] = useState(false);
   const animation = useRef(null);
@@ -221,29 +222,7 @@ const of_products = () => {
                           ))}
                       </>
                     ) : (
-                      <>
-                        <View
-                          style={{
-                            padding: 40,
-                            width: "100%",
-                            height: "auto",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <LottieView
-                            autoPlay
-                            ref={animation}
-                            style={{
-                              marginTop: 50,
-                              width: 380,
-                              height: 380,
-                            }}
-                            source={require("@/assets/gif_json/gif_global.json")}
-                          />
-                        </View>
-                      </>
+                      <Not_data/>
                     )}
                   </View>
                   <View style={{ marginBottom: 40 }}>

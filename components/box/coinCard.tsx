@@ -1,24 +1,22 @@
 import { ICloseBox } from "@/types/box/box.types";
 import { useContext } from "react";
-import {
-  View,
-  Image,
-  Text,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, Image, Text } from "react-native";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
 import Card from "../Global/components_app/Card";
 import Input from "../Global/components_app/Input";
 import { ThemeContext } from "@/hooks/useTheme";
-import { ScrollView } from "react-native-actions-sheet";
+import Button from "../Global/components_app/Button";
 
 const CoinCards = ({
   boxValues,
   setBoxValues,
+  preview_box,
+  complete,
 }: {
   boxValues: ICloseBox;
   setBoxValues: React.Dispatch<React.SetStateAction<ICloseBox>>;
+  preview_box: () => void;
+  complete?: () => void;
 }) => {
   const { theme } = useContext(ThemeContext);
   const handleInputChange = (field: keyof ICloseBox) => (text: string) => {
@@ -36,11 +34,11 @@ const CoinCards = ({
     <>
       <View
         style={{
-          padding: 10,
           flexDirection: "row",
           flexWrap: "wrap",
-          justifyContent: "center",
           alignItems: "center",
+          height: "100%",
+          justifyContent: "space-around",
         }}
       >
         <Card style={{ ...stylesGlobals.CardBox, marginTop: 20 }}>
@@ -352,6 +350,33 @@ const CoinCards = ({
             </View>
           </View>
         </Card>
+        {!complete ? (
+          <>
+            <Button
+              onPress={() => {
+                preview_box();
+              }}
+              color={theme.colors.dark}
+              Title="Cerrar caja"
+            />
+          </>
+        ) : (
+          <>
+            <Button
+              Title="Cuadrar caja"
+              color={theme.colors.third}
+              onPress={() => preview_box()}
+            />
+
+            <Button
+              onPress={() => {
+                complete()
+              }}
+              color={theme.colors.danger}
+              Title="Cerrar caja"
+            />
+          </>
+        )}
       </View>
     </>
   );

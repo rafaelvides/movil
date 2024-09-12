@@ -19,6 +19,7 @@ import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import AnimatedButton from "@/components/Global/AnimatedButtom";
 import LottieView from "lottie-react-native";
+import Not_data from "@/components/Global/Global_Animation/Not_data";
 
 const of_customers = () => {
   const [isloading, setIsLoading] = useState(false);
@@ -179,14 +180,7 @@ const of_customers = () => {
                           ))}
                       </>
                     ) : (
-                      <View style={stylesGlobals.viewLottie}>
-                        <LottieView
-                          autoPlay
-                          ref={animation}
-                          style={stylesGlobals.LottieStyle}
-                          source={require("@/assets/gif_json/gif_global.json")}
-                        />
-                      </View>
+                      <Not_data/>
                     )}
                   </View>
                 </ScrollView>

@@ -150,10 +150,13 @@ const Box_close = (props: Props) => {
     <>
       <StatusBar style="inverted" />
       {!boxPreview ? (
+        <ScrollView>
         <View
           style={{
             backgroundColor: "white",
             width: "100%",
+            // height: "auto",
+            height:"100%"
           }}
         >
           {props.validation && (
@@ -169,25 +172,9 @@ const Box_close = (props: Props) => {
               </Text>
             </Text>
           )}
-          <ScrollView style={{}}>
-            <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
-            <View
-              style={{
-                marginLeft: 40,
-
-                marginBottom: props.validation ? 50 : 0,
-              }}
-            >
-              <Button
-                onPress={() => {
-                  preview_box();
-                }}
-                color={theme.colors.dark}
-                Title="Cerrar caja"
-              />
-            </View>
-          </ScrollView>
+            <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} preview_box={() => preview_box()} />
         </View>
+        </ScrollView>
       ) : (
         <>
           <View
@@ -219,8 +206,8 @@ const Box_close = (props: Props) => {
               style={{
                 backgroundColor: "white",
                 width: "100%",
-                height: props.isModal ? 540 : 500,
-
+                // height: props.isModal ? 540 : 500,
+                height: props.isModal ? "70%" : "71%",
                 // borderBottomLeftRadius: 30,
                 // borderBottomRightRadius: 30,
                 borderTopStartRadius: 30,
@@ -234,7 +221,7 @@ const Box_close = (props: Props) => {
                   marginTop: 10,
                 }}
               >
-                <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} />
+                <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} preview_box={() => preview_box()} complete={()=> completeBox()}/>
                 <View
                   style={{
                     // right: 6,
@@ -242,19 +229,7 @@ const Box_close = (props: Props) => {
                     alignItems: "center",
                   }}
                 >
-                  <Button
-                    Title="Cuadrar caja"
-                    color={theme.colors.third}
-                    onPress={() => preview_box()}
-                  />
-
-                  <Button
-                    onPress={() => {
-                      completeBox();
-                    }}
-                    color={theme.colors.danger}
-                    Title="Cerrar caja"
-                  />
+                 
                 </View>
               </ScrollView>
             </View>
