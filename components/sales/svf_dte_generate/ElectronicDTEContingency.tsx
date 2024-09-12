@@ -15,6 +15,7 @@ import React, {
   SetStateAction,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { Dropdown } from "react-native-element-dropdown";
@@ -23,7 +24,11 @@ import { ITiposDeContingencia } from "@/types/billing/cat-005-tipos-de-contigenc
 import { AntDesign } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { DatePickerModal } from "react-native-paper-dates";
-import { getElSalvadorDateTimeParam } from "@/utils/date";
+import {
+  formatDate,
+  getElSalvadorDateTimeParam,
+  returnDate,
+} from "@/utils/date";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { return_token_mh } from "@/plugins/secure_store";
 import { get_configuration, get_user } from "@/plugins/async_storage";
@@ -47,16 +52,16 @@ import Button from "@/components/Global/components_app/Button";
 import { ThemeContext } from "@/hooks/useTheme";
 
 const ElectronicDTEContingency = ({
-  infoContingency,
+  // infoContingency,
   setModalContingency,
 }: {
-  infoContingency: {
-    saleDTE: string;
-    pathJson: string;
-    box_id: number;
-    customer_id: number;
-    employee: number;
-  };
+  // infoContingency: {
+  //   saleDTE: string;
+  //   pathJson: string;
+  //   box_id: number;
+  //   customer_id: number;
+  //   employee: number;
+  // };
   setModalContingency: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [isFocus, setIsFocus] = useState(false);
@@ -66,45 +71,57 @@ const ElectronicDTEContingency = ({
     isActivated: true,
     valores: "No disponibilidad de sistema del emisor",
   });
+  const { OnImgPDF, img_invalidation, img_logo, contingence_sales } =
+    useSaleStore();
   const [contingReason, setContingReason] = useState("");
-  const [startDate, setStartDate] = useState(new Date());
-  const [time, setTime] = useState(new Date());
+  const [startDate, setStartDate] = useState(formatDate());
+  const [time, setTime] = useState(contingence_sales[0]?.horEmi);
   const [showCalendarStart, setShowCalendarStart] = useState(false);
+  const [showCalendarEnd, setShowCalendarEnd] = useState(false);
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [screenChange, setsCreenChange] = useState(false);
   const [message, setMessage] = useState("Esperando");
   const [isFocusEmp, setIsFocusEmp] = useState(false);
   const [employee, setEmployee] = useState<IEmployee>();
   const { theme } = useContext(ThemeContext);
-
+  const [endDate, setEndDate] = useState(formatDate());
+  const [endTime, setEndTime] = useState(
+    contingence_sales[contingence_sales.length - 1]?.horEmi
+  );
   const { cat_005_tipo_de_contingencia, OnGetCat005TipoDeContingencia } =
     useBillingStore();
   const { OnGetTransmitter, transmitter } = useTransmitterStore();
   const { OnPressAllSalesConting } = useSaleStore();
   const { employee_list, OnGetEmployeesList } = useEmployeeStore();
-  const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
+
+  const timeStart = useMemo(() => {
+    if (contingence_sales.length > 0) {
+      setTime(contingence_sales[0]?.horEmi);
+      return contingence_sales[0]?.horEmi;
+    }
+    return "";
+  }, [contingence_sales]);
+
+  const timeEnd = useMemo(() => {
+    if (contingence_sales.length > 0) {
+      setEndTime(contingence_sales[contingence_sales.length - 1]?.horEmi);
+      return contingence_sales[contingence_sales.length - 1]?.horEmi;
+    }
+    return "";
+  }, [contingence_sales]);
+
   const handleConfirmTime = (date: Date) => {
-    setTime(date);
+    setTime(getElSalvadorDateTimeParam(date).horEmi);
     setTimePickerVisibility(false);
   };
-  
+
   useEffect(() => {
     OnGetCat005TipoDeContingencia();
     OnGetEmployeesList();
     OnGetTransmitter();
   }, []);
-  useEffect(() => {
-    (async () => {
-      await get_configuration().then((data) => {
-        OnImgPDF(String(data?.logo));
-      });
-    })();
-  }, []);
 
   const handleContingencySubtraction = async () => {
-    if (!infoContingency) {
-      ToastAndroid.show("Vuelve a seleccionar la venta", ToastAndroid.SHORT);
-    }
     let currentOperation = Promise.resolve<boolean | void>(false);
     const token_mh = await return_token_mh();
     const user = await get_user();
@@ -112,10 +129,7 @@ const ElectronicDTEContingency = ({
       ToastAndroid.show("No se encontró el usuario", ToastAndroid.SHORT);
       return;
     }
-    const correlatives = await get_find_by_correlative(
-      user.id,
-      infoContingency.saleDTE === "03" ? "CCF" : "F"
-    );
+    const correlatives = await get_find_by_correlative(user.id, "FE");
     if (!correlatives.data.correlativo) {
       ToastAndroid.show("No se encontraron correlativos", ToastAndroid.SHORT);
       return;
@@ -125,21 +139,22 @@ const ElectronicDTEContingency = ({
       return;
     }
     setsCreenChange(true);
-    const infoSale = [
-      {
-        noItem: 1,
-        codigoGeneracion: generate_uuid().toUpperCase(),
-        tipoDoc: String(infoContingency.saleDTE),
-      },
-    ];
+
+    const correlativesDTE = contingence_sales.map((sale, index) => ({
+      noItem: index + 1,
+      codigoGeneracion: sale.codigoGeneracion,
+      tipoDoc: sale.tipoDte,
+    }));
 
     const generateContingency = ContingencySalesGenerator(
       transmitter,
       startDate,
       time,
+      endDate,
+      endTime,
       Number(typeConting?.codigo),
       contingReason,
-      infoSale,
+      correlativesDTE,
       correlatives.data.correlativo,
       employee
     );
@@ -152,48 +167,53 @@ const ElectronicDTEContingency = ({
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel("El tiempo de espera ha expirado");
-          //   setIsProcessing(false);
         }, 60000);
 
         Promise.race([
-          send_to_mh_contingencia(send, token_mh ?? "").then(
+          send_to_mh_contingencia(send, token_mh ?? "", source).then(
             async (resspon) => {
               clearTimeout(timeout);
+              if (resspon.data.estado === "RECHAZADO") {
+                Alert.alert(
+                  resspon?.data.descripcionMsg
+                    ? resspon?.data.descripcionMsg
+                    : "El Ministerio de Hacienda no pudo procesar la solicitud",
+                  resspon.data.observaciones &&
+                    resspon.data.observaciones.length > 0
+                    ? resspon?.data.observaciones.join("\n\n")
+                    : ""
+                );
+                setsCreenChange(false);
+              }
               if (resspon.data.estado === "RECIBIDO") {
-                currentOperation = currentOperation
-                  .then(async () => {
-                    await OnPressAllSalesConting(
-                      transmitter,
-                      infoContingency.box_id,
-                      infoContingency.saleDTE,
-                      infoContingency.pathJson,
-                      String(token_mh),
-                      infoContingency.employee,
-                      img_logo,
-                      img_invalidation,
-                      infoContingency.customer_id
-                    ).then(async (response) => {
-                      if (response?.isErrorMh) {
-                        await showAlertAndWait(
-                          response.title,
-                          response.message
-                        );
-                        return true;
-                      } else {
-                        await showAlertAndWait(
-                          response?.title
-                            ? response.title
-                            : "Ocurrió un error inesperado",
-                          response?.message
-                            ? response.title
-                            : "Inténtelo mas tarde o contacta al equipo de soporte"
-                        );
-                      }
-                    });
+                const promises = contingence_sales.map((sale, index) =>
+                  OnPressAllSalesConting(
+                    transmitter,
+                    sale.boxId,
+                    sale.tipoDte,
+                    sale.pathJson,
+                    String(token_mh),
+                    sale.employeeId,
+                    img_logo,
+                    img_invalidation,
+                    sale.customerId
+                  ).then(async (response) => {
+                    if (response?.isErrorMh) {
+                      await showAlertAndWait(response.title, response.message);
+                      return true;
+                    } else {
+                      await showAlertAndWait(
+                        response?.title
+                          ? response.title
+                          : "Ocurrió un error inesperado",
+                        response?.message
+                          ? response.title
+                          : "Inténtelo mas tarde o contacta al equipo de soporte"
+                      );
+                    }
                   })
-                  .catch(() => {
-                    return false;
-                  });
+                );
+
                 currentOperation.then(() => {
                   setsCreenChange(false);
 
@@ -208,18 +228,6 @@ const ElectronicDTEContingency = ({
                   "Hacienda no respondió con el sello",
                   ToastAndroid.LONG
                 );
-              }
-              if (resspon.data.estado === "RECHAZADO") {
-                Alert.alert(
-                  resspon?.data.descripcionMsg
-                    ? resspon?.data.descripcionMsg
-                    : "El Ministerio de Hacienda no pudo procesar la solicitud",
-                  resspon.data.observaciones &&
-                    resspon.data.observaciones.length > 0
-                    ? resspon?.data.observaciones.join("\n\n")
-                    : ""
-                );
-                setsCreenChange(false);
               }
             }
           ),
@@ -470,11 +478,7 @@ const ElectronicDTEContingency = ({
                   <Input
                     keyboardType="numeric"
                     placeholder="0.0"
-                    defaultValue={startDate.toLocaleString("es", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
+                    defaultValue={startDate}
                     onPress={() => setShowCalendarStart(true)}
                     icon="calendar-edit"
                     aria-labelledbyledBy="inputLabel"
@@ -482,12 +486,12 @@ const ElectronicDTEContingency = ({
                   <DatePickerModal
                     locale="es"
                     mode="single"
-                    date={startDate}
+                    date={new Date()}
                     visible={showCalendarStart}
                     onConfirm={({ date }) => {
                       setShowCalendarStart(false);
                       if (date) {
-                        setStartDate(date);
+                        setStartDate(returnDate(date));
                       }
                     }}
                     onDismiss={() => setShowCalendarStart(false)}
@@ -511,8 +515,8 @@ const ElectronicDTEContingency = ({
                     caretHidden={true}
                     keyboardType="numeric"
                     placeholder="0.0"
-                    defaultValue={getElSalvadorDateTimeParam(time).horEmi}
-                    onPress={() => setTimePickerVisibility(true)}
+                    defaultValue={timeStart}
+                    // onPress={() => setTimePickerVisibility(true)}
                     icon="calendar-edit"
                     aria-labelledbyledBy="inputLabel"
                   />
@@ -541,14 +545,23 @@ const ElectronicDTEContingency = ({
                   <Input
                     keyboardType="numeric"
                     placeholder="0.0"
-                    defaultValue={startDate.toLocaleString("es", {
-                      year: "numeric",
-                      month: "2-digit",
-                      day: "2-digit",
-                    })}
+                    defaultValue={endDate}
                     onPress={() => setShowCalendarStart(true)}
                     icon="calendar-edit"
                     aria-labelledbyledBy="inputLabel"
+                  />
+                  <DatePickerModal
+                    locale="es"
+                    mode="single"
+                    date={new Date()}
+                    visible={showCalendarEnd}
+                    onConfirm={({ date }) => {
+                      setShowCalendarEnd(false);
+                      if (date) {
+                        setEndDate(returnDate(date));
+                      }
+                    }}
+                    onDismiss={() => setShowCalendarEnd(false)}
                   />
                 </View>
                 <View style={{ marginTop: 20, width: "45%" }}>
@@ -569,8 +582,8 @@ const ElectronicDTEContingency = ({
                     caretHidden={true}
                     keyboardType="numeric"
                     placeholder="0.0"
-                    defaultValue={getElSalvadorDateTimeParam(time).horEmi}
-                    onPress={() => setTimePickerVisibility(true)}
+                    defaultValue={timeEnd}
+                    // onPress={() => setTimePickerVisibility(true)}
                     icon="calendar-edit"
                     aria-labelledbyledBy="inputLabel"
                   />

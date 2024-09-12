@@ -4,6 +4,7 @@ import {
   get_paginated_sales,
   get_recent_sales,
   get_details_sales,
+  get_sales_in_contingence,
 } from "../services/sale.service";
 import { ToastAndroid } from "react-native";
 import { IPagination } from "@/types/GlobalTypes/Global.types";
@@ -31,6 +32,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
   is_loading_details: false,
   img_invalidation: null,
   img_logo: null,
+  contingence_sales: [],
 
   async GetJsonSale(path) {
     const url = await getSignedUrl(
@@ -58,6 +60,19 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
           json_sale: undefined,
         });
         ToastAndroid.show("Error al obtener el json", ToastAndroid.LONG);
+      });
+  },
+  onGetSalesContingence(id) {
+    get_sales_in_contingence(id)
+      .then((res) => {
+        set({
+          contingence_sales: res.data.sales,
+        });
+      })
+      .catch(() => {
+        set({
+          contingence_sales: [],
+        });
       });
   },
   GetPaginatedSales: (id, page, limit, startDate, endDate, status) => {
@@ -205,6 +220,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
           );
         })
         .catch((error) => {
+          console.log('store:',error);
           ToastAndroid.show("No se encontró el documento", ToastAndroid.LONG);
           return {
             ok: false,

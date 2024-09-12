@@ -11,8 +11,10 @@ import { IEmployee } from "@/types/employee/employee.types";
 
 export const ContingencySalesGenerator = (
   transmitter: ITransmitter,
-  startDate: Date,
-  time: Date,
+  startDate: string,
+  time: string,
+  endDate: string,
+  endTime: string,
   codeConting: number,
   reasonConting: string,
   infoSales: {
@@ -53,10 +55,10 @@ export const ContingencySalesGenerator = (
       },
       detalleDTE: infoSales,
       motivo: {
-        fInicio: getElSalvadorDateTimeParam(startDate).fecEmi,
-        fFin: getElSalvadorDateTime().fecEmi,
-        hInicio: getElSalvadorDateTimeParam(time).horEmi,
-        hFin: getElSalvadorDateTime().horEmi,
+        fInicio: startDate,
+        fFin: endDate,
+        hInicio: time,
+        hFin: endTime,
         tipoContingencia: codeConting,
         motivoContingencia: reasonConting === "" ? null : reasonConting,
       },

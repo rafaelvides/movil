@@ -1,6 +1,5 @@
 import {
   Modal,
-  Pressable,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -24,28 +23,16 @@ import AnimatedButton from "@/components/Global/AnimatedButtom";
 import { ThemeContext } from "@/hooks/useTheme";
 import Card from "@/components/Global/components_app/Card";
 import { formatCurrency } from "@/utils/dte";
-import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
-import SpinnerButton from "@/components/Global/SpinnerButton";
-import { generate_json } from "@/plugins/DTE/GeneratePDFGeneral";
 
-const processed_sales = () => {
-  const [startDate, setStartDate] = useState(formatDate());
-  const [endDate, setEndDate] = useState(formatDate());
+const contingenceFE_CCFE = () => {
+
   const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [modalContingency, setModalContingency] = useState(false);
-  const [spinButton, setSpinButton] = useState({ loading: false, index: "" });
-  const [infoContingency, setInfoContingecy] = useState({
-    saleDTE: "",
-    pathJson: "",
-    box_id: 0,
-    customer_id: 0,
-    employee: 0,
-  });
 
   const { theme } = useContext(ThemeContext);
 
-  const { GetPaginatedSales, is_loading, sales, img_invalidation, img_logo } =
+  const { is_loading, onGetSalesContingence, contingence_sales } =
     useSaleStore();
 
   useFocusEffect(
@@ -61,42 +48,14 @@ const processed_sales = () => {
     (async () => {
       await get_branch_id().then(async (id) => {
         if (id !== null && id !== undefined) {
-          await GetPaginatedSales(Number(id), 1, 5, startDate, endDate, 3);
+          await onGetSalesContingence(Number(id));
+          // await GetPaginatedSales(Number(id), 1, 5, startDate, endDate, 3);
         }
       });
     })();
     setRefreshing(false);
   }, [refreshing]);
 
-  const handlePDF = async (
-    pathJso: string,
-    SaleDte: string,
-    codigoGeneracion: string,
-    index: string
-  ) => {
-    setSpinButton({ loading: true, index: index });
-    // if (!img_logo) {
-    //   ToastAndroid.show("No se encontró el logo", ToastAndroid.LONG);
-    //   setSpinButton({ loading: false, index: index });
-    //   return;
-    // }
-    await generate_json(
-      pathJso,
-      SaleDte,
-      img_invalidation,
-      img_logo!,
-      false,
-      codigoGeneracion
-    )
-      .then((data) => {
-        if (data?.ok) {
-          setSpinButton({ loading: false, index: index });
-        }
-      })
-      .catch(() => {
-        setSpinButton({ loading: false, index: index });
-      });
-  };
   return (
     <>
       <StatusBar style="dark" />
@@ -115,7 +74,7 @@ const processed_sales = () => {
             ) : (
               <>
                 <View style={stylesGlobals.filter}>
-                  <AnimatedButton
+                  {/* <AnimatedButton
                     handleClick={() => {
                       SheetManager.show("sales-filters-sheet", {
                         payload: {
@@ -140,17 +99,26 @@ const processed_sales = () => {
                     left={10}
                     size={25}
                     top={0}
-                  />
-                  {/* <AnimatedButton
-                    handleClick={pickDocument}
-                    iconName="database-arrow-down"
+                  /> */}
+                  <AnimatedButton
+                    handleClick={() => {
+                      setModalContingency(true);
+                      // setInfoContingecy({
+                      //   saleDTE: sale.tipoDte,
+                      //   pathJson: sale.pathJson,
+                      //   customer_id: Number(sale.customerId),
+                      //   box_id: sale.boxId,
+                      //   employee: sale.employeeId,
+                      // });
+                    }}
+                    iconName="database-plus"
                     buttonColor={theme.colors.third}
                     width={40}
                     height={40}
                     right={10}
                     size={25}
                     top={0}
-                  /> */}
+                  />
                 </View>
 
                 <ScrollView
@@ -163,8 +131,8 @@ const processed_sales = () => {
                 >
                   <View style={stylesGlobals.viewScroll}>
                     {!is_loading &&
-                      sales &&
-                      sales.map((sale, index) => (
+                      contingence_sales &&
+                      contingence_sales.map((sale, index) => (
                         <Card key={index} style={stylesGlobals.styleCard}>
                           <View
                             style={{
@@ -181,7 +149,7 @@ const processed_sales = () => {
                           <View style={{ width: "100%" }}>
                             <View style={stylesGlobals.ViewCard}>
                               <MaterialCommunityIcons
-                                color={"#AFB0B1"}
+                                color={theme.colors.secondary}
                                 name="card-text-outline"
                                 size={22}
                                 style={styles.icon}
@@ -192,7 +160,7 @@ const processed_sales = () => {
                             </View>
                             <View style={stylesGlobals.ViewCard}>
                               <MaterialCommunityIcons
-                                color={"#AFB0B1"}
+                                color={theme.colors.secondary}
                                 name="account"
                                 size={22}
                                 style={styles.icon}
@@ -215,7 +183,7 @@ const processed_sales = () => {
                                 }}
                               >
                                 <MaterialCommunityIcons
-                                  color={"#AFB0B1"}
+                                  color={theme.colors.secondary}
                                   name="calendar-month"
                                   size={22}
                                   style={styles.icon}
@@ -238,7 +206,7 @@ const processed_sales = () => {
                                 }}
                               >
                                 <MaterialCommunityIcons
-                                  color={"#AFB0B1"}
+                                  color={theme.colors.secondary}
                                   name="clipboard-clock-outline"
                                   size={22}
                                   style={styles.icon}
@@ -268,7 +236,7 @@ const processed_sales = () => {
                                 }}
                               >
                                 <MaterialCommunityIcons
-                                  color={"#AFB0B1"}
+                                  color={theme.colors.secondary}
                                   name="ticket-percent"
                                   size={22}
                                   style={styles.icon}
@@ -292,7 +260,7 @@ const processed_sales = () => {
                                 }}
                               >
                                 <MaterialCommunityIcons
-                                  color={"#AFB0B1"}
+                                  color={theme.colors.secondary}
                                   name="cash"
                                   size={22}
                                   style={{ position: "absolute", left: 6 }}
@@ -309,51 +277,6 @@ const processed_sales = () => {
                                 </Text>
                               </View>
                             </View>
-                            <View style={stylesGlobals.ViewGroupButton}>
-                              {spinButton &&
-                              spinButton.loading &&
-                              Number(spinButton.index) === index ? (
-                                <Pressable
-                                  style={{
-                                    flexDirection: "row",
-                                    marginTop: 5,
-                                    width: 40,
-                                    height: 40,
-                                    borderRadius: 10,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <SpinnerButton />
-                                </Pressable>
-                              ) : (
-                                <ButtonForCard
-                                  onPress={() =>
-                                    handlePDF(
-                                      sale.pathJson,
-                                      sale.tipoDte,
-                                      sale.codigoGeneracion,
-                                      String(index)
-                                    )
-                                  }
-                                  icon={"eye-outline"}
-                                />
-                              )}
-                              <ButtonForCard
-                                onPress={() => {
-                                  setModalContingency(true);
-                                  setInfoContingecy({
-                                    saleDTE: sale.tipoDte,
-                                    pathJson: sale.pathJson,
-                                    customer_id: Number(sale.customerId),
-                                    box_id: sale.boxId,
-                                    employee: sale.employeeId,
-                                  });
-                                }}
-                                color={theme.colors.danger}
-                                icon={"database-plus"}
-                              />
-                            </View>
                           </View>
                         </Card>
                       ))}
@@ -364,7 +287,7 @@ const processed_sales = () => {
           </SafeAreaView>
           <Modal visible={modalContingency} animationType="fade">
             <ElectronicDTEContingency
-              infoContingency={infoContingency}
+              // infoContingency={infoContingency}
               setModalContingency={setModalContingency}
             />
           </Modal>
@@ -374,37 +297,11 @@ const processed_sales = () => {
   );
 };
 
-export default processed_sales;
+export default contingenceFE_CCFE;
 
 const styles = StyleSheet.create({
-  filter: {
-    flexDirection: "row",
-    justifyContent: "center",
-    width: "100%",
-    paddingLeft: 20,
-    marginTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#D1D5DB",
-    height: 56,
-    backgroundColor: "#f9f9f9",
-    alignItems: "center",
-  },
-  card: {
-    height: "auto",
-    marginBottom: 25,
-    padding: 5,
-    width: "95%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 10,
-  },
   icon: {
     position: "absolute",
     left: 7,
-    top: "30%",
-    transform: [{ translateY: -15 }],
   },
 });

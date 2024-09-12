@@ -96,6 +96,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
         login_mh(data.transmitter.nit, data.transmitter.claveApi)
           .then(async (login_mh) => {
             if (login_mh.data.status === "OK") {
+              console.log('mh:',login_mh.data.body);
               await save_token_mh(login_mh.data.body.token).catch((er) => {
               });
             } else {

@@ -10,6 +10,7 @@ export interface SaleStore {
   is_loading_details: boolean;
   sales: ISale[];
   recentSales: ISale[];
+  contingence_sales: ISale[];
   sale_details: ISaleDetails | undefined;
   json_sale: ISale_JSON_Debito | undefined;
   img_invalidation: string | null;
@@ -38,4 +39,5 @@ export interface SaleStore {
     img_invalidation: string | null,
     customer_id: number
   ) => Promise<IProcessSalesResponse | undefined>;
+  onGetSalesContingence: (id: number) => void;
 }

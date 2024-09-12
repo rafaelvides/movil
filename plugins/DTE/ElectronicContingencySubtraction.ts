@@ -10,7 +10,7 @@ import {
   SendMHFailed,
 } from "@/types/svf_dte/responseMH/responseMH.types";
 import { ITransmitter } from "@/types/transmitter/transmiter.types";
-import { ambiente, API_URL } from "@/utils/constants";
+import { ambiente, API_URL, SPACES_BUCKET } from "@/utils/constants";
 import axios, { AxiosError } from "axios";
 import { QR_URL } from "./make_generator/qr_generate";
 import jsPDF from "jspdf";
@@ -19,10 +19,11 @@ import * as FileSystem from "expo-file-system";
 import { formatDate } from "@/utils/date";
 import { s3Client } from "../s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import { return_token } from "../secure_store";
+import { return_token } from "../async_storage";
 import { save_logs } from "@/services/logs.service";
 import { SVFC_CF_Firmado, SVFE_CF_SEND } from "@/types/svf_dte/cf.types";
 import { generateCreditoFiscal } from "../templates/template_cf";
+import { generateURL } from "@/utils/utils";
 
 export const save_electronic_invoice = async (
   transmitter: ITransmitter,
@@ -40,15 +41,15 @@ export const save_electronic_invoice = async (
     passwordPri: transmitter.clavePublica,
     dteJson: {
       identificacion: saleDTE.identificacion,
-      documentoRelacionado: null,
+      documentoRelacionado: saleDTE.documentoRelacionado,
       emisor: saleDTE.emisor,
       receptor: saleDTE.receptor,
-      otrosDocumentos: null,
-      ventaTercero: null,
+      otrosDocumentos: saleDTE.otrosDocumentos,
+      ventaTercero: saleDTE.ventaTercero,
       cuerpoDocumento: saleDTE.cuerpoDocumento,
       resumen: saleDTE.resumen,
-      extension: null,
-      apendice: null,
+      extension: saleDTE.extension,
+      apendice: saleDTE.apendice,
     },
   };
   return await firmarDocumentoFactura(DTE)
@@ -61,14 +62,13 @@ export const save_electronic_invoice = async (
           tipoDte: saleDTE.identificacion.tipoDte ?? "01",
           documento: firmador.data.body,
         };
-
         if (token_mh) {
           const source = axios.CancelToken.source();
           const timeout = setTimeout(() => {
             source.cancel("El tiempo de espera ha expirado");
           }, 60000);
           const result = await Promise.race([
-            send_to_mh(data_send, token_mh).then(async ({ data }) => {
+            send_to_mh(data_send, token_mh, source).then(async ({ data }) => {
               clearTimeout(timeout);
 
               if (data.selloRecibido) {
@@ -78,26 +78,7 @@ export const save_electronic_invoice = async (
                   firma: firmador.data.body,
                 };
 
-                const doc = new jsPDF();
-                const QR = QR_URL(
-                  DTE_FORMED.identificacion.codigoGeneracion,
-                  DTE_FORMED.identificacion.fecEmi
-                );
-
-                const blobQR = await axios.get<ArrayBuffer>(QR, {
-                  responseType: "arraybuffer",
-                });
-
-                const document_gen = generateFacturaComercial(
-                  doc,
-                  DTE_FORMED,
-                  new Uint8Array(blobQR.data),
-                  img_invalidation,
-                  img_logo,
-                  false
-                );
-
-                if (document_gen) {
+                if (DTE_FORMED) {
                   const JSON_uri =
                     FileSystem.documentDirectory +
                     DTE.dteJson.identificacion.numeroControl +
@@ -113,36 +94,43 @@ export const save_electronic_invoice = async (
                     }
                   )
                     .then(async () => {
-                      const json_url = `CLIENTES/${
-                        transmitter.nombre
-                      }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
-                        DTE.dteJson.identificacion.codigoGeneracion
-                      }/${DTE.dteJson.identificacion.numeroControl}.json`;
-
-                      const pdf_url = `CLIENTES/${
-                        transmitter.nombre
-                      }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
-                        DTE.dteJson.identificacion.codigoGeneracion
-                      }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
-                      const filePath = `${FileSystem.documentDirectory}example.pdf`;
-                      await FileSystem.writeAsStringAsync(
-                        filePath,
-                        document_gen.replace(
-                          /^data:application\/pdf;filename=generated\.pdf;base64,/,
-                          ""
-                        ),
-                        {
-                          encoding: FileSystem.EncodingType.Base64,
-                        }
+                      const json_url = generateURL(
+                        DTE.dteJson.emisor.nombre,
+                        DTE.dteJson.identificacion.codigoGeneracion,
+                        "json",
+                        saleDTE.identificacion.tipoDte,
+                        saleDTE.identificacion.fecEmi
                       );
+                      // const json_url = `CLIENTES/${
+                      //   transmitter.nombre
+                      // }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
+                      //   DTE.dteJson.identificacion.codigoGeneracion
+                      // }/${DTE.dteJson.identificacion.numeroControl}.json`;
 
-                      const response = await fetch(filePath);
-                      const blob = await response.blob();
-                      const pdfUploadParams = {
-                        Bucket: "facturacion-seedcode",
-                        Key: pdf_url,
-                        Body: blob,
-                      };
+                      // const pdf_url = `CLIENTES/${
+                      //   transmitter.nombre
+                      // }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
+                      //   DTE.dteJson.identificacion.codigoGeneracion
+                      // }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
+                      // const filePath = `${FileSystem.documentDirectory}example.pdf`;
+                      // await FileSystem.writeAsStringAsync(
+                      //   filePath,
+                      //   document_gen.replace(
+                      //     /^data:application\/pdf;filename=generated\.pdf;base64,/,
+                      //     ""
+                      //   ),
+                      //   {
+                      //     encoding: FileSystem.EncodingType.Base64,
+                      //   }
+                      // );
+
+                      // const response = await fetch(filePath);
+                      // const blob = await response.blob();
+                      // const pdfUploadParams = {
+                      //   Bucket: "facturacion-seedcode",
+                      //   Key: pdf_url,
+                      //   Body: blob,
+                      // };
 
                       const blobJSON = await fetch(JSON_uri)
                         .then((res) => res.blob())
@@ -158,84 +146,58 @@ export const save_electronic_invoice = async (
                         };
                       }
                       const jsonUploadParams = {
-                        Bucket: "facturacion-seedcode",
+                        Bucket: SPACES_BUCKET,
                         Key: json_url,
                         Body: blobJSON!,
                       };
 
-                      if (jsonUploadParams && pdfUploadParams) {
+                      if (jsonUploadParams) {
                         s3Client
                           .send(new PutObjectCommand(jsonUploadParams))
-                          .then((response) => {
+                          .then(async (response) => {
                             if (response.$metadata) {
-                              s3Client
-                                .send(new PutObjectCommand(pdfUploadParams))
-                                .then(async(response) => {
-                                  if (response.$metadata) {
-                                    const payload = {
-                                      pdf: pdf_url,
-                                      dte: json_url,
-                                      sello: true,
-                                    };
-                                    await return_token()
-                                      .then((token) => {
-                                        return axios
-                                          .put(
-                                            API_URL +
-                                              "/sales/sale-update-transaction",
-                                            payload,
-                                            {
-                                              headers: {
-                                                Authorization: `Bearer ${token}`,
-                                              },
-                                            }
-                                          )
-                                          .then(() => {
-                                            return {
-                                              ok: true,
-                                              isErrorMh: false,
-                                              title: "Venta creada con éxito",
-                                              message: "Se creo la venta",
-                                            };
-                                          })
-                                          .catch(() => {
-                                            return {
-                                              ok: false,
-                                              isErrorMh: false,
-                                              title:
-                                                "Error al sincronizar la venta",
-                                              message:
-                                                "No se guardaron los datos correctamente",
-                                            };
-                                          });
-                                      })
-                                      .catch(() => {
-                                        return {
-                                          ok: false,
-                                          isErrorMh: false,
-                                          title:
-                                            "Error al sincronizar la venta",
-                                          message:
-                                            "No tienes los accesos necesarios",
-                                        };
-                                      });
-                                  } else {
-                                    return {
-                                      ok: false,
-                                      isErrorMh: false,
-                                      title: "Error al subir el pdf",
-                                      message:
-                                        "Error en respuesta del servidor",
-                                    };
-                                  }
+                              const payload = {
+                                pdf: "N/A",
+                                dte: json_url,
+                                sello: true,
+                              };
+                              await return_token()
+                                .then((token) => {
+                                  return axios
+                                    .put(
+                                      API_URL +
+                                        "/sales/sale-update-transaction",
+                                      payload,
+                                      {
+                                        headers: {
+                                          Authorization: `Bearer ${token}`,
+                                        },
+                                      }
+                                    )
+                                    .then(() => {
+                                      return {
+                                        ok: true,
+                                        isErrorMh: false,
+                                        title: "Venta creada con éxito",
+                                        message: "Se creo la venta",
+                                      };
+                                    })
+                                    .catch(() => {
+                                      return {
+                                        ok: false,
+                                        isErrorMh: false,
+                                        title: "Error al sincronizar la venta",
+                                        message:
+                                          "No se guardaron los datos correctamente",
+                                      };
+                                    });
                                 })
                                 .catch(() => {
                                   return {
                                     ok: false,
                                     isErrorMh: false,
-                                    title: "Error al subir el pdf",
-                                    message:
-                                      "El documento no se guardo correctamente",
+                                    title: "Error al sincronizar la venta",
+                                    message: "No tienes los accesos necesarios",
                                   };
                                 });
                             } else {
@@ -413,7 +375,7 @@ export const save_electronic_tax_credit = async (
             source.cancel("El tiempo de espera ha expirado");
           }, 60000);
           const result = await Promise.race([
-            send_to_mh(data_send, token_mh).then(async ({ data }) => {
+            send_to_mh(data_send, token_mh, source).then(async ({ data }) => {
               clearTimeout(timeout);
               if (data.selloRecibido) {
                 const DTE_FORMED = {

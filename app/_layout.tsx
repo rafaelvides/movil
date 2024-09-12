@@ -223,6 +223,13 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
                         title: "Reporte de ventas",
                       }}
                     />
+                     <Drawer.Screen
+                      name="(contingence)"
+                      options={{
+                        drawerLabel: "Ventas en contingencia",
+                        title: "Ventas en contingencia",
+                      }}
+                    />
                     <Drawer.Screen
                       name="(inventory)"
                       options={{

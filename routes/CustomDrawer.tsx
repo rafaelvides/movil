@@ -10,7 +10,7 @@ import {
   View,
   Text,
   StyleSheet,
-  Image
+  Image,
 } from "react-native";
 import { Href, Link } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -49,8 +49,7 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
     );
   };
 
-const {personalization} = useAuthStore()
-
+  const { personalization } = useAuthStore();
 
   return (
     <>
@@ -82,11 +81,15 @@ const {personalization} = useAuthStore()
               alignSelf: "center",
             }}
             source={
-              
-              personalization.logo ? { uri: personalization.logo }
+              personalization.logo
+                ? { uri: personalization.logo }
                 : require("../assets/images/react-logo.png")
             }
-            alt={personalization && personalization.name ? personalization.name: "Logo Default"}
+            alt={
+              personalization && personalization.name
+                ? personalization.name
+                : "Logo Default"
+            }
           />
         </View>
         <Text
@@ -97,7 +100,9 @@ const {personalization} = useAuthStore()
             alignSelf: "center",
           }}
         >
-          {personalization && personalization.name ? personalization.name : "ERP APP"}
+          {personalization && personalization.name
+            ? personalization.name
+            : "ERP APP"}
         </Text>
       </View>
       <View
@@ -450,6 +455,54 @@ const {personalization} = useAuthStore()
                           }}
                         >
                           Reporte de ventas
+                        </Text>
+                      </Pressable>
+                    </Link>
+                    <Link
+                      href={"/(contingence)/contingenceFE_CCFE" as Href}
+                      style={{ width: "100%" }}
+                      asChild
+                    >
+                      <Pressable
+                        style={{
+                          backgroundColor: currentRoute.name.includes(
+                            "contingence"
+                          )
+                            ? theme.colors.dark
+                            : "#fff",
+                          ...styles.drawer_item,
+                        }}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: "rgb(249 250 251)",
+                            padding: 10,
+                            borderRadius: 300,
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="database-sync"
+                            size={25}
+                            color={
+                              currentRoute.name.includes("contingence")
+                                ? theme.colors.dark
+                                : "#94a3b8"
+                            }
+                          />
+                        </View>
+                        <Text
+                          style={{
+                            fontWeight: currentRoute.name.includes(
+                              "contingence"
+                            )
+                              ? "bold"
+                              : "normal",
+                            color: currentRoute.name.includes("contingence")
+                              ? "white"
+                              : "rgb(17,24,39)",
+                          }}
+                        >
+                          Contingencia
                         </Text>
                       </Pressable>
                     </Link>
