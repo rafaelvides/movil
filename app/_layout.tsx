@@ -126,10 +126,11 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
       setLoading(false);
     });
   }, []);
-
+console.log(is_authenticated, "auth")
   useEffect(() => {
     if (!loading && isConnected !== null) {
       if (isConnected) {
+        console.log("lo que", is_authenticated)
         if (!loading && is_authenticated) {
           router.navigate("/home");
         } else {

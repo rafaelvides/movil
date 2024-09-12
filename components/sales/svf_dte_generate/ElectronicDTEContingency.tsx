@@ -3,12 +3,20 @@ import {
   Alert,
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   ToastAndroid,
   View,
 } from "react-native";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { useBillingStore } from "@/store/billing/billing.store";
 import { ITiposDeContingencia } from "@/types/billing/cat-005-tipos-de-contigencia.types";
@@ -18,10 +26,7 @@ import { DatePickerModal } from "react-native-paper-dates";
 import { getElSalvadorDateTimeParam } from "@/utils/date";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { return_token_mh } from "@/plugins/secure_store";
-import {
-  get_configuration,
-  get_user,
-} from "@/plugins/async_storage";
+import { get_configuration, get_user } from "@/plugins/async_storage";
 import { get_find_by_correlative } from "@/services/point_of_sale.service";
 import { ContingencySalesGenerator } from "@/plugins/DTE/ContingencySalesGenerator";
 import { generate_uuid } from "@/plugins/random/random";
@@ -34,6 +39,12 @@ import axios, { AxiosError } from "axios";
 import { useSaleStore } from "@/store/sale.store";
 import { showAlertAndWait } from "@/plugins/DTE/make_generator/make-dte";
 import { SendMHFailed } from "@/types/svf_dte/responseMH/responseMH.types";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import { useEmployeeStore } from "@/store/employee.store";
+import { IEmployee } from "@/types/employee/employee.types";
+import Input from "@/components/Global/components_app/Input";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const ElectronicDTEContingency = ({
   infoContingency,
@@ -49,7 +60,12 @@ const ElectronicDTEContingency = ({
   setModalContingency: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [isFocus, setIsFocus] = useState(false);
-  const [typeConting, setTypeConting] = useState<ITiposDeContingencia>();
+  const [typeConting, setTypeConting] = useState<ITiposDeContingencia>({
+    codigo: "2",
+    id: 2,
+    isActivated: true,
+    valores: "No disponibilidad de sistema del emisor",
+  });
   const [contingReason, setContingReason] = useState("");
   const [startDate, setStartDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
@@ -57,18 +73,24 @@ const ElectronicDTEContingency = ({
   const [isTimePickerVisible, setTimePickerVisibility] = useState(false);
   const [screenChange, setsCreenChange] = useState(false);
   const [message, setMessage] = useState("Esperando");
+  const [isFocusEmp, setIsFocusEmp] = useState(false);
+  const [employee, setEmployee] = useState<IEmployee>();
+  const { theme } = useContext(ThemeContext);
+
   const { cat_005_tipo_de_contingencia, OnGetCat005TipoDeContingencia } =
     useBillingStore();
   const { OnGetTransmitter, transmitter } = useTransmitterStore();
   const { OnPressAllSalesConting } = useSaleStore();
+  const { employee_list, OnGetEmployeesList } = useEmployeeStore();
   const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
   const handleConfirmTime = (date: Date) => {
     setTime(date);
     setTimePickerVisibility(false);
   };
-
+  console.log(typeConting);
   useEffect(() => {
     OnGetCat005TipoDeContingencia();
+    OnGetEmployeesList();
     OnGetTransmitter();
   }, []);
   useEffect(() => {
@@ -98,6 +120,10 @@ const ElectronicDTEContingency = ({
       ToastAndroid.show("No se encontraron correlativos", ToastAndroid.SHORT);
       return;
     }
+    if (!employee) {
+      ToastAndroid.show("No se encontró al responsable", ToastAndroid.SHORT);
+      return;
+    }
     setsCreenChange(true);
     const infoSale = [
       {
@@ -114,7 +140,8 @@ const ElectronicDTEContingency = ({
       Number(typeConting?.codigo),
       contingReason,
       infoSale,
-      correlatives.data.correlativo
+      correlatives.data.correlativo,
+      employee
     );
     firmarDocumentoContingencia(generateContingency)
       .then((result) => {
@@ -261,216 +288,317 @@ const ElectronicDTEContingency = ({
           </Text>
         </View>
       ) : (
-        <View
-          style={{
-            paddingHorizontal: 40,
-          }}
-        >
-          <Pressable
-            style={{
-              position: "absolute",
-              right: 10,
-              top: 10,
-              marginBottom: 40,
-            }}
-          >
-            <MaterialCommunityIcons
-              name="close"
-              size={30}
-              onPress={() => {
-                setModalContingency(false);
-              }}
-            />
-          </Pressable>
-          <Text
-            style={{
-              fontSize: 20,
-              marginTop: 10,
-              fontWeight: "400",
-            }}
-          >
-            Nuevo evento de contingencia
-          </Text>
-          <View style={{ width: "100%", marginTop: 10 }}>
-            <Text
-              style={{
-                fontSize: 16,
-                marginTop: 25,
-                fontWeight: "400",
-              }}
-            >
-              Tipo de contingencia
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: "#ef4444",
-                  fontWeight: "700",
-                }}
-              >
-                *
-              </Text>
-            </Text>
-            <SafeAreaView
-              style={{
-                width: "100%",
-                marginTop: 10,
-                borderWidth: 1,
-                borderColor: "#D1D5DB",
-                padding: 12,
-                borderRadius: 5,
-              }}
-            >
-              <Dropdown
-                style={[isFocus && { borderColor: "blue" }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={cat_005_tipo_de_contingencia}
-                itemTextStyle={{
-                  fontSize: 16,
-                }}
-                search
-                maxHeight={250}
-                labelField="valores"
-                valueField="id"
-                placeholder={!isFocus ? "Selecciona un item " : "..."}
-                searchPlaceholder="Escribe para buscar..."
-                value={typeConting}
-                onFocus={() => setIsFocus(true)}
-                onBlur={() => setIsFocus(false)}
-                onChange={(item) => {
-                  setTypeConting(item);
-                  setIsFocus(false);
-                }}
-                renderLeftIcon={() => (
-                  <AntDesign
-                    style={{ marginRight: 5 }}
-                    color={isFocus ? "green" : "black"}
-                    name="Safety"
-                    size={20}
-                  />
-                )}
-              />
-            </SafeAreaView>
-          </View>
-          <View>
-            <Text
-              style={{
-                fontSize: 16,
-                marginTop: 25,
-                fontWeight: "400",
-              }}
-            >
-              Motivo de contingencia
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: "#ef4444",
-                  fontWeight: "700",
-                }}
-              >
-                *
-              </Text>
-            </Text>
-           
-          </View>
+        <>
           <View
             style={{
-              flexDirection: "column",
+              borderRadius: 25,
               width: "100%",
-              marginTop: 25,
+              top: -5,
+              height: 130,
+              backgroundColor: theme.colors.third,
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <Text
+            <Pressable
               style={{
-                color: "#2C3377",
-                fontSize: 16,
-                fontWeight: "400",
+                position: "absolute",
+                right: 20,
+                top: 20,
               }}
             >
-              Fecha de Inicio
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: "#ef4444",
-                  fontWeight: "700",
+              <MaterialCommunityIcons
+                color={"white"}
+                name="close"
+                size={30}
+                onPress={() => {
+                  setModalContingency(false);
                 }}
-              >
-                *
-              </Text>
+              />
+            </Pressable>
+            <Text style={{ fontSize: 20, top: 15, color: "white" }}>
+              Nuevo evento de contingencia
             </Text>
-
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 10,
-                width: "100%",
-                backgroundColor: "#FFFFFF",
-              }}
-            >
-              <View style={styles.inputWrapper}>
-              
-                <MaterialCommunityIcons
-                  color={"#1359"}
-                  name="calendar-edit"
-                  size={27}
-                  style={styles.icon}
-                  onPress={() => setShowCalendarStart(true)}
+          </View>
+          <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
+            <ScrollView>
+              <View style={{ width: "100%", marginTop: 20 }}>
+                <Text style={stylesGlobals.textInput}>
+                  Motivo
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: "#ef4444",
+                      fontWeight: "700",
+                    }}
+                  >
+                    *
+                  </Text>
+                </Text>
+                <SafeAreaView
+                  style={{
+                    width: "100%",
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    padding: 12,
+                    borderRadius: 15,
+                  }}
+                >
+                  <Dropdown
+                    style={[isFocus && { borderColor: "blue" }]}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    inputSearchStyle={styles.inputSearchStyle}
+                    iconStyle={styles.iconStyle}
+                    data={cat_005_tipo_de_contingencia}
+                    itemTextStyle={{
+                      fontSize: 16,
+                    }}
+                    search
+                    maxHeight={250}
+                    labelField="valores"
+                    valueField="id"
+                    placeholder={!isFocus ? "Selecciona un item " : "..."}
+                    searchPlaceholder="Escribe para buscar..."
+                    value={typeConting}
+                    onFocus={() => setIsFocus(true)}
+                    onBlur={() => setIsFocus(false)}
+                    onChange={(item) => {
+                      setTypeConting(item);
+                      setIsFocus(false);
+                    }}
+                    renderLeftIcon={() => (
+                      <AntDesign
+                        style={{ marginRight: 5 }}
+                        color={isFocus ? "green" : "black"}
+                        name="Safety"
+                        size={20}
+                      />
+                    )}
+                  />
+                </SafeAreaView>
+              </View>
+              <View style={{ width: "100%", marginTop: 20 }}>
+                <Text style={stylesGlobals.textInput}>Responsable</Text>
+                <SafeAreaView
+                  style={{
+                    width: "100%",
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    padding: 12,
+                    borderRadius: 15,
+                  }}
+                >
+                  <Dropdown
+                    style={[isFocusEmp && { borderColor: "blue" }]}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    inputSearchStyle={styles.inputSearchStyle}
+                    iconStyle={styles.iconStyle}
+                    data={employee_list}
+                    itemTextStyle={{
+                      fontSize: 16,
+                    }}
+                    search
+                    maxHeight={250}
+                    labelField="fullName"
+                    valueField="id"
+                    placeholder={!isFocusEmp ? "Selecciona un item " : "..."}
+                    searchPlaceholder="Escribe para buscar..."
+                    value={employee}
+                    onFocus={() => setIsFocusEmp(true)}
+                    onBlur={() => setIsFocusEmp(false)}
+                    onChange={(item) => {
+                      setEmployee(item);
+                      setIsFocusEmp(false);
+                    }}
+                    renderLeftIcon={() => (
+                      <AntDesign
+                        style={styles.icon}
+                        color={isFocusEmp ? "blue" : "black"}
+                        name="Safety"
+                        size={20}
+                      />
+                    )}
+                  />
+                </SafeAreaView>
+              </View>
+              <View style={{ marginTop: 20 }}>
+                <Text style={stylesGlobals.textInput}>
+                  Información adicional
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: "#ef4444",
+                      fontWeight: "700",
+                    }}
+                  >
+                    *
+                  </Text>
+                </Text>
+                <TextInput
+                  editable
+                  multiline
+                  numberOfLines={3}
+                  placeholder={`Ingresa tus observaciones e información adicional`}
+                  onChangeText={(text) => {
+                    setContingReason(text);
+                  }}
+                  style={{
+                    padding: 10,
+                    borderRadius: 15,
+                    borderColor: "#D9D9DA",
+                    borderWidth: 1,
+                    color: "black",
+                  }}
                 />
               </View>
-              <DatePickerModal
-                locale="es"
-                mode="single"
-                date={startDate}
-                visible={showCalendarStart}
-                onConfirm={({ date }) => {
-                  setShowCalendarStart(false);
-                  if (date) {
-                    setStartDate(date);
-                  }
-                }}
-                onDismiss={() => setShowCalendarStart(false)}
-              />
-            </View>
-          </View>
-          <View style={{ marginTop: 18 }}>
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "400",
-              }}
-            >
-              Hora de Inicio
-              <Text
+              <View style={{ flexDirection: "row", width: "100%", gap: 30 }}>
+                <View style={{ marginTop: 20, width: "45%" }}>
+                  <Text style={stylesGlobals.textInput}>
+                    Fecha de Inicio
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: "#ef4444",
+                        fontWeight: "700",
+                      }}
+                    >
+                      *
+                    </Text>
+                  </Text>
+                  <Input
+                    keyboardType="numeric"
+                    placeholder="0.0"
+                    defaultValue={startDate.toLocaleString("es", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })}
+                    onPress={() => setShowCalendarStart(true)}
+                    icon="calendar-edit"
+                    aria-labelledbyledBy="inputLabel"
+                  />
+                  <DatePickerModal
+                    locale="es"
+                    mode="single"
+                    date={startDate}
+                    visible={showCalendarStart}
+                    onConfirm={({ date }) => {
+                      setShowCalendarStart(false);
+                      if (date) {
+                        setStartDate(date);
+                      }
+                    }}
+                    onDismiss={() => setShowCalendarStart(false)}
+                  />
+                </View>
+                <View style={{ marginTop: 20, width: "45%" }}>
+                  <Text style={stylesGlobals.textInput}>
+                    Hora de Inicio
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: "#ef4444",
+                        fontWeight: "700",
+                      }}
+                    >
+                      *
+                    </Text>
+                  </Text>
+                  <Input
+                    showSoftInputOnFocus={false}
+                    caretHidden={true}
+                    keyboardType="numeric"
+                    placeholder="0.0"
+                    defaultValue={getElSalvadorDateTimeParam(time).horEmi}
+                    onPress={() => setTimePickerVisibility(true)}
+                    icon="calendar-edit"
+                    aria-labelledbyledBy="inputLabel"
+                  />
+                  <DateTimePickerModal
+                    isVisible={isTimePickerVisible}
+                    mode="time"
+                    onConfirm={handleConfirmTime}
+                    onCancel={() => setTimePickerVisibility(false)}
+                  />
+                </View>
+              </View>
+              <View style={{ flexDirection: "row", width: "100%", gap: 30 }}>
+                <View style={{ marginTop: 20, width: "45%" }}>
+                  <Text style={stylesGlobals.textInput}>
+                    Fecha de Fin
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: "#ef4444",
+                        fontWeight: "700",
+                      }}
+                    >
+                      *
+                    </Text>
+                  </Text>
+                  <Input
+                    keyboardType="numeric"
+                    placeholder="0.0"
+                    defaultValue={startDate.toLocaleString("es", {
+                      year: "numeric",
+                      month: "2-digit",
+                      day: "2-digit",
+                    })}
+                    onPress={() => setShowCalendarStart(true)}
+                    icon="calendar-edit"
+                    aria-labelledbyledBy="inputLabel"
+                  />
+                </View>
+                <View style={{ marginTop: 20, width: "45%" }}>
+                  <Text style={stylesGlobals.textInput}>
+                    Hora de Fin
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: "#ef4444",
+                        fontWeight: "700",
+                      }}
+                    >
+                      *
+                    </Text>
+                  </Text>
+                  <Input
+                    showSoftInputOnFocus={false}
+                    caretHidden={true}
+                    keyboardType="numeric"
+                    placeholder="0.0"
+                    defaultValue={getElSalvadorDateTimeParam(time).horEmi}
+                    onPress={() => setTimePickerVisibility(true)}
+                    icon="calendar-edit"
+                    aria-labelledbyledBy="inputLabel"
+                  />
+                  <DateTimePickerModal
+                    isVisible={isTimePickerVisible}
+                    mode="time"
+                    onConfirm={handleConfirmTime}
+                    onCancel={() => setTimePickerVisibility(false)}
+                  />
+                </View>
+              </View>
+              <View
                 style={{
-                  fontSize: 16,
-                  color: "#ef4444",
-                  fontWeight: "700",
+                  ...stylesGlobals.viewBotton,
+                  marginBottom: 20,
+                  marginTop: 20,
                 }}
               >
-                *
-              </Text>
-            </Text>
-            <View style={styles.inputWrapper}>
-              <MaterialCommunityIcons
-                color={"#1359"}
-                name="clock-edit-outline"
-                size={27}
-                style={styles.icon}
-                onPress={() => setTimePickerVisibility(true)}
-              />
-            </View>
-            <DateTimePickerModal
-              isVisible={isTimePickerVisible}
-              mode="time"
-              onConfirm={handleConfirmTime}
-              onCancel={() => setTimePickerVisibility(false)}
-            />
-          </View>
-
-        </View>
+                <Button
+                  withB={390}
+                  onPress={() => handleContingencySubtraction()}
+                  Title="Filtrar"
+                  color={theme.colors.third}
+                />
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </>
       )}
     </>
   );
@@ -501,10 +629,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   icon: {
-    position: "absolute",
-    right: 20,
-    top: "50%",
-    transform: [{ translateY: -15 }],
+    marginRight: 5,
   },
   input: {
     height: "100%",

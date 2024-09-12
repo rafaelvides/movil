@@ -1,17 +1,26 @@
-import { View, Text, ToastAndroid, Alert, Pressable } from "react-native";
-import React, { Dispatch, SetStateAction, useContext, useEffect, useState } from "react";
+import {
+  View,
+  ToastAndroid,
+  Alert,
+  Animated,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+} from "react-native";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { ICustomer } from "@/types/customer/customer.types";
 import { ITransmitter } from "@/types/transmitter/transmiter.types";
 import { ICat002TipoDeDocumento } from "@/types/billing/cat-002-tipo-de-documento.types";
 import { ICartProduct } from "@/types/branch_product/branch_product.types";
 import { IFormasDePagoResponse } from "@/types/billing/cat-017-forma-de-pago.types";
 import { ITipoTributo } from "@/types/billing/cat-015-tipo-de-tributo.types";
-import {
-  get_box_data,
-  get_configuration,
-  get_employee_id,
-  get_user,
-} from "@/plugins/async_storage";
+import { get_box_data, get_user } from "@/plugins/async_storage";
 import { generate_credito_fiscal } from "@/plugins/DTE/ElectronicTaxCreditGenerator";
 import { SVFE_CF_SEND } from "@/types/svf_dte/cf.types";
 import {
@@ -19,7 +28,8 @@ import {
   firmarDocumentoFiscal,
   send_to_mh,
 } from "@/services/ministry_of_finance.service";
-import { return_token, return_token_mh } from "@/plugins/secure_store";
+import { return_token_mh } from "@/plugins/secure_store";
+import { return_token } from "@/plugins/async_storage";
 import { ambiente, API_URL, SPACES_BUCKET } from "@/utils/constants";
 import axios, { AxiosError } from "axios";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -33,8 +43,6 @@ import {
 } from "@/types/svf_dte/responseMH/responseMH.types";
 import { ICheckResponse } from "@/types/dte/Check.types";
 import jsPDF from "jspdf";
-import { generateCreditoFiscal } from "@/plugins/templates/template_cf";
-import { useSaleStore } from "@/store/sale.store";
 import { QR_URL } from "@/plugins/DTE/make_generator/qr_generate";
 import { save_logs } from "@/services/logs.service";
 import { PayloadMH } from "@/types/dte/DTE.types";
@@ -46,6 +54,12 @@ import * as Sharing from "expo-sharing";
 import Button from "@/components/Global/components_app/Button";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
+import { IEmployee } from "@/types/employee/employee.types";
+import { useBranchProductStore } from "@/store/branch_product.store";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
+import ErrorAlert from "@/components/Global/manners/ErrorAlert";
+import { sending_steps } from "@/utils/dte";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 
 interface Props {
   customer: ICustomer | undefined;
@@ -58,8 +72,7 @@ interface Props {
   focusButton: boolean;
   totalUnformatted: number;
   onePercentRetention: number;
-  setLoadingSave: Dispatch<SetStateAction<boolean>>;
-  setMessage: Dispatch<SetStateAction<string>>;
+  employee: IEmployee | undefined;
   setShowModalSale: Dispatch<SetStateAction<boolean>>;
   setLoadingRevision: Dispatch<SetStateAction<boolean>>;
   clearAllData: () => void;
@@ -70,8 +83,7 @@ const ElectronicTaxCredit = (props: Props) => {
     typeDocument,
     transmitter,
     cart_products,
-    setLoadingSave,
-    setMessage,
+    employee,
     setShowModalSale,
     clearAllData,
     setLoadingRevision,
@@ -82,8 +94,17 @@ const ElectronicTaxCredit = (props: Props) => {
     totalUnformatted,
     onePercentRetention,
   } = props;
+
+  const [loadingSale, setLoadingSale] = useState(false);
+  const [modalError, setModalError] = useState(false);
   const [title, setTitle] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [currentDTE, setCurrentDTE] = useState<SVFE_CF_SEND>();
+  const [detailSale, setDetailSale] = useState({
+    box: 0,
+    codEmployee: 0,
+  });
+  const [step, setStep] = useState(0);
   const [responseMH, setResponseMH] = useState<{
     respuestaMH: ResponseMHSuccess;
     firma: string;
@@ -104,17 +125,18 @@ const ElectronicTaxCredit = (props: Props) => {
     firma: "",
   });
   const { theme } = useContext(ThemeContext);
+  const { emptyCart } = useBranchProductStore();
 
-  // const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
   const { OnGetCorrelativesByDte } = usePointOfSaleStore();
+  const progress = new Animated.Value(step);
 
-  // useEffect(() => {
-  //   (async () => {
-  //     await get_configuration().then((data) => {
-  //       OnImgPDF(String(data?.logo));
-  //     });
-  //   })();
-  // }, []);
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: step,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [step]);
 
   const generateTaxCredit = async () => {
     if (conditionPayment === 0) {
@@ -144,7 +166,7 @@ const ElectronicTaxCredit = (props: Props) => {
     const total_filteres = tipo_pago
       .map((a) => a.monto)
       .reduce((a, b) => a + b, 0);
-      
+
     if (total_filteres !== Number(totalUnformatted.toFixed(2))) {
       ToastAndroid.show(
         "Los montos de las formas de pago no coinciden con el total de la compra",
@@ -186,7 +208,7 @@ const ElectronicTaxCredit = (props: Props) => {
       ToastAndroid.show("No se encontró el usuario", ToastAndroid.SHORT);
       return;
     }
-    const correlatives = await OnGetCorrelativesByDte(user.id, "CCF");
+    const correlatives = await OnGetCorrelativesByDte(user.id, "CCFE");
 
     if (!correlatives) {
       ToastAndroid.show("No se encontraron correlativos", ToastAndroid.SHORT);
@@ -212,9 +234,7 @@ const ElectronicTaxCredit = (props: Props) => {
       return;
     }
 
-    const codeEmployee = await get_employee_id();
-
-    if (!codeEmployee) {
+    if (!employee) {
       ToastAndroid.show("No se encontró el empleado", ToastAndroid.SHORT);
       return;
     }
@@ -254,9 +274,12 @@ const ElectronicTaxCredit = (props: Props) => {
         totalUnformatted,
         onePercentRetention
       );
-      setLoadingSave(true);
-      setMessage("Estamos firmando tu documento");
-
+      setLoadingSale(true);
+      setCurrentDTE(generate);
+      setDetailSale({
+        box: box.id,
+        codEmployee: employee.id,
+      });
       firmarDocumentoFiscal(generate)
         .then(async (firma) => {
           if (firma.data.status === "ERROR") {
@@ -264,7 +287,8 @@ const ElectronicTaxCredit = (props: Props) => {
 
             setTitle("Error en el firmador " + new_data.body.codigo);
             setErrorMessage(new_data.body.mensaje);
-            setLoadingSave(false);
+            setModalError(true);
+            setLoadingSale(false);
             return;
           }
           if (firma.data.body) {
@@ -280,345 +304,23 @@ const ElectronicTaxCredit = (props: Props) => {
               generate,
               firma.data.body,
               box,
-              codeEmployee
+              String(employee.id)
             );
-            setMessage("Se ah enviado a hacienda, esperando respuesta...");
           } else {
             setTitle("Error en el firmador");
             setErrorMessage("Error al firmar el documento");
-            setLoadingSave(false);
+            setModalError(true);
+            setLoadingSale(false);
             return;
           }
-          // const token_mh = await return_token_mh();
-          // if (firma.data.body) {
-          //   const data_send: PayloadMH = {
-          //     ambiente: ambiente,
-          //     idEnvio: 1,
-          //     version: 3,
-          //     tipoDte: "03",
-          //     documento: firma.data.body,
-          //   };
-          //   setMessage("Se ah enviado a hacienda, esperando respuesta...");
-          //   if (token_mh) {
-          //     const source = axios.CancelToken.source();
-          //     const timeoutId = setTimeout(() => {
-          //       source.cancel("El tiempo de espera ha expirado");
-          //       setLoadingSave(false);
-          //     }, 60000);
-          //     Promise.race([
-          //       send_to_mh(data_send, token_mh).then(async ({ data }) => {
-          //         clearTimeout(timeoutId);
-          //         if (data.selloRecibido) {
-          //           setMessage("El DTE ah sido validado por hacienda");
-          //           const DTE_FORMED = {
-          //             ...generate.dteJson,
-          //             respuestaMH: data,
-          //             firma: firma.data.body,
-          //           };
-          //           const DTE_FORMED_VERIFY = {
-          //             respuestaMH: data,
-          //             firma: firma.data.body,
-          //           };
-          //           setResponseMH(DTE_FORMED_VERIFY);
-          //           const doc = new jsPDF();
-          //           const QR = QR_URL(
-          //             DTE_FORMED.identificacion.codigoGeneracion,
-          //             DTE_FORMED.identificacion.fecEmi
-          //           );
-
-          //           const blobQR = await axios.get<ArrayBuffer>(QR, {
-          //             responseType: "arraybuffer",
-          //           });
-          //           const document_gen = generateCreditoFiscal(
-          //             doc,
-          //             DTE_FORMED,
-          //             new Uint8Array(blobQR.data),
-          //             img_invalidation,
-          //             img_logo,
-          //             false
-          //           );
-          //           if (document_gen) {
-          //             const JSON_uri =
-          //               FileSystem.documentDirectory +
-          //               generate.dteJson.identificacion.numeroControl +
-          //               ".json";
-
-          //             FileSystem.writeAsStringAsync(
-          //               JSON_uri,
-          //               JSON.stringify({
-          //                 ...DTE_FORMED,
-          //               }),
-          //               {
-          //                 encoding: FileSystem.EncodingType.UTF8,
-          //               }
-          //             )
-          //               .then(async () => {
-          //                 const json_url = `CLIENTES/${
-          //                   transmitter.nombre
-          //                 }/${new Date().getFullYear()}/VENTAS/CRÉDITO_FISCAL/${formatDate()}/${
-          //                   generate.dteJson.identificacion.codigoGeneracion
-          //                 }/${
-          //                   generate.dteJson.identificacion.numeroControl
-          //                 }.json`;
-          //                 const pdf_url = `CLIENTES/${
-          //                   transmitter.nombre
-          //                 }/${new Date().getFullYear()}/VENTAS/CRÉDITO_FISCAL/${formatDate()}/${
-          //                   generate.dteJson.identificacion.codigoGeneracion
-          //                 }/${
-          //                   generate.dteJson.identificacion.numeroControl
-          //                 }.pdf`;
-          //                 setMessage("Estamos generando los documentos");
-
-          //                 const filePath = `${FileSystem.documentDirectory}example.pdf`;
-          //                 await FileSystem.writeAsStringAsync(
-          //                   filePath,
-          //                   document_gen.replace(
-          //                     /^data:application\/pdf;filename=generated\.pdf;base64,/,
-          //                     ""
-          //                   ),
-          //                   {
-          //                     encoding: FileSystem.EncodingType.Base64,
-          //                   }
-          //                 );
-          //                 const response = await fetch(filePath);
-
-          //                 if (!response) {
-          //                   setLoadingSave(false);
-          //                   return;
-          //                 }
-
-          //                 const blob = await response.blob();
-          //                 const pdfUploadParams = {
-          //                   Bucket: "facturacion-seedcode",
-          //                   Key: pdf_url,
-          //                   Body: blob,
-          //                 };
-
-          //                 const blobJSON = await fetch(JSON_uri)
-          //                   .then((res) => res.blob())
-          //                   .catch(() => {
-          //                     ToastAndroid.show(
-          //                       "Error al generar la url del documento",
-          //                       ToastAndroid.LONG
-          //                     );
-          //                     setLoadingSave(false);
-          //                     return null;
-          //                   });
-          //                 if (!blobJSON) {
-          //                   setLoadingSave(false);
-          //                   return;
-          //                 }
-
-          //                 const jsonUploadParams = {
-          //                   Bucket: "facturacion-seedcode",
-          //                   Key: json_url,
-          //                   Body: blobJSON!,
-          //                 };
-
-          //                 if (jsonUploadParams && pdfUploadParams) {
-          //                   s3Client
-          //                     .send(new PutObjectCommand(jsonUploadParams))
-          //                     .then((response) => {
-          //                       if (response.$metadata) {
-          //                         s3Client
-          //                           .send(new PutObjectCommand(pdfUploadParams))
-          //                           .then((response) => {
-          //                             if (response.$metadata) {
-          //                               setMessage(
-          //                                 "Estamos guardando tus documentos"
-          //                               );
-          //                               const payload = {
-          //                                 pdf: pdf_url,
-          //                                 dte: json_url,
-          //                                 cajaId: box.id,
-          //                                 codigoEmpleado: codeEmployee,
-          //                                 sello: true,
-          //                                 clienteId: customer?.id,
-          //                               };
-          //                               return_token()
-          //                                 .then((token) => {
-          //                                   axios
-          //                                     .post(
-          //                                       API_URL +
-          //                                         "/sales/sale-fiscal-transaction",
-          //                                       payload,
-          //                                       {
-          //                                         headers: {
-          //                                           Authorization: `Bearer ${token}`,
-          //                                         },
-          //                                       }
-          //                                     )
-          //                                     .then(() => {
-          //                                       setMessage("");
-          //                                       Alert.alert(
-          //                                         "Éxito",
-          //                                         "Se completaron todos los procesos"
-          //                                       );
-          //                                       setLoadingSave(false);
-          //                                       setShowModalSale(false);
-          //                                       clearAllData();
-          //                                     })
-          //                                     .catch(() => {
-          //                                       ToastAndroid.show(
-          //                                         "Error al guarda la venta",
-          //                                         ToastAndroid.LONG
-          //                                       );
-          //                                       setMessage(
-          //                                         "Se produjo un error al guardar la venta en nuestra base de datos"
-          //                                       );
-          //                                       setLoadingSave(false);
-          //                                     });
-          //                                 })
-          //                                 .catch(() => {
-          //                                   setLoadingSave(false);
-          //                                   ToastAndroid.show(
-          //                                     "No tienes el acceso necesario",
-          //                                     ToastAndroid.LONG
-          //                                   );
-          //                                 });
-          //                             } else {
-          //                               setLoadingSave(false);
-          //                               ToastAndroid.show(
-          //                                 "Error inesperado, contacte al equipo de soporte1",
-          //                                 ToastAndroid.LONG
-          //                               );
-          //                             }
-          //                           })
-          //                           .catch(() => {
-          //                             setLoadingSave(false);
-          //                             ToastAndroid.show(
-          //                               "Ocurrió un error al subir el PDF",
-          //                               ToastAndroid.LONG
-          //                             );
-          //                           });
-          //                       } else {
-          //                         setLoadingSave(false);
-          //                         ToastAndroid.show(
-          //                           "Error inesperado, contacte al equipo de soporte",
-          //                           ToastAndroid.LONG
-          //                         );
-          //                       }
-          //                     })
-          //                     .catch(() => {
-          //                       ToastAndroid.show(
-          //                         "Ocurrió un error al subir el Json",
-          //                         ToastAndroid.LONG
-          //                       );
-          //                     });
-          //                 } else {
-          //                   setLoadingSave(false);
-          //                   ToastAndroid.show(
-          //                     "No tienes los documentos",
-          //                     ToastAndroid.LONG
-          //                   );
-          //                 }
-          //               })
-          //               .catch(() => {
-          //                 setLoadingSave(false);
-          //                 ToastAndroid.show(
-          //                   "Ocurrió un error en el Json",
-          //                   ToastAndroid.LONG
-          //                 );
-          //               });
-          //           } else {
-          //             ToastAndroid.show(
-          //               "Hubo un error al generar la información",
-          //               ToastAndroid.LONG
-          //             );
-          //             setLoadingSave(false);
-          //           }
-          //         } else {
-          //           ToastAndroid.show(
-          //             "Hacienda no respondió con el sello",
-          //             ToastAndroid.LONG
-          //           );
-          //         }
-          //       }),
-          //     ]).catch(async (error: AxiosError<SendMHFailed>) => {
-          //       clearTimeout(timeoutId);
-          //       if (error.response?.status === 401) {
-          //         ToastAndroid.show(
-          //           "No tienes los accesos necesarios",
-          //           ToastAndroid.LONG
-          //         );
-          //         setLoadingSave(false);
-          //         return;
-          //       } else {
-          //         if (error.response?.data) {
-          //           Alert.alert(
-          //             error.response?.data.descripcionMsg
-          //               ? error.response?.data.descripcionMsg
-          //               : "El Ministerio de Hacienda no pudo procesar la solicitud",
-          //             error.response.data.observaciones &&
-          //               error.response.data.observaciones.length > 0
-          //               ? error.response?.data.observaciones.join("\n\n")
-          //               : error.response?.data.descripcionMsg
-          //               ? ""
-          //               : "El Ministerio de Hacienda no pudo responder a la solicitud. Por favor, inténtalo de nuevo más tarde.",
-          //             [
-          //               {
-          //                 text: "Reintentar",
-          //                 onPress: () => generateTaxCredit(),
-          //               },
-          //               {
-          //                 text: "Revisar",
-          //                 onPress: () => {
-          //                   handleVerify(generate, box.id, codeEmployee);
-          //                 },
-          //               },
-          //               {
-          //                 text: "Enviar a contingencia",
-          //                 onPress: () =>
-          //                   handleContigence(generate, box.id, codeEmployee),
-          //               },
-          //             ]
-          //           );
-          //           setLoadingSave(false);
-          //           return;
-          //         } else {
-          //           ToastAndroid.show(
-          //             "Ah ocurrido un error, consulte al equipo de soporte técnico",
-          //             ToastAndroid.LONG
-          //           );
-          //           setLoadingSave(false);
-          //         }
-          //       }
-          //       if (error.response?.data) {
-          //         await save_logs({
-          //           title:
-          //             error.response.data.descripcionMsg ??
-          //             "Error al procesar venta",
-          //           message:
-          //             error.response.data.observaciones &&
-          //             error.response.data.observaciones.length > 0
-          //               ? error.response?.data.observaciones.join("\n\n")
-          //               : "",
-          //           generationCode:
-          //             generate.dteJson.identificacion.codigoGeneracion,
-          //         });
-          //       }
-          //     });
-          //   } else {
-          //     ToastAndroid.show(
-          //       "No se ha podido obtener el token de hacienda",
-          //       ToastAndroid.LONG
-          //     );
-          //     setLoadingSave(false);
-          //   }
-          // } else {
-          //   ToastAndroid.show(
-          //     "No se proporciono la firma necesaria",
-          //     ToastAndroid.LONG
-          //   );
-          //   setLoadingSave(false);
-          // }
         })
         .catch(() => {
           Alert.alert(
             "Error al firmar el documento",
             "Intenta firmar el documento mas tarde o contacta al equipo de soporte"
           );
-          setLoadingSave(false);
+          setModalError(true);
+          setLoadingSale(false);
         });
     } catch (error) {
       ToastAndroid.show(`Error: ${error}`, ToastAndroid.LONG);
@@ -637,45 +339,56 @@ const ElectronicTaxCredit = (props: Props) => {
     }, 25000);
     const token_mh = await return_token_mh();
     if (!token_mh) {
-      setLoadingSave(false);
       ToastAndroid.show(
         "Fallo al obtener las credenciales del Ministerio de Hacienda",
         ToastAndroid.LONG
       );
+      setLoadingSale(false);
       return;
     }
-    send_to_mh(data, token_mh!, source)
-      .then(({ data }) => {
-        setMessage("Estamos subiendo los archivos...");
-        handleUploadFile(json, firma, data, box, codeEmployee);
-      })
-      .catch((error: AxiosError<SendMHFailed>) => {
+    setStep(1);
+    Promise.race([
+      send_to_mh(data, token_mh!, source).then(({ data }) => {
         clearTimeout(timeout);
-        if (axios.isCancel(error)) {
-          setTitle("Tiempo de espera agotado");
-          setErrorMessage("El tiempo limite de espera ha expirado");
-          setLoadingSave(false);
-        }
+        handleUploadFile(json, firma, data, box, codeEmployee);
+      }),
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("El tiempo de espera ha expirado"));
+          setLoadingSale(false);
+          setModalError(true);
+        }, 25000);
+      }),
+    ]).catch((error: AxiosError<SendMHFailed>) => {
+      clearTimeout(timeout);
+      if (axios.isCancel(error)) {
+        setTitle("Tiempo de espera agotado");
+        setErrorMessage("El tiempo limite de espera ha expirado");
+        setLoadingSale(false);
+        setModalError(true);
+      }
 
-        if (error.response?.data) {
-          setErrorMessage(
-            error.response.data.observaciones &&
-              error.response.data.observaciones.length > 0
-              ? error.response?.data.observaciones.join("\n\n")
-              : ""
-          );
-          setTitle(
-            error.response.data.descripcionMsg ?? "Error al procesar venta"
-          );
-          setLoadingSave(false);
-        } else {
-          setTitle("No se obtuvo respuesta de hacienda");
-          setErrorMessage(
-            "Al enviar la venta, no se obtuvo respuesta de hacienda"
-          );
-          setLoadingSave(false);
-        }
-      });
+      if (error.response?.data) {
+        setErrorMessage(
+          error.response.data.observaciones &&
+            error.response.data.observaciones.length > 0
+            ? error.response?.data.observaciones.join("\n\n")
+            : "No se pudo obtener una respuesta de hacienda, inténtelo de nuevo mas tarde..."
+        );
+        setTitle(
+          error.response.data.descripcionMsg ?? "Error al procesar venta"
+        );
+        setModalError(true);
+        setLoadingSale(false);
+      } else {
+        setTitle("No se obtuvo respuesta de hacienda");
+        setErrorMessage(
+          "Al enviar la venta, no se obtuvo respuesta de hacienda"
+        );
+        setModalError(true);
+        setLoadingSale(false);
+      }
+    });
   };
   const handleUploadFile = async (
     json: SVFE_CF_SEND,
@@ -684,6 +397,7 @@ const ElectronicTaxCredit = (props: Props) => {
     box: IBox,
     codeEmployee: string
   ) => {
+    setStep(2);
     const DTE_FORMED = {
       ...json.dteJson,
       respuestaMH: respuestaMH,
@@ -694,6 +408,7 @@ const ElectronicTaxCredit = (props: Props) => {
       FileSystem.documentDirectory +
       json.dteJson.identificacion.numeroControl +
       ".json";
+
     FileSystem.writeAsStringAsync(
       JSON_uri,
       JSON.stringify({
@@ -717,11 +432,11 @@ const ElectronicTaxCredit = (props: Props) => {
             "Error al generar la url del documento",
             ToastAndroid.LONG
           );
-          setLoadingSave(false);
+          setLoadingSale(false);
           return null;
         });
       if (!blobJSON) {
-        setLoadingSave(false);
+        setLoadingSale(false);
         return;
       }
       const jsonUploadParams = {
@@ -733,8 +448,7 @@ const ElectronicTaxCredit = (props: Props) => {
         s3Client
           .send(new PutObjectCommand(jsonUploadParams))
           .then(() => {
-            console.log("bueno");
-            setMessage("Estamos guardando tus documentos...");
+            setStep(3);
             handleSave(
               json_url,
               "pdf_url",
@@ -748,13 +462,12 @@ const ElectronicTaxCredit = (props: Props) => {
             //   pdf: "",
             // });
           })
-          .catch((error) => {
-            console.log(error);
+          .catch(() => {
             ToastAndroid.show(
               "Error al subir el archivo JSON",
               ToastAndroid.LONG
             );
-            setLoadingSave(false);
+            setLoadingSale(false);
             Alert.alert(
               "Fallo la subida a nuestros servidores",
               "Puedes descargar el JSON e intentar subir la venta manualmente",
@@ -777,7 +490,7 @@ const ElectronicTaxCredit = (props: Props) => {
           });
       } else {
         ToastAndroid.show("Error al generar el archivo", ToastAndroid.LONG);
-        setLoadingSave(false);
+        setLoadingSale(false);
         Alert.alert(
           "Fallo la subida a nuestros servidores",
           "Puedes descargar el JSON e intentar subir la venta manualmente",
@@ -813,6 +526,7 @@ const ElectronicTaxCredit = (props: Props) => {
       sello: true,
       clienteId: customer?.id,
     };
+    setStep(4);
     return_token()
       .then((token) => {
         axios
@@ -822,16 +536,19 @@ const ElectronicTaxCredit = (props: Props) => {
             },
           })
           .then(() => {
-            setMessage("");
-            Alert.alert("Éxito", "Se completaron todos los procesos");
-            setLoadingSave(false);
+            Toast.show({
+              type: ALERT_TYPE.SUCCESS,
+              title: "Éxito",
+              textBody: "Se completaron todos los procesos",
+            });
+            setLoadingSale(false);
             setShowModalSale(false);
+            emptyCart();
             clearAllData();
           })
-          .catch((error) => {
-            console.log("el error", error);
+          .catch(() => {
             ToastAndroid.show("Error al guarda la venta", ToastAndroid.LONG);
-            setLoadingSave(false);
+            setLoadingSale(false);
             Alert.alert(
               "Fallo al guardarlo en nuestra base de datos",
               "¿Quieres volver a intentarlo?",
@@ -862,7 +579,7 @@ const ElectronicTaxCredit = (props: Props) => {
           });
       })
       .catch(() => {
-        setLoadingSave(false);
+        setLoadingSale(false);
         ToastAndroid.show("No tienes el acceso necesario", ToastAndroid.LONG);
       });
   };
@@ -871,7 +588,7 @@ const ElectronicTaxCredit = (props: Props) => {
       await FileSystem.writeAsStringAsync(JSON_uri, json);
       await Sharing.shareAsync(JSON_uri);
     } catch (error) {
-      ToastAndroid.show(`Error: ${error}`, ToastAndroid.LONG);
+      ToastAndroid.show(`Error al descargar el JSON`, ToastAndroid.LONG);
     }
   };
   const handleContigence = async (
@@ -881,13 +598,8 @@ const ElectronicTaxCredit = (props: Props) => {
   ) => {
     if (!DTE) {
       ToastAndroid.show("No se obtuvo la venta", ToastAndroid.LONG);
-      setLoadingSave(false);
       return;
     }
-    setLoadingSave(true);
-    setMessage(
-      "Estamos realizando el evento\n de contingencia, Espera un momento..."
-    );
 
     if (DTE) {
       const JSON_uri =
@@ -905,7 +617,6 @@ const ElectronicTaxCredit = (props: Props) => {
         }
       )
         .then(async () => {
-          setMessage("Estamos procesando la información, Espera un momento...");
           const json_url = `CLIENTES/${
             transmitter.nombre
           }/${new Date().getFullYear()}/VENTAS/CREDITOS-FISCALES/${formatDate()}/${
@@ -915,7 +626,6 @@ const ElectronicTaxCredit = (props: Props) => {
           const blobJSON = await fetch(JSON_uri)
             .then((res) => res.blob())
             .catch(() => {
-              setLoadingSave(false);
               ToastAndroid.show(
                 "Error al generar la url del documento",
                 ToastAndroid.LONG
@@ -924,7 +634,6 @@ const ElectronicTaxCredit = (props: Props) => {
             });
 
           if (!blobJSON) {
-            setLoadingSave(false);
             return;
           }
 
@@ -935,9 +644,6 @@ const ElectronicTaxCredit = (props: Props) => {
           };
 
           if (jsonUploadParams) {
-            setMessage(
-              "Subiendo los archivos\n y guardando el evento, Espera un momento..."
-            );
             s3Client
               .send(new PutObjectCommand(jsonUploadParams))
               .then((response) => {
@@ -962,29 +668,30 @@ const ElectronicTaxCredit = (props: Props) => {
                           }
                         )
                         .then(() => {
-                          setMessage("");
-                          Alert.alert(
-                            "Éxito",
-                            "La venta se envió a contingencia"
-                          );
-                          setLoadingSave(false);
+                          Toast.show({
+                            type: ALERT_TYPE.SUCCESS,
+                            title: "Éxito",
+                            textBody: "Se completaron todos los procesos",
+                          });
                           setShowModalSale(false);
+                          emptyCart();
                           clearAllData();
                         })
                         .catch(() => {
-                          setMessage("Error al guardar la venta");
-                          setLoadingSave(false);
+                          setLoadingSale(false);
+                          ToastAndroid.show(
+                            "Error al guardarlo en nuestra base de datos",
+                            ToastAndroid.LONG
+                          );
                         });
                     })
                     .catch(() => {
-                      setLoadingSave(false);
                       ToastAndroid.show(
                         "No tienes el acceso necesario",
                         ToastAndroid.LONG
                       );
                     });
                 } else {
-                  setLoadingSave(false);
                   ToastAndroid.show(
                     "Error inesperado, contacte al equipo de soporte",
                     ToastAndroid.LONG
@@ -992,14 +699,12 @@ const ElectronicTaxCredit = (props: Props) => {
                 }
               })
               .catch(() => {
-                setLoadingSave(false);
                 ToastAndroid.show(
                   "Ocurrió un error al subir el archivo",
                   ToastAndroid.LONG
                 );
               });
           } else {
-            setLoadingSave(false);
             ToastAndroid.show(
               "Ocurrió un error al crear el Json",
               ToastAndroid.LONG
@@ -1007,11 +712,9 @@ const ElectronicTaxCredit = (props: Props) => {
           }
         })
         .catch(() => {
-          setLoadingSave(false);
           ToastAndroid.show("Ocurrió un error en el Json", ToastAndroid.LONG);
         });
     } else {
-      setLoadingSave(false);
       ToastAndroid.show(
         "Hubo un error al generar la información",
         ToastAndroid.LONG
@@ -1032,30 +735,11 @@ const ElectronicTaxCredit = (props: Props) => {
             .then(async (response) => {
               if (response.data.selloRecibido) {
                 setLoadingRevision(false);
-                setLoadingSave(true);
                 const DTE_FORMED = {
                   ...DTE.dteJson,
                   ...responseMH,
                 };
-                setMessage(
-                  "El DTE se encontró en hacienda,\n se están generando los documentos..."
-                );
-                const doc = new jsPDF();
-                const QR = QR_URL(
-                  DTE_FORMED.identificacion.codigoGeneracion,
-                  DTE_FORMED.identificacion.fecEmi
-                );
-                const blobQR = await axios.get<ArrayBuffer>(QR, {
-                  responseType: "arraybuffer",
-                });
-                // const document_gen = generateCreditoFiscal(
-                //   doc,
-                //   DTE_FORMED,
-                //   new Uint8Array(blobQR.data),
-                //   img_invalidation,
-                //   img_logo,
-                //   false
-                // );
+
                 if (DTE_FORMED) {
                   const JSON_uri =
                     FileSystem.documentDirectory +
@@ -1077,36 +761,7 @@ const ElectronicTaxCredit = (props: Props) => {
                       }/${new Date().getFullYear()}/VENTAS/CRÉDITO_FISCAL/${formatDate()}/${
                         DTE.dteJson.identificacion.codigoGeneracion
                       }/${DTE.dteJson.identificacion.numeroControl}.json`;
-                      // const pdf_url = `CLIENTES/${
-                      //   transmitter.nombre
-                      // }/${new Date().getFullYear()}/VENTAS/CRÉDITO_FISCAL/${formatDate()}/${
-                      //   DTE.dteJson.identificacion.codigoGeneracion
-                      // }/${DTE.dteJson.identificacion.numeroControl}.pdf`;
 
-                      // const filePath = `${FileSystem.documentDirectory}example.pdf`;
-                      // await FileSystem.writeAsStringAsync(
-                      //   filePath,
-                      //   document_gen.replace(
-                      //     /^data:application\/pdf;filename=generated\.pdf;base64,/,
-                      //     ""
-                      //   ),
-                      //   {
-                      //     encoding: FileSystem.EncodingType.Base64,
-                      //   }
-                      // );
-                      // const response = await fetch(filePath);
-
-                      // if (!response) {
-                      //   setLoadingSave(false);
-                      //   return;
-                      // }
-
-                      // const blob = await response.blob();
-                      // const pdfUploadParams = {
-                      //   Bucket: "facturacion-seedcode",
-                      //   Key: pdf_url,
-                      //   Body: blob,
-                      // };
                       const blobJSON = await fetch(JSON_uri)
                         .then((res) => res.blob())
                         .catch(() => {
@@ -1114,11 +769,9 @@ const ElectronicTaxCredit = (props: Props) => {
                             "Error al generar la url del documento",
                             ToastAndroid.LONG
                           );
-                          setLoadingSave(false);
                           return null;
                         });
                       if (!blobJSON) {
-                        setLoadingSave(false);
                         return;
                       }
 
@@ -1127,84 +780,56 @@ const ElectronicTaxCredit = (props: Props) => {
                         Key: json_url,
                         Body: blobJSON!,
                       };
-                      setMessage("Se están subiendo los documentos...");
                       if (jsonUploadParams) {
                         s3Client
                           .send(new PutObjectCommand(jsonUploadParams))
                           .then((response) => {
                             if (response.$metadata) {
-                              // s3Client
-                              //   .send(new PutObjectCommand(pdfUploadParams))
-                              //   .then((response) => {
-                              //     if (response.$metadata) {
-                                    setMessage(
-                                      "Se esta guardando el DTE en nuestra base de datos..."
-                                    );
-                                    const payload = {
-                                      pdf: "pdf_url",
-                                      dte: json_url,
-                                      cajaId: box,
-                                      codigoEmpleado: employee,
-                                      sello: true,
-                                      clienteId: customer?.id,
-                                    };
-                                    return_token()
-                                      .then((token) => {
-                                        axios
-                                          .post(
-                                            API_URL +
-                                              "/sales/sale-fiscal-transaction",
-                                            payload,
-                                            {
-                                              headers: {
-                                                Authorization: `Bearer ${token}`,
-                                              },
-                                            }
-                                          )
-                                          .then(() => {
-                                            Alert.alert(
-                                              "Éxito",
-                                              "Se completaron todos los procesos"
-                                            );
-                                            setLoadingSave(false);
-                                            setShowModalSale(false);
-                                            clearAllData();
-                                          })
-                                          .catch(() => {
-                                            ToastAndroid.show(
-                                              "Error al guarda la venta",
-                                              ToastAndroid.LONG
-                                            );
-                                            setMessage(
-                                              "Se produjo un error al guardar la venta en nuestra base de datos"
-                                            );
-                                            setLoadingSave(false);
-                                          });
-                                      })
-                                      .catch(() => {
-                                        setLoadingSave(false);
-                                        ToastAndroid.show(
-                                          "No tienes el acceso necesario",
-                                          ToastAndroid.LONG
-                                        );
+                              const payload = {
+                                pdf: "pdf_url",
+                                dte: json_url,
+                                cajaId: box,
+                                codigoEmpleado: employee,
+                                sello: true,
+                                clienteId: customer?.id,
+                              };
+                              return_token()
+                                .then((token) => {
+                                  axios
+                                    .post(
+                                      API_URL +
+                                        "/sales/sale-fiscal-transaction",
+                                      payload,
+                                      {
+                                        headers: {
+                                          Authorization: `Bearer ${token}`,
+                                        },
+                                      }
+                                    )
+                                    .then(() => {
+                                      Toast.show({
+                                        type: ALERT_TYPE.SUCCESS,
+                                        title: "Éxito",
+                                        textBody:
+                                          "Se completaron todos los procesos",
                                       });
-                                //   } else {
-                                //     setLoadingSave(false);
-                                //     ToastAndroid.show(
-                                //       "Error inesperado, contacte al equipo de soporte1",
-                                //       ToastAndroid.LONG
-                                //     );
-                                //   }
-                                // })
-                                // .catch(() => {
-                                //   setLoadingSave(false);
-                                //   ToastAndroid.show(
-                                //     "Ocurrió un error al subir el PDF",
-                                //     ToastAndroid.LONG
-                                //   );
-                                // });
+                                      setShowModalSale(false);
+                                      clearAllData();
+                                    })
+                                    .catch(() => {
+                                      ToastAndroid.show(
+                                        "Error al guarda la venta",
+                                        ToastAndroid.LONG
+                                      );
+                                    });
+                                })
+                                .catch(() => {
+                                  ToastAndroid.show(
+                                    "No tienes el acceso necesario",
+                                    ToastAndroid.LONG
+                                  );
+                                });
                             } else {
-                              setLoadingSave(false);
                               ToastAndroid.show(
                                 "Error inesperado, contacte al equipo de soporte",
                                 ToastAndroid.LONG
@@ -1212,14 +837,12 @@ const ElectronicTaxCredit = (props: Props) => {
                             }
                           })
                           .catch(() => {
-                            setLoadingSave(false);
                             ToastAndroid.show(
                               "Ocurrió un error al subir el Json",
                               ToastAndroid.LONG
                             );
                           });
                       } else {
-                        setLoadingSave(false);
                         ToastAndroid.show(
                           "No tienes los documentos",
                           ToastAndroid.LONG
@@ -1227,7 +850,6 @@ const ElectronicTaxCredit = (props: Props) => {
                       }
                     })
                     .catch(() => {
-                      setLoadingSave(false);
                       ToastAndroid.show(
                         "Ocurrió un error en el Json",
                         ToastAndroid.LONG
@@ -1238,7 +860,6 @@ const ElectronicTaxCredit = (props: Props) => {
                     "Hubo un error al generar la información",
                     ToastAndroid.LONG
                   );
-                  setLoadingSave(false);
                 }
               }
             })
@@ -1266,46 +887,168 @@ const ElectronicTaxCredit = (props: Props) => {
   return (
     <>
       {!focusButton && (
-        // <View style={{ justifyContent: "center", alignItems: "center" }}>
-        //   <Pressable
-        //     onPress={() => {
-        //       generateTaxCredit();
-        //     }}
-        //     style={{
-        //       width: "84%",
-        //       padding: 16,
-        //       borderRadius: 4,
-        //       backgroundColor: "#1d4ed8",
-        //       display: "flex",
-        //       justifyContent: "center",
-        //       alignItems: "center",
-        //       marginTop: 10,
-        //     }}
-        //   >
-        //     <Text
-        //       style={{
-        //         color: "#fff",
-        //         fontWeight: "bold",
-        //       }}
-        //     >
-        //       Generar el crédito fiscal
-        //     </Text>
-        //   </Pressable>
+        <>
+          {loadingSale ? (
+            <View style={styles.overlay}>
+              <ActivityIndicator
+                size="large"
+                color="#16a34a"
+                style={{ marginBottom: 30 }}
+              />
+              <Text style={styles.processingText}>Procesando solicitud...</Text>
 
-        // </View>
-         <View style={stylesGlobals.viewBotton}>
-         <Button
-           withB={390}
-           onPress={() =>
-             {}
-           }
-           Title="Generar el crédito fiscal"
-           color={theme.colors.dark}
-         />
-       </View>
+              <View style={styles.stepsContainer}>
+                {sending_steps.map((ste, index) => (
+                  <View key={index} style={styles.stepRow}>
+                    <View style={styles.progressContainer}>
+                      <View key={index} style={styles.stepIndicator}>
+                        <Animated.View
+                          style={[
+                            styles.circle,
+                            {
+                              backgroundColor:
+                                index <= step ? "#16a34a" : "#e0e0e0",
+                              transform: [{ scale: index === step ? 1.2 : 1 }],
+                              shadowColor:
+                                index <= step ? "#16a34a" : "#757575",
+                              shadowOpacity: 0.3,
+                              shadowRadius: 4,
+                            },
+                          ]}
+                        >
+                          <Icon
+                            name={
+                              index < step ? "check-circle" : "check-circle"
+                            }
+                            size={24}
+                            color={index <= step ? "#fff" : "#757575"}
+                          />
+                        </Animated.View>
+                      </View>
+                    </View>
+                    <View style={styles.stepInfo}>
+                      <Text
+                        style={[
+                          styles.stepLabel,
+                          index <= step
+                            ? styles.activeStepLabel
+                            : styles.inactiveStepLabel,
+                        ]}
+                      >
+                        {ste.label}
+                      </Text>
+                      {ste.description && (
+                        <Text style={styles.stepDescription}>
+                          {ste.description}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ) : (
+            <>
+              <ErrorAlert
+                visible={modalError}
+                title={title}
+                message={errorMessage}
+                onPressSendContingency={() =>
+                  handleContigence(
+                    currentDTE!,
+                    detailSale.box,
+                    String(detailSale.codEmployee)
+                  )
+                }
+                onPressVerify={() =>
+                  handleVerify(
+                    currentDTE!,
+                    detailSale.box,
+                    String(detailSale.codEmployee)
+                  )
+                }
+                onPressRetry={() => generateTaxCredit()}
+                onClose={() => {
+                  setModalError(false);
+                  setStep(0);
+                }}
+              />
+
+              <View style={stylesGlobals.viewBotton}>
+                <Button
+                  withB={390}
+                  onPress={generateTaxCredit}
+                  Title="Generar el crédito fiscal"
+                  color={theme.colors.dark}
+                />
+              </View>
+            </>
+          )}
+        </>
       )}
     </>
   );
 };
 
 export default ElectronicTaxCredit;
+
+const styles = StyleSheet.create({
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+
+  progressContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  stepIndicator: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  circle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowOffset: { width: 0, height: 5 },
+  },
+  processingText: {
+    fontSize: 21,
+    color: "#4b5563",
+    fontWeight: "600",
+    marginBottom: 20,
+  },
+  stepsContainer: {
+    flexDirection: "column",
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 8,
+  },
+
+  stepInfo: {
+    marginLeft: 16,
+  },
+  stepLabel: {
+    fontSize: 19,
+    fontWeight: "600",
+  },
+  activeStepLabel: {
+    color: "#16a34a",
+  },
+  inactiveStepLabel: {
+    color: "#6b7280",
+  },
+  stepDescription: {
+    fontSize: 14,
+    color: "#374151",
+    fontWeight: "600",
+  },
+});

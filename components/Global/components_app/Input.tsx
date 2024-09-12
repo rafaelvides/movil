@@ -24,7 +24,8 @@ const Input = ({
   icon,
   defaultValue,
   placeholderTextColor,
-  withI
+  showSoftInputOnFocus,
+  caretHidden,
 }: {
   values?: string;
   placeholder?: string;
@@ -32,16 +33,22 @@ const Input = ({
   icon: string;
   keyboardType?: KeyboardTypeOptions | undefined;
   onChangeText?: (text: string) => void | undefined;
-  onChange?:((e: NativeSyntheticEvent<TextInputChangeEventData>) => void)
-  | undefined;
+  onChange?:
+    | ((e: NativeSyntheticEvent<TextInputChangeEventData>) => void)
+    | undefined;
   handleBlur?: (
     e: NativeSyntheticEvent<TextInputFocusEventData>
   ) => void | undefined;
   onPress?: (e: NativeSyntheticEvent<NativeTouchEvent>) => void | undefined;
-  onFocus?: ((e: NativeSyntheticEvent<TextInputFocusEventData>) => void) | undefined
-  placeholderTextColor?: string | undefined
-  withI?: number
+  onFocus?:
+    | ((e: NativeSyntheticEvent<TextInputFocusEventData>) => void)
+    | undefined;
+  placeholderTextColor?: string | undefined;
+  showSoftInputOnFocus?: boolean;
+  caretHidden?: boolean;
 }) => {
+  const keypad = showSoftInputOnFocus ?? true;
+  const linea = caretHidden ? caretHidden : false;
   return (
     <View style={styles.inputWrapper}>
       <MaterialCommunityIcons
@@ -51,7 +58,8 @@ const Input = ({
         style={styles.icon}
       />
       <TextInput
-       
+        showSoftInputOnFocus={keypad}
+        caretHidden={linea}
         //   secureTextEntry
         defaultValue={defaultValue}
         style={styles.input}
@@ -77,7 +85,7 @@ const styles = StyleSheet.create({
     borderColor: "#D9D9DA",
     borderWidth: 1,
     borderRadius: 15,
-    width: "100%"
+    width: "100%",
   },
   icon: {
     position: "absolute",

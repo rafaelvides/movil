@@ -23,3 +23,7 @@ export async function save_employees(employee: IEmployeeCreateDto) {
   const save_employee = await employeeRepository.save(employee);
   return save_employee;
 }
+export async function get_employees(): Promise<Employee[]> {
+  const employeeRepository = connection.getRepository(Employee);
+  return await employeeRepository.find();
+}

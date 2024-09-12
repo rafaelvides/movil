@@ -1,5 +1,5 @@
 export interface IClientePayload {
-  clienteId: number;
+  customerId: number;
   nombre: string;
   nombreComercial: string;
   nrc: string;

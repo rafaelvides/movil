@@ -1,19 +1,19 @@
 import { View, Text, ToastAndroid, Pressable } from "react-native";
-import React from "react";
+import React, { useContext } from "react";
 import { ICat002TipoDeDocumento } from "@/types/billing/cat-002-tipo-de-documento.types";
 import { ICartProductOffline } from "@/offline/types/branch_product_offline";
 import { IFormasDePagoResponse } from "@/types/billing/cat-017-forma-de-pago.types";
 import { ITipoTributo } from "@/types/billing/cat-015-tipo-de-tributo.types";
-import {
-  get_box_data,
-  get_employee_id,
-  get_user,
-} from "@/plugins/async_storage";
+import { get_box_data, get_user } from "@/plugins/async_storage";
 import { save_local_sale_tax_credit } from "@/offline/service/sale_local.service";
 import { Customer } from "@/offline/entity/customer.entity";
 import { generate_credito_fiscal_offline } from "@/plugins/Offline_DTE/ElectonicTaxCreditGenerator_offline";
 import { Transmitter } from "@/offline/entity/transmitter.entity";
 import { validateCustomerFiscal, validationTransmitter } from "@/utils/filters";
+import { Employee } from "@/offline/entity/employee.entity";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 interface Props {
   customer: Customer | undefined;
@@ -26,6 +26,7 @@ interface Props {
   focusButton: boolean;
   totalUnformatted: number;
   onePercentRetention: number;
+  employee: Employee | undefined;
   clearAllData: () => void;
 }
 const ElectronicTaxCredit = (props: Props) => {
@@ -35,6 +36,7 @@ const ElectronicTaxCredit = (props: Props) => {
     transmitter,
     cart_products,
     pays,
+    employee,
     conditionPayment,
     typeTribute,
     focusButton,
@@ -42,6 +44,7 @@ const ElectronicTaxCredit = (props: Props) => {
     onePercentRetention,
     clearAllData,
   } = props;
+  const { theme } = useContext(ThemeContext);
 
   const generateTaxCredit = async () => {
     if (conditionPayment === 0) {
@@ -130,12 +133,12 @@ const ElectronicTaxCredit = (props: Props) => {
       ToastAndroid.show("No se encontró la caja", ToastAndroid.SHORT);
       return;
     }
-    const codeEmployee = await get_employee_id();
 
-    if (!codeEmployee) {
+    if (!employee) {
       ToastAndroid.show("No se encontró el empleado", ToastAndroid.SHORT);
       return;
     }
+
     if (cart_products.some((product) => Number(product.price) <= 0)) {
       ToastAndroid.show(
         "No se puede facturar un precio negativo o cero",
@@ -163,6 +166,7 @@ const ElectronicTaxCredit = (props: Props) => {
         conditionPayment,
         onePercentRetention
       );
+      console.log(JSON.stringify(generate, null, 2))
       save_local_sale_tax_credit(generate, box.id, user?.id!).then(() => {
         clearAllData();
       });
@@ -174,31 +178,13 @@ const ElectronicTaxCredit = (props: Props) => {
   return (
     <>
       {!focusButton && (
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Pressable
-            onPress={() => {
-              generateTaxCredit();
-            }}
-            style={{
-              width: "84%",
-              padding: 16,
-              borderRadius: 4,
-              backgroundColor: "#1d4ed8",
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-            >
-              Generar el crédito fiscal
-            </Text>
-          </Pressable>
+        <View style={stylesGlobals.viewBotton}>
+          <Button
+            withB={390}
+            onPress={generateTaxCredit}
+            Title="Generar el crédito fiscal"
+            color={theme.colors.dark}
+          />
         </View>
       )}
     </>

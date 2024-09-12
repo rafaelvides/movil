@@ -476,7 +476,6 @@ const AddMakeSaleScreen = (props: Props) => {
               width: "100%",
               justifyContent: "center",
               alignItems: "center",
-              // padding: 10
             }}
           >
             {typeDocument && typeDocument.codigo === "03" && (
@@ -553,7 +552,6 @@ const AddMakeSaleScreen = (props: Props) => {
                       }}
                     >
                       <MaterialCommunityIcons
-                        color={"#2C3377"}
                         name="close"
                         size={30}
                         onPress={() => {
@@ -687,17 +685,16 @@ const AddMakeSaleScreen = (props: Props) => {
                         {conditions > 1 && (
                           <>
                             <View style={{ marginTop: 10, width: "100%" }}>
-                              <Text style={{ fontWeight: "500" }}>
+                              <Text style={stylesGlobals.textInput}>
                                 Plazo de pago
                               </Text>
                               <SafeAreaView
                                 style={{
                                   width: "100%",
-                                  marginTop: 10,
                                   borderWidth: 1,
                                   borderColor: "#D1D5DB",
                                   padding: 12,
-                                  borderRadius: 5,
+                                  borderRadius: 15,
                                 }}
                               >
                                 <Dropdown

@@ -1,7 +1,5 @@
 import { ILoginPayload } from "@/types/auth/auth.types";
 import * as SecureStore from "expo-secure-store";
-import { jwtDecode } from "jwt-decode";
-import { returnAddress } from "./templates/template_fe";
 
 export const save_login_data_biometric = async (
   key: string,
@@ -18,15 +16,13 @@ export const get_data_biometric = async (key: string) => {
     return undefined;
   }
 };
-export const save_toke = async (token: string) => {
-  await SecureStore.setItem("token", token);
-};
-export const return_token = async () => {
-  const token = await SecureStore.getItem("token");
-  if (token) {
-    return token;
-  }
-};
+// export const save_toke = async (token: string) => {
+//   await SecureStore.setItem("token", token);
+// };
+// export const return_token = () => {
+//   return SecureStore.getItemAsync("token");
+  
+// };
 export const save_token_mh = async (token: string) => {
   console.log("token a guardar", token);
   await SecureStore.setItem("token_mh", token)
@@ -66,19 +62,19 @@ export const return_location = async () => {
   return false;
 };
 //------------------token------------------------------
-export const is_expired_token = (token: string) => {
-  const decoded = jwtDecode(token);
-  if (decoded && decoded.exp) {
-    return Date.now() >= decoded.exp * 1000;
-  }
-  return true;
-};
-export const is_auth = async () => {
-  const token = await return_token();
-  return token && !is_expired_token(token);
-};
+// export const is_expired_token = (token: string) => {
+//   const decoded = jwtDecode(token);
+//   if (decoded && decoded.exp) {
+//     return Date.now() >= decoded.exp * 1000;
+//   }
+//   return true;
+// };
+// export const is_auth = async () => {
+//   const token = await return_token();
+//   return token && !is_expired_token(token);
+// };
 //-----------------------------------------------------
 export const delete_secure = () => {
-  SecureStore.deleteItemAsync("token");
+  SecureStore.deleteItemAsync("token")
   SecureStore.deleteItemAsync("token_mh");
 };

@@ -605,9 +605,6 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
                     <View>
                       <Pressable
                         style={{
-                          backgroundColor: currentRoute.name.includes("offline")
-                            ? "#bae6fd"
-                            : "#fff",
                           ...styles.drawer_item,
                         }}
                         onPress={() => {

@@ -6,11 +6,10 @@ import { AxiosError } from "axios";
 import { ToastAndroid } from "react-native";
 import {
   save_login_data_biometric,
-  save_toke,
+  // save_toke,
   delete_secure,
   save_token_mh,
-  return_token,
-  is_auth,
+  // return_token,
 } from "@/plugins/secure_store";
 import {
   box_data,
@@ -20,6 +19,10 @@ import {
   save_configuration,
   save_point_sale_Id,
   save_user,
+  save_token,
+  return_token,
+  remove_token,
+  is_auth,
 } from "@/plugins/async_storage";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { get_transmitter } from "@/services/transmitter.service";
@@ -33,6 +36,7 @@ import {
 import { router } from "expo-router";
 import { get_by_transmitter } from "@/services/personalization.service";
 import { IConfiguration } from "@/types/configuration/configuration.types";
+import * as SecureStore from "expo-secure-store";
 
 export const useAuthStore = create<IAuthStore>((set, get) => ({
   user: {} as UserLogin,
@@ -41,17 +45,16 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   is_authenticated_offline: false,
   box: {} as IBox,
   OnMakeLogin: async (payload) => {
-    console.log("SE EJECUTA LA PETICION EN EL STOREEEEEEEEEEEEEEEEEEWEEEE", payload)
     return await make_login(payload)
       .then(async ({ data }) => {
-        console.log("ESTAAAAAAAAA RETORNAAAAAANDOOOOOOOOOOOOOOOOOO",data)
-        console.log("toooo")
         console.log("auth store");
         get().GetConfigurationByTransmitter(data.user.transmitterId);
         console.log("auth 2");
         if (data.ok) {
+          await get().OnLoginMH(data.user.transmitterId, data.token);
+
           console.log("auth 3");
-         save_toke(data.token)
+          save_token(data.token);
           console.log("auth 4", data.token);
           console.log("auth 5");
           await save_user(data.user);
@@ -59,10 +62,9 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           await save_point_sale_Id(String(data.user.pointOfSaleId));
           console.log("auth 7");
           if (data.box) {
-            console.log("LOS DATOOOOOOOOOOS QUE VIENE DEL LOGIN", data.box)
             box_data(data.box);
           }
-         save_login_data_biometric("authBiometric", {
+          save_login_data_biometric("authBiometric", {
             userName: payload.userName,
             password: payload.password,
           });
@@ -76,7 +78,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
               is_authenticated: true,
             });
           }
-          get()
+          await get()
             .OnSaveUserLocal(data, data.token, payload.password)
             .catch(() => {
               ToastAndroid.show(
@@ -85,10 +87,8 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
               );
             });
           console.log("auth 10", data.user.transmitterId);
-          await get().OnLoginMH(data.user.transmitterId, data.token)
           await save_branch_id(String(data.user.branchId));
           console.log("auth 11");
-          
         }
         return true;
       })
@@ -101,17 +101,17 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       });
   },
   async OnLoginMH(id, token) {
-    console.log(token)
+    console.log(token);
     get_transmitter(id, token)
       .then(({ data }) => {
-        console.log(data, "data")
+        console.log(data, "data");
         login_mh(data.transmitter.nit, data.transmitter.claveApi)
           .then(async (login_mh) => {
             if (login_mh.data.status === "OK") {
-              console.log("MH", login_mh.data.body.token)
+              console.log("MH", login_mh.data.body.token);
               await save_token_mh(login_mh.data.body.token).catch((er) => {
-                console.log(er)
-              })
+                console.log(er);
+              });
             } else {
               const data = login_mh as unknown as ILoginMHFailed;
               ToastAndroid.show(
@@ -122,7 +122,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
             }
           })
           .catch((error: AxiosError<ILoginMHFailed>) => {
-            console.log(error.response?.data.body, "1")
+            console.log(error.response?.data.body, "1");
             ToastAndroid.show(
               `Error ${error.response?.data.body.descripcionMsg}`,
               ToastAndroid.SHORT
@@ -131,7 +131,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           });
       })
       .catch((error) => {
-        console.log(error, "2")
+        console.log(error, "2");
         console.log("error", error);
         ToastAndroid.show(`Aun no tienes datos asignados`, ToastAndroid.SHORT);
         return;
@@ -142,10 +142,10 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
       token: "",
       is_authenticated: false,
     });
-    await AsyncStorage.clear();
-    await delete_secure();
-    console.log("DATOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOS ELIMINADOS")
-    
+    AsyncStorage.clear();
+    await remove_token();
+    //  SecureStore.deleteItemAsync("token");
+    await SecureStore.deleteItemAsync("token_mh");
     return true;
   },
   OnSetInfo: async () => {
@@ -153,7 +153,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     const auth = await is_auth();
     const user = await get_user();
     const box = await get_box_data();
-    console.log("el onsetInfo", token, auth)
+    console.log("el onsetInfo", token, auth);
     if (token && auth) {
       set({
         token,
@@ -208,6 +208,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
   async OnSaveUserLocal(Auth, token, password) {
     await get_transmitter(Auth.user.transmitterId, token)
       .then(async ({ data }) => {
+        console.log("local", data);
         await saveUserAndTransmitter(
           { box: Auth.box, user: Auth.user, token: Auth.token },
           {
@@ -215,7 +216,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
             departamento: data.transmitter.direccion.departamento,
             municipio: data.transmitter.direccion.municipio,
             complemento: data.transmitter.direccion.complemento,
-            emisorId: data.transmitter.id,
+            transmitterId: data.transmitter.id,
           },
           password
         );

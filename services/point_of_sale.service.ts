@@ -1,6 +1,6 @@
 import axios from "axios";
 import { API_URL } from "@/utils/constants";
-import { return_token } from "../plugins/secure_store";
+import { return_token } from "../plugins/async_storage";
 import {
   IGetPointOfSales,
   IPointOfSaleReply,

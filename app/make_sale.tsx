@@ -31,12 +31,7 @@ import AnimatedButton from "@/components/Global/AnimatedButtom";
 import { useCustomerStore } from "@/store/customer.store";
 import { useEmployeeStore } from "@/store/employee.store";
 import { IEmployee } from "@/types/employee/employee.types";
-import {
-  ALERT_TYPE,
-  Dialog,
-  AlertNotificationRoot,
-  Toast,
-} from "react-native-alert-notification";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 
 const make_sale = () => {
   const [loading, setLoading] = useState(false);
@@ -46,7 +41,6 @@ const make_sale = () => {
   const [loadingSaveSale, setLoadingSaveSale] = useState(false);
   const [loadingRevision, setLoadingRevision] = useState(false);
   const [focusButton, setFocusButton] = useState(false);
-  const [message, setMessage] = useState("Esperando");
   const [customer, setCustomer] = useState<ICustomer>();
   const [employee, setEmployee] = useState<IEmployee>();
   const [typeDocument, setTypeDocument] = useState<ICat002TipoDeDocumento>({
@@ -179,7 +173,6 @@ const make_sale = () => {
         monto: 0,
       },
     ]);
-    setMessage("");
     setLoadingRevision(false);
     setConditionPayment({
       codigo: "1",
@@ -234,14 +227,7 @@ const make_sale = () => {
     <>
       <StatusBar style="dark" />
       {loading ? (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "#fff",
-          }}
-        >
+        <View style={stylesGlobals.viewSpinnerInit}>
           <SpinnerInitPage />
         </View>
       ) : (
@@ -317,23 +303,6 @@ const make_sale = () => {
             />
           </SafeAreaView>
           <Modal visible={showModal} animationType="fade">
-            <Pressable
-              style={{
-                position: "absolute",
-                right: 15,
-                top: 15,
-                marginBottom: 40,
-              }}
-            >
-              <MaterialCommunityIcons
-                color={"#2C3377"}
-                name="close"
-                size={30}
-                onPress={() => {
-                  setShowModal(false);
-                }}
-              />
-            </Pressable>
             <View
               style={{
                 width: "100%",
@@ -344,163 +313,134 @@ const make_sale = () => {
             </View>
           </Modal>
           <Modal visible={showModalSale} animationType="fade">
-            {loadingSaveSale ? (
-              <>
-                <View
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                height: "90%",
+              }}
+            >
+              <View
+                style={{
+                  borderRadius: 25,
+                  width: "100%",
+                  top: -5,
+                  height: 130,
+                  backgroundColor: theme.colors.third,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Pressable
                   style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
+                    position: "absolute",
+                    right: 20,
+                    top: 20,
                   }}
                 >
-                  <ActivityIndicator size={"large"} />
-                  <Text
-                    style={{
-                      fontSize: 18,
-                      marginTop: 12,
+                  <MaterialCommunityIcons
+                    color={"white"}
+                    name="close"
+                    size={30}
+                    onPress={() => {
+                      setShowModalSale(false);
                     }}
-                  >
-                    {message}
-                  </Text>
-                </View>
-              </>
-            ) : (
+                  />
+                </Pressable>
+                <Text style={{ fontSize: 20, top: 15, color: "white" }}>
+                  Procesar venta
+                </Text>
+              </View>
+              <View
+                style={{
+                  padding: 15,
+                  width: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <AddMakeSaleScreen
+                  customer={customer}
+                  setCustomer={setCustomer}
+                  employee={employee}
+                  setEmployee={setEmployee}
+                  typeDocument={typeDocument}
+                  setTypeDocument={setTypeDocument}
+                  typeTribute={typeTribute}
+                  setTypeTribute={setTypeTribute}
+                  handleAddPay={handleAddPay}
+                  onUpdatePeriodo={onUpdatePeriodo}
+                  onUpdateMonto={onUpdateMonto}
+                  handleUpdatePlazo={handleUpdatePlazo}
+                  handleUpdateTipoPago={handleUpdateTipoPago}
+                  handleRemovePay={handleRemovePay}
+                  pays={pays}
+                  setConditionPayment={setConditionPayment}
+                  conditionPayment={conditionPayment}
+                  totalUnformatted={totalPagar}
+                  totalPagarIva={totalPagarIva}
+                  setFocusButton={setFocusButton}
+                  total={discountTotal.toString()}
+                />
+              </View>
+            </View>
+            {loadingRevision === true ? (
               <>
                 <View
                   style={{
                     display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
                     flexDirection: "column",
-
-                    width: "100%",
-                    height: "90%",
-                    // padding: 32,
+                    marginTop: 0,
                   }}
                 >
-                  <View
-                    style={{
-                      borderRadius: 25,
-                      width: "100%",
-                      top: -5,
-                      height: 130,
-                      backgroundColor: theme.colors.third,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Pressable
-                      style={{
-                        position: "absolute",
-                        right: 20,
-                        top: 20,
-                      }}
-                    >
-                      <MaterialCommunityIcons
-                        color={"white"}
-                        name="close"
-                        size={30}
-                        onPress={() => {
-                          setShowModalSale(false);
-                        }}
-                      />
-                    </Pressable>
-                    <Text style={{ fontSize: 20, top: 15, color: "white" }}>
-                      Procesar venta
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      padding: 15,
-                      width: "100%",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <AddMakeSaleScreen
-                      customer={customer}
-                      setCustomer={setCustomer}
-                      employee={employee}
-                      setEmployee={setEmployee}
-                      typeDocument={typeDocument}
-                      setTypeDocument={setTypeDocument}
-                      typeTribute={typeTribute}
-                      setTypeTribute={setTypeTribute}
-                      handleAddPay={handleAddPay}
-                      onUpdatePeriodo={onUpdatePeriodo}
-                      onUpdateMonto={onUpdateMonto}
-                      handleUpdatePlazo={handleUpdatePlazo}
-                      handleUpdateTipoPago={handleUpdateTipoPago}
-                      handleRemovePay={handleRemovePay}
-                      pays={pays}
-                      setConditionPayment={setConditionPayment}
-                      conditionPayment={conditionPayment}
-                      totalUnformatted={totalPagar}
-                      totalPagarIva={totalPagarIva}
-                      setFocusButton={setFocusButton}
-                      total={discountTotal.toString()}
-                    />
-                  </View>
+                  <ActivityIndicator size="large"></ActivityIndicator>
+                  <Text>Consultando el documento en hacienda...</Text>
                 </View>
-                {loadingRevision === true ? (
-                  <>
-                    <View
-                      style={{
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        flexDirection: "column",
-                        marginTop: 0,
-                      }}
-                    >
-                      <ActivityIndicator size="large"></ActivityIndicator>
-                      <Text>Consultando el documento en hacienda...</Text>
-                    </View>
-                  </>
-                ) : (
-                  <>
-                    {typeDocument &&
-                      (typeDocument.codigo === "03" ? (
-                        <>
-                          <ElectronicTaxCredit
-                            clearAllData={handleReset}
-                            setLoadingRevision={setLoadingRevision}
-                            setLoadingSave={setLoadingSaveSale}
-                            setShowModalSale={setShowModalSale}
-                            setMessage={setMessage}
-                            customer={customer}
-                            typeDocument={typeDocument}
-                            transmitter={transmitter}
-                            cart_products={cart_products}
-                            pays={pays}
-                            conditionPayment={conditionPayment.id}
-                            typeTribute={typeTribute}
-                            focusButton={focusButton}
-                            totalUnformatted={totalPagarIva}
-                            onePercentRetention={onePercentRetention}
-                          />
-                        </>
-                      ) : (
-                        <>
-                          <ElectronicInvoice
-                            clearAllData={handleReset}
-                            setLoadingRevision={setLoadingRevision}
-                            setLoadingSave={setLoadingSaveSale}
-                            setShowModalSale={setShowModalSale}
-                            setMessage={setMessage}
-                            employee={employee}
-                            customer={customer}
-                            typeDocument={typeDocument}
-                            transmitter={transmitter}
-                            cart_products={cart_products}
-                            pays={pays}
-                            conditionPayment={conditionPayment.id}
-                            totalUnformatted={totalPagar}
-                            focusButton={focusButton}
-                            onePercentRetention={onePercentRetention}
-                          />
-                        </>
-                      ))}
-                  </>
-                )}
+              </>
+            ) : (
+              <>
+                {typeDocument &&
+                  (typeDocument.codigo === "03" ? (
+                    <>
+                      <ElectronicTaxCredit
+                        clearAllData={handleReset}
+                        setLoadingRevision={setLoadingRevision}
+                        employee={employee}
+                        setShowModalSale={setShowModalSale}
+                        customer={customer}
+                        typeDocument={typeDocument}
+                        transmitter={transmitter}
+                        cart_products={cart_products}
+                        pays={pays}
+                        conditionPayment={conditionPayment.id}
+                        typeTribute={typeTribute}
+                        focusButton={focusButton}
+                        totalUnformatted={totalPagarIva}
+                        onePercentRetention={onePercentRetention}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <ElectronicInvoice
+                        clearAllData={handleReset}
+                        setLoadingRevision={setLoadingRevision}
+                        setShowModalSale={setShowModalSale}
+                        employee={employee}
+                        customer={customer}
+                        typeDocument={typeDocument}
+                        transmitter={transmitter}
+                        cart_products={cart_products}
+                        pays={pays}
+                        conditionPayment={conditionPayment.id}
+                        totalUnformatted={totalPagar}
+                        focusButton={focusButton}
+                        onePercentRetention={onePercentRetention}
+                      />
+                    </>
+                  ))}
               </>
             )}
           </Modal>

@@ -12,15 +12,13 @@ import { useFocusEffect } from "@react-navigation/native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import ListBranchProduct from "@/offline/components/sales_offline/Product_sale/ListBranchProductsOffline";
 import CartProductsList from "@/offline/components/sales_offline/Product_sale/CartsProductBranchOffline";
-import { formatCurrency, formatCurrencyValue } from "@/utils/dte";
+import { formatCurrency } from "@/utils/dte";
 import AddSalesSupplement from "@/offline/components/sales_offline/AddSaleSupplement";
 import { ICat002TipoDeDocumento } from "@/types/billing/cat-002-tipo-de-documento.types";
 import { ITipoTributo } from "@/types/billing/cat-015-tipo-de-tributo.types";
 import ElectronicTaxCredit from "@/offline/components/sales_offline/svf_dte_generate/ElectronicTaxCreditOffline";
 import LottieView from "lottie-react-native";
 import { ThemeContext } from "@/hooks/useTheme";
-// import { Button } from "@/~/components/ui/button";
-import { Card, FAB } from "react-native-paper";
 import { useBranchProductOfflineStore } from "@/offline/store/branch_product_offline.store";
 import { Customer } from "@/offline/entity/customer.entity";
 import { useUserAndTransmitterOfflineStore } from "@/offline/store/user_and_transmitter_offline.store";
@@ -29,8 +27,11 @@ import { ICondicionDeLaOperacion } from "@/types/billing/cat-016-condicion-de-la
 import { returnTypeCustomer } from "@/utils/filters";
 import SpinnerInitPage from "@/components/Global/SpinnerInitPage";
 import DetailsProduct from "@/components/sales/sales_products/DetailsProduct";
-import Button from "@/components/Global/components_app/Button";
-import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
+import { useClientOfflineStore } from "@/offline/store/customer_offline.store";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import AnimatedButton from "@/components/Global/AnimatedButtom";
+import { useEmployeeStoreOffline } from "@/offline/store/employee.store";
+import { Employee } from "@/offline/entity/employee.entity";
 const offline_make_sales = () => {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -38,6 +39,7 @@ const offline_make_sales = () => {
   const [showModalSale, setShowModalSale] = useState(false);
   const [focusButton, setFocusButton] = useState(false);
   const [customer, setCustomer] = useState<Customer>();
+  const [employee, setEmployee] = useState<Employee>();
   const [typeDocument, setTypeDocument] = useState<ICat002TipoDeDocumento>({
     codigo: "01",
     id: 1,
@@ -61,6 +63,8 @@ const offline_make_sales = () => {
   const { theme } = useContext(ThemeContext);
   const { OnGetTransmitter, transmitter } = useUserAndTransmitterOfflineStore();
   const { cart_products, emptyCart } = useBranchProductOfflineStore();
+  const { OnGetClientsList, clientList } = useClientOfflineStore();
+  const { OnGetEmployeesList } = useEmployeeStoreOffline();
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
@@ -72,6 +76,8 @@ const offline_make_sales = () => {
   );
   useEffect(() => {
     OnGetTransmitter();
+    OnGetClientsList();
+    OnGetEmployeesList();
     setRefresh(false);
   }, [refresh]);
 
@@ -158,6 +164,14 @@ const offline_make_sales = () => {
       ]);
     }
   }, [cart_products, typeDocument, onePercentRetention, totalAPagar]);
+
+  useMemo(() => {
+    if (!customer) {
+      setCustomer(clientList.length > 0 ? clientList[0] : undefined);
+      return clientList.length > 0 ? clientList[0] : undefined;
+    }
+  }, [clientList]);
+
   const handleAddPay = () => {
     setPays([...pays, { codigo: "01", plazo: "", periodo: 0, monto: 0 }]);
   };
@@ -204,14 +218,7 @@ const offline_make_sales = () => {
       <StatusBar style="dark" />
       {loading ? (
         <>
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "#fff",
-            }}
-          >
+          <View style={stylesGlobals.viewSpinnerInit}>
             <SpinnerInitPage />
           </View>
         </>
@@ -224,22 +231,24 @@ const offline_make_sales = () => {
             backgroundColor: "#fff",
           }}
         >
-          <View
-            style={{ width: "100%", height: "100%", paddingHorizontal: 20 }}
-          >
+          <View style={{ width: "100%", height: "75%", paddingHorizontal: 10 }}>
             <View
               style={{
-                marginLeft: 290,
+                alignContent: "flex-end",
+                alignItems: "flex-end",
               }}
             >
-              <View>
-                <ButtonForCard
-                  onPress={() => {
-                    setShowModal(true);
-                  }}
-                  icon="cart-outline"
-                />
-              </View>
+              <AnimatedButton
+                handleClick={() => {
+                  setShowModal(true);
+                }}
+                iconName="cart-outline"
+                buttonColor={"#000"}
+                width={44}
+                height={44}
+                right={10}
+                size={25}
+              />
             </View>
             {cart_products && cart_products.length > 0 ? (
               <CartProductsList handleReset={handleReset} />
@@ -266,42 +275,25 @@ const offline_make_sales = () => {
                 />
               </View>
             )}
-            <DetailsProduct
-              buttonAction={() => setShowModalSale(true)}
-              total={formatCurrency(totalAPagar)}
-              montoDescuento={0}
-              cantidad={calcQuantityProduct()}
-            />
           </View>
+          <DetailsProduct
+            buttonAction={() => setShowModalSale(true)}
+            total={formatCurrency(totalAPagar)}
+            montoDescuento={"0"}
+            cantidad={calcQuantityProduct()}
+            color={"#AFB0B1"}
+            colorB="#000"
+          />
         </SafeAreaView>
       )}
       <Modal visible={showModal} animationType="fade">
-        <Pressable
-          style={{
-            position: "absolute",
-            right: 10,
-            top: 10,
-            marginBottom: 40,
-          }}
-        >
-          <MaterialCommunityIcons
-            color={"#2C3377"}
-            name="close"
-            size={30}
-            onPress={() => {
-              setShowModal(false);
-            }}
-          />
-        </Pressable>
         <View
           style={{
             width: "100%",
             height: "100%",
-            paddingHorizontal: 20,
-            marginTop: 45,
           }}
         >
-          <ListBranchProduct />
+          <ListBranchProduct closeModal={() => setShowModal(false)} />
         </View>
       </Modal>
       <Modal visible={showModalSale} animationType="fade">
@@ -310,49 +302,72 @@ const offline_make_sales = () => {
             style={{
               display: "flex",
               flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
               width: "100%",
               height: "90%",
-              padding: 32,
             }}
           >
-            <Pressable
+            <View
               style={{
-                position: "absolute",
-                right: 20,
-                top: 20,
+                borderRadius: 25,
+                width: "100%",
+                top: -5,
+                height: 130,
+                backgroundColor: theme.colors.third,
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              <MaterialCommunityIcons
-                color={"#2C3377"}
-                name="close"
-                size={30}
-                onPress={() => {
-                  setShowModalSale(false);
+              <Pressable
+                style={{
+                  position: "absolute",
+                  right: 20,
+                  top: 20,
                 }}
+              >
+                <MaterialCommunityIcons
+                  color={"white"}
+                  name="close"
+                  size={30}
+                  onPress={() => {
+                    setShowModalSale(false);
+                  }}
+                />
+              </Pressable>
+              <Text style={{ fontSize: 20, top: 15, color: "white" }}>
+                Procesar venta
+              </Text>
+            </View>
+            <View
+              style={{
+                padding: 15,
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <AddSalesSupplement
+                customer={customer}
+                setCustomer={setCustomer}
+                employee={employee}
+                setEmployee={setEmployee}
+                typeDocument={typeDocument}
+                setTypeDocument={setTypeDocument}
+                typeTribute={typeTribute}
+                setTypeTribute={setTypeTribute}
+                handleAddPay={handleAddPay}
+                onUpdatePeriodo={onUpdatePeriodo}
+                onUpdateMonto={onUpdateMonto}
+                handleUpdatePlazo={handleUpdatePlazo}
+                handleUpdateTipoPago={handleUpdateTipoPago}
+                handleRemovePay={handleRemovePay}
+                pays={pays}
+                conditionPayment={conditionPayment}
+                setConditionPayment={setConditionPayment}
+                totalUnformatted={totalPagar}
+                totalPagarIva={totalPagarIva}
+                setFocusButton={setFocusButton}
               />
-            </Pressable>
-            <Text style={{ fontSize: 25 }}>Procesar venta</Text>
-            <AddSalesSupplement
-              customer={customer}
-              setCustomer={setCustomer}
-              typeDocument={typeDocument}
-              setTypeDocument={setTypeDocument}
-              typeTribute={typeTribute}
-              setTypeTribute={setTypeTribute}
-              handleAddPay={handleAddPay}
-              onUpdatePeriodo={onUpdatePeriodo}
-              onUpdateMonto={onUpdateMonto}
-              handleUpdatePlazo={handleUpdatePlazo}
-              handleUpdateTipoPago={handleUpdateTipoPago}
-              handleRemovePay={handleRemovePay}
-              pays={pays}
-              conditionPayment={conditionPayment}
-              setConditionPayment={setConditionPayment}
-              totalUnformatted={totalAPagar}
-              setFocusButton={setFocusButton}
-            />
+            </View>
           </View>
           <>
             {typeDocument &&
@@ -361,6 +376,7 @@ const offline_make_sales = () => {
                   <ElectronicTaxCredit
                     clearAllData={handleReset}
                     customer={customer}
+                    employee={employee}
                     typeDocument={typeDocument}
                     transmitter={transmitter}
                     cart_products={cart_products}
@@ -378,6 +394,7 @@ const offline_make_sales = () => {
                     clearAllData={handleReset}
                     customer={customer}
                     typeDocument={typeDocument}
+                    employee={employee}
                     transmitter={transmitter}
                     cart_products={cart_products}
                     pays={pays}

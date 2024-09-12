@@ -1,5 +1,5 @@
 export interface ICreateEmisor {
-  emisorId: number;
+  transmitterId: number;
   clavePrivada: string;
   clavePublica: string;
   nit: string;

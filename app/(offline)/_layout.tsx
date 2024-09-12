@@ -12,11 +12,11 @@ const StackMenu = () => {
         /> */}
         <Stack.Screen
           name="offline_clients"
-          options={{ headerShown: true, title: "Clientes" }}
+          options={{ headerShown: false, title: "Clientes" }}
         />
         <Stack.Screen
           name="offline_branch_product"
-          options={{ headerShown: true, title: "Productos" }}
+          options={{ headerShown: false, title: "Productos" }}
         />
         <Stack.Screen
           name="offline_make_sales"

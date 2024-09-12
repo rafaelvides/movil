@@ -20,8 +20,8 @@ export const useClientOfflineStore = create<IClientOfflineStore>((set) => ({
       .then(() => {
         return true;
       })
-      .catch((error: AxiosError) => {
-        ToastAndroid.show(`Error: ${error.message}`, ToastAndroid.SHORT);
+      .catch(() => {
+        ToastAndroid.show(`Error al guardar los clientes`, ToastAndroid.SHORT);
         return false;
       });
 
@@ -32,8 +32,8 @@ export const useClientOfflineStore = create<IClientOfflineStore>((set) => ({
       .then((data) => {
         set({ clientList: data });
       })
-      .catch((error) => {
-        ToastAndroid.show(`Error: ${error.message}`, ToastAndroid.SHORT);
+      .catch(() => {
+        ToastAndroid.show(`Error al cargar los clientes`, ToastAndroid.SHORT);
         set({ clientList: [] });
       });
   },

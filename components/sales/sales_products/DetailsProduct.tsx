@@ -8,15 +8,25 @@ const DetailsProduct = ({
   montoDescuento,
   cantidad,
   buttonAction,
-}: any) => {
+  color,
+  colorB,
+}: {
+  total: string;
+  montoDescuento: string;
+  cantidad: number;
+  buttonAction: () => void;
+  color?: string;
+  colorB?: string;
+}) => {
   const { theme } = useContext(ThemeContext);
-
+  const bg = color ? color : theme.colors.dark;
+  const bgB = colorB ? colorB : theme.colors.third;
   return (
     <>
       <View
         style={{
           position: "absolute",
-          backgroundColor: theme.colors.dark,
+          backgroundColor: bg,
           width: "100%",
           height: "auto",
           borderTopStartRadius: 20,
@@ -137,14 +147,20 @@ const DetailsProduct = ({
           </View>
         </View>
         {cantidad > 0 && (
-          <View style={{justifyContent: "center", alignItems: "center", marginBottom: 10}}>
-          <Button
-            Title="Enviar"
-            onPress={() => {
-              buttonAction();
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              marginBottom: 10,
             }}
-            color={theme.colors.third}
-          />
+          >
+            <Button
+              Title="Enviar"
+              onPress={() => {
+                buttonAction();
+              }}
+              color={bgB}
+            />
           </View>
         )}
       </View>

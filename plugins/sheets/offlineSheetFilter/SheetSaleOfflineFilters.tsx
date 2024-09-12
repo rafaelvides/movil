@@ -1,16 +1,16 @@
 import { Pressable, SafeAreaView, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
-// import {
-//   type_document,
-//   type_document_filter,
-// } from "@/offline/global/document_to_be_issued";
 import { Dropdown } from "react-native-element-dropdown";
 import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { ICat002TipoDeDocumento } from "@/types/billing/cat-002-tipo-de-documento.types";
-// import { Input } from "@/~/components/ui/input";
 import { DatePickerModal } from "react-native-paper-dates";
 import { returnDate } from "@/utils/date";
+import { type_document_filter } from "@/offline/global/dte/document_to_be_issued";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Input from "@/components/Global/components_app/Input";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const SheetSaleOfflineFilters = ({
   sheetId,
@@ -21,6 +21,7 @@ const SheetSaleOfflineFilters = ({
     payload!.typeDTE
   );
   const [showCalendarStart, setShowCalendarStart] = useState(false);
+  const { theme } = useContext(ThemeContext);
 
   const [startDate, setStartDate] = useState(
     payload?.startDate
@@ -52,54 +53,91 @@ const SheetSaleOfflineFilters = ({
             }}
           >
             <View style={{ width: "100%", marginTop: 20 }}>
-              <Text style={{ fontWeight: "500", marginLeft: "3%" }}>
-                Tipo documento
-              </Text>
-             
+              <Text style={stylesGlobals.textInput}>Tipo documento</Text>
+              <SafeAreaView
+                style={{
+                  width: "100%",
+                  borderWidth: 1,
+                  borderColor: "#D1D5DB",
+                  padding: 12,
+                  borderRadius: 15,
+                }}
+              >
+                <Dropdown
+                  style={[isFocusTipoDocum && { borderColor: "blue" }]}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  iconStyle={styles.iconStyle}
+                  containerStyle={{
+                    top: "57%",
+                  }}
+                  data={type_document_filter}
+                  itemTextStyle={{
+                    fontSize: 16,
+                  }}
+                  search
+                  maxHeight={250}
+                  labelField="valores"
+                  valueField="id"
+                  placeholder={
+                    !isFocusTipoDocum
+                      ? payload?.typeDTE
+                        ? payload.typeDTE.valores
+                        : "Selecciona un item "
+                      : "..."
+                  }
+                  searchPlaceholder="Escribe para buscar..."
+                  value={typeDoc}
+                  onFocus={() => setIsFocusTipoDocum(true)}
+                  onBlur={() => setIsFocusTipoDocum(false)}
+                  onChange={(item) => {
+                    setTypeDocument(item);
+                    setIsFocusTipoDocum(false);
+                  }}
+                  renderLeftIcon={() => (
+                    <AntDesign
+                      style={styles.icon}
+                      color={isFocusTipoDocum ? "blue" : "black"}
+                      name="Safety"
+                      size={20}
+                    />
+                  )}
+                />
+              </SafeAreaView>
             </View>
             <View style={{ marginTop: 15, width: "100%" }}>
-              <Text style={{ marginLeft: "3%", fontWeight: "500" }}>
+              <Text style={stylesGlobals.textInput}>
                 Fechas de la ubicación
               </Text>
               <View style={styles.inputWrapper}>
-              
-                <MaterialCommunityIcons
-                  color={"#1359"}
-                  name="calendar-multiple"
-                  size={27}
-                  style={styles.iconInput}
+                <Input
+                  icon={"calendar-multiple"}
+                  values={startDate.toLocaleDateString()}
                   onPress={() => setShowCalendarStart(true)}
                 />
               </View>
             </View>
-            <Text style={{ marginLeft: "3%", fontWeight: "500" }}>Total</Text>
+            <Text style={stylesGlobals.textInput}>Total</Text>
             <View style={styles.inputWrapper}>
-           
+              <Input
+                placeholder="Total de la venta..."
+                defaultValue={payload?.totalP}
+                onChangeText={payload?.onChangeValueTotalP}
+                icon="currency-usd"
+              />
             </View>
           </View>
-          <Pressable
-            onPress={() =>
-              payload?.handleConfirm(returnDate(startDate), typeDoc)
-            }
-            style={{
-              width: "100%",
-              padding: 12,
-              borderRadius: 4,
-              backgroundColor: "#1F91DC",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-            >
-              Filtrar
-            </Text>
-          </Pressable>
+          <View style={stylesGlobals.viewBotton}>
+            <Button
+              withB={390}
+              onPress={() =>
+                payload?.handleConfirm(returnDate(startDate), typeDoc)
+              }
+              Title="Filtrar"
+              color={theme.colors.dark}
+            />
+          </View>
         </View>
       </ActionSheet>
       <DatePickerModal

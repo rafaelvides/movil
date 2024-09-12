@@ -36,3 +36,25 @@ export const generateURLMH = (
 ) => {
   return `${MH_QUERY}?ambiente=${ambiente}&codGen=${codegen}&fechaEmi=${fechaEmi}`;
 };
+export const sending_steps = [
+  {
+    label: "Firmando el documento",
+    description: "Espere mientras se firma el documento",
+  },
+  {
+    label: "Validando en hacienda",
+    description: "Hacienda esta validando el documento",
+  },
+  {
+    label: "Subiendo archivo",
+    description: "Se están subiendo los archivos",
+  },
+  {
+    label: "Guardando DTE",
+    description: "Estamos guardando el documento",
+  },
+  {
+    label: "Finalizando el proceso",
+    description: "El proceso esta casi listo",
+  },
+];

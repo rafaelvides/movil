@@ -5,7 +5,7 @@ import {
   IGetCustomers,
   IGetCustomersPaginated,
 } from "../types/customer/customer.types";
-import { return_token } from "../plugins/secure_store";
+import { return_token } from "@/plugins/async_storage";
 import { get_user } from "@/plugins/async_storage";
 
 export const get_customer_paginated = async (
