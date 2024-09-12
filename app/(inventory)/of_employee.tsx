@@ -20,6 +20,7 @@ import { useEmployeeStore } from "@/store/employee.store";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import AnimatedButton from "@/components/Global/AnimatedButtom";
 import Card from "@/components/Global/components_app/Card";
+import Not_data from "@/components/Global/Global_Animation/Not_data";
 
 const of_customers = () => {
   const animation = useRef(null);
@@ -168,29 +169,7 @@ const of_customers = () => {
                           ))}
                       </>
                     ) : (
-                      <>
-                        <View
-                          style={{
-                            padding: 40,
-                            width: "100%",
-                            height: "auto",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          <LottieView
-                            autoPlay
-                            ref={animation}
-                            style={{
-                              marginTop: 50,
-                              width: 380,
-                              height: 380,
-                            }}
-                            source={require("@/assets/gif_json/gif_global.json")}
-                          />
-                        </View>
-                      </>
+                      <Not_data/>
                     )}
                   </View>
                 </ScrollView>

@@ -10,9 +10,9 @@ import {
   View,
   Text,
   StyleSheet,
-  Image
+  Image,
 } from "react-native";
-import { Href, Link } from "expo-router";
+import { Href, Link, useFocusEffect } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuthStore } from "../store/auth.store";
 import { ThemeContext } from "@/hooks/useTheme";
@@ -20,7 +20,15 @@ import { StatusBar } from "expo-status-bar";
 import { useLocation } from "@/hooks/useLocation";
 import { useIsConnected } from "react-native-offline";
 import { Divider } from "react-native-paper";
-const CustomDrawer = (props: DrawerContentComponentProps) => {
+import { IConfiguration } from "@/types/configuration/configuration.types";
+
+
+interface CustomDrawerContentComponentProps extends DrawerContentComponentProps {
+  personalization?: IConfiguration;
+}
+
+const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
+
   const currentRoute = props.state.routes[props.state.index];
   const [index, setIndex] = useState(0);
   const { OnMakeLogout } = useAuthStore();
@@ -49,9 +57,7 @@ const CustomDrawer = (props: DrawerContentComponentProps) => {
     );
   };
 
-const {personalization} = useAuthStore()
-
-
+// const { personalization } = useAuthStore()
   return (
     <>
       <StatusBar style="light" />
@@ -66,7 +72,7 @@ const {personalization} = useAuthStore()
           style={{
             height: 80,
             borderRadius: 40,
-            backgroundColor: personalization.logo ? "transparent" : "white",
+            backgroundColor: props?.personalization?.logo? "transparent" : "white",
             width: 80,
             marginTop: 30,
             justifyContent: "center",
@@ -82,11 +88,15 @@ const {personalization} = useAuthStore()
               alignSelf: "center",
             }}
             source={
-              
-              personalization.logo ? { uri: personalization.logo }
+              props?.personalization?.logo
+                ? { uri:props?.personalization?.logo }
                 : require("../assets/images/react-logo.png")
             }
-            alt={personalization && personalization.name ? personalization.name: "Logo Default"}
+            alt={
+            props.personalization && props.personalization?.name
+                ? props.personalization?.name
+                : "Logo Default"
+            }
           />
         </View>
         <Text
@@ -97,7 +107,9 @@ const {personalization} = useAuthStore()
             alignSelf: "center",
           }}
         >
-          {personalization && personalization.name ? personalization.name : "ERP APP"}
+          {props.personalization && props?.personalization?.name
+            ? props?.personalization?.name
+            : "ERP APP"}
         </Text>
       </View>
       <View

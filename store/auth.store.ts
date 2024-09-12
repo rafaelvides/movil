@@ -54,7 +54,8 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           save_token(data.token);
           await save_user(data.user);
           get().GetConfigurationByTransmitter(data.user.transmitterId);
-          await save_point_sale_Id(String(data.user.pointOfSaleId));          if (data.box) {
+          await save_point_sale_Id(String(data.user.pointOfSaleId));
+          if (data.box) {
             box_data(data.box);
           }
           save_login_data_biometric("authBiometric", {
@@ -96,8 +97,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
         login_mh(data.transmitter.nit, data.transmitter.claveApi)
           .then(async (login_mh) => {
             if (login_mh.data.status === "OK") {
-              await save_token_mh(login_mh.data.body.token).catch((er) => {
-              });
+              await save_token_mh(login_mh.data.body.token).catch((er) => {});
             } else {
               const data = login_mh as unknown as ILoginMHFailed;
               ToastAndroid.show(
@@ -213,14 +213,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
     try {
       const { data } = await get_by_transmitter(id);
       if (data.personalization) {
-        // const personalizationArray = Array.isArray(data.personalization)
-        //   ? data.personalization
-        //   : [data.personalization];
-        // // set({
-        //   personalization: personalizationArray,
-        // });
         await save_configuration(data.personalization);
-        const perso = await get_configuration();
       }
     } catch (error) {
       set((state) => ({ ...state, config: {} as IConfiguration }));
