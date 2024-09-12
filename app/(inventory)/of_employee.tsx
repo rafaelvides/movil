@@ -117,7 +117,7 @@ const of_customers = () => {
                                 />
 
                                 <Text style={stylesGlobals.textCard}>
-                                  {employee.fullName.slice(0, 15)}
+                                  {/* {employee?.fullName.slice(0, 15)} */}
                                 </Text>
                               </View>
                               <View style={stylesGlobals.ViewCard}>
@@ -147,7 +147,7 @@ const of_customers = () => {
                                 />
 
                                 <Text style={stylesGlobals.textCard}>
-                                  {employee.branch.name}
+                                  {employee.branch?.name}
                                 </Text>
                               </View>
                               <View style={stylesGlobals.ViewCard}>
@@ -162,7 +162,7 @@ const of_customers = () => {
                                 />
 
                                 <Text style={stylesGlobals.textCard}>
-                                  {employee.branch.codEstable}?{" "}
+                                  {employee.branch?.codEstable}?{" "}
                                 </Text>
                               </View>
                             </Card>

@@ -174,7 +174,6 @@ const Box_close = (props: Props) => {
             <View
               style={{
                 marginLeft: 40,
-
                 marginBottom: props.validation ? 50 : 0,
               }}
             >
