@@ -153,7 +153,6 @@ export const save_electronic_invoice = async (
           const timeout = setTimeout(() => {
             source.cancel("El tiempo de espera ha expirado");
           }, 60000);
-          console.log("antes de enviar a mh", token_mh);
           const result = await Promise.race([
             send_to_mh(data_send, token_mh!, source).then(async ({ data }) => {
               clearTimeout(timeout);
@@ -300,7 +299,6 @@ export const save_electronic_invoice = async (
                 message: "No tienes los accesos necesarios",
               };
             } else {
-              console.log(error.message);
               if (error.response?.data) {
                 if (error.response?.data) {
                   return {

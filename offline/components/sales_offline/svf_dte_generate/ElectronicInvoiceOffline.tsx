@@ -43,7 +43,6 @@ const ElectronicInvoice = (props: Props) => {
   const { theme } = useContext(ThemeContext);
 
   const generateFactura = async () => {
-    console.log(transmitter);
     if (conditionPayment === 0) {
       ToastAndroid.show("Debes seleccionar una condición", ToastAndroid.SHORT);
       return;

@@ -474,7 +474,7 @@ const ElectronicTaxCredit = (props: Props) => {
               [
                 {
                   text: "Cancelar",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel",
                 },
                 {
@@ -497,7 +497,7 @@ const ElectronicTaxCredit = (props: Props) => {
           [
             {
               text: "Cancelar",
-              onPress: () => console.log("Cancel Pressed"),
+              onPress: () => {},
               style: "cancel",
             },
             {
@@ -555,7 +555,7 @@ const ElectronicTaxCredit = (props: Props) => {
               [
                 {
                   text: "Cancelar",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel",
                 },
                 {

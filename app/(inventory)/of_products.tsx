@@ -67,7 +67,6 @@ const of_products = () => {
   const handleSavePrdocts = async () => {
     try {
       const promises = branch_products_list.map(async (branch_product) => {
-        console.log(branch_product);
         return await OnSaveBranchProduct({
           branchProductId: branch_product.id,
           stock: branch_product.stock,

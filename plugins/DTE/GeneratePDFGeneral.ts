@@ -39,13 +39,11 @@ export const generate_json = async (
           Key: pathJso,
         })
       );
-      console.log("la ruta es ", url);
       return await axios
         .get<SVFC_FC_Firmado>(url, {
           responseType: "json",
         })
         .then(async ({ data }) => {
-          console.log(data);
           const doc = new jsPDF();
           const QR = QR_URL(
             data.identificacion.codigoGeneracion,
@@ -88,7 +86,6 @@ export const generate_json = async (
           };
         })
         .catch((error) => {
-          console.log(error)
           return {
             ok: false,
             message: "Error en la generación del pdf",

@@ -453,7 +453,7 @@ const ElectronicInvoice = ({
               [
                 {
                   text: "Cancelar",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel",
                 },
                 {
@@ -476,7 +476,7 @@ const ElectronicInvoice = ({
           [
             {
               text: "Cancelar",
-              onPress: () => console.log("Cancel Pressed"),
+              onPress: () => {},
               style: "cancel",
             },
             {
@@ -536,7 +536,7 @@ const ElectronicInvoice = ({
               [
                 {
                   text: "Cancelar",
-                  onPress: () => console.log("Cancel Pressed"),
+                  onPress: () => {},
                   style: "cancel",
                 },
                 {

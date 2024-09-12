@@ -87,7 +87,7 @@ const ElectronicDTEContingency = ({
     setTime(date);
     setTimePickerVisibility(false);
   };
-  console.log(typeConting);
+  
   useEffect(() => {
     OnGetCat005TipoDeContingencia();
     OnGetEmployeesList();

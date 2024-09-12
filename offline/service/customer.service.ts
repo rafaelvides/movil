@@ -7,7 +7,6 @@ import { Like } from "typeorm/browser";
 
 export async function save_client(client: IClientePayload): Promise<boolean> {
   try {
-    console.log("cliente entrante", client);
     const clientRepository = connection.getRepository(Customer);
 
     const existingClient = await clientRepository.findOne({
@@ -15,7 +14,6 @@ export async function save_client(client: IClientePayload): Promise<boolean> {
         customerId: client.customerId,
       },
     });
-    console.log("cliente existente", existingClient);
     if (existingClient) {
       existingClient.numDocumento = client.numDocumento;
       existingClient.telefono = client.telefono;
@@ -29,27 +27,17 @@ export async function save_client(client: IClientePayload): Promise<boolean> {
       existingClient.tipoContribuyente = String(client.tipoContribuyente);
       existingClient.codActividad = String(client.codActividad);
       existingClient.descActividad = String(client.descActividad);
-console.log("first")
       const save_client = await clientRepository.save(existingClient);
       if (save_client) {
-        console.log(save_client, "1");
         return true;
       } else {
-        console.log(save_client, "2");
-
         return false;
       }
     } else {
-      console.log("no existe cliente");
       const save_client = await clientRepository.save(client);
-      console.log("cliente guardado", save_client);
       if (save_client) {
-        console.log(save_client, "3");
-
         return true;
       } else {
-        console.log(save_client, "4");
-
         return false;
       }
     }

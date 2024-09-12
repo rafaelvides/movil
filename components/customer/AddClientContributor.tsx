@@ -92,7 +92,6 @@ function AddClientContributor(props: Props) {
       .string()
       .required("*El tipo de documento es requerido*")
       .test((tipoDocumento) => {
-        // console.log("dataaa", tipoDocumento)
         if (tipoDocumento) {
           return true;
         }

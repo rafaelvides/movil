@@ -60,9 +60,7 @@ export const useSalesOfflineStore = create<ISalesOfflineStore>((set, get) => ({
           token
         )
           .then(async (response) => {
-            console.log("la respuesta", response);
             if (response.ok === true) {
-              console.log("finbla");
               await clear_complete_sale(sale.id);
               return response;
             } else {
@@ -70,7 +68,6 @@ export const useSalesOfflineStore = create<ISalesOfflineStore>((set, get) => ({
             }
           })
           .catch((error: IProcessSalesResponse) => {
-            console.log(error);
             return {
               ok: false,
               isErrorMh: false,

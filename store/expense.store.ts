@@ -92,8 +92,6 @@ export const useExpenseStore = create<IExpenseStore>((set, get) => ({
       });
   },
   delete_expense: async (id) => {
-    console.log("si llega el id", id);
-
     await expense_delete(id).then((data) => {
       const boxId = Number(AsyncStorage.getItem("box") ?? 0);
       get().getPaginatedExpenses(boxId, 1, 5, "");

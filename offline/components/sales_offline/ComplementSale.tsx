@@ -156,7 +156,6 @@ import {
                 clearTimeout(timeout);
               } else {
                 clearTimeout(timeout);
-                console.log(token_mh);
                 processed_sales.map(async (sale, index) => {
                   if (sale.tipoDte) {
                     const correlativeF = await OnGetCorrelativesByDte(
@@ -197,7 +196,6 @@ import {
                           });
                           return result;
                         } catch (error) {
-                          console.log(error);
                           ToastAndroid.show(
                             "Error al procesar la venta",
                             ToastAndroid.SHORT
@@ -247,7 +245,6 @@ import {
                           });
                           return result;
                         } catch (error) {
-                          console.log(error);
                           ToastAndroid.show(
                             "Error al procesar la venta",
                             ToastAndroid.SHORT

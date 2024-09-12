@@ -166,7 +166,6 @@ const ElectronicTaxCredit = (props: Props) => {
         conditionPayment,
         onePercentRetention
       );
-      console.log(JSON.stringify(generate, null, 2))
       save_local_sale_tax_credit(generate, box.id, user?.id!).then(() => {
         clearAllData();
       });

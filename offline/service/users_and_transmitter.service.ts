@@ -12,19 +12,16 @@ export async function saveUserAndTransmitter(
   try {
     const userRepository = connection.getRepository(User);
     const transmitterRepository = connection.getRepository(Transmitter);
-console.log(data.user.id, transmitter, "data transmitter")
     const existingUser = await userRepository.findOne({
       where: {
         userId: data.user.id,
       },
     });
-    console.log("existingUser", existingUser);
     const existingTransmitter = await transmitterRepository.findOne({
       where: {
         nit: transmitter.nit,
       },
     });
-    console.log(existingTransmitter, existingUser, "existingssssssssssssssssssssssssssssssssdds");
     if (existingUser) {
       if (existingTransmitter) {
         existingTransmitter.clavePrivada = transmitter.clavePrivada;
@@ -83,9 +80,7 @@ console.log(data.user.id, transmitter, "data transmitter")
 
       return newUser;
     }
-    console.log("los nueos")
     const newTransmitter = await transmitterRepository.save(transmitter);
-    console.log("emisor nuevo", newTransmitter, data.box);
     const newUser = await userRepository.save({
       userId: data.user.id,
       username: data.user.userName,
@@ -97,7 +92,6 @@ console.log(data.user.id, transmitter, "data transmitter")
       transmitter: newTransmitter,
       BoxId: data.box && data.box.id ? data.box.id : 0,
     });
-    console.log(newUser, "new user");
     return newUser;
   } catch (error) {
     ToastAndroid.show(`Error ${error}`, ToastAndroid.LONG);

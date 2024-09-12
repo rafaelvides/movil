@@ -78,7 +78,6 @@ const processed_sales = () => {
     codigoGeneracion: string,
     index: string
   ) => {
-    console.log(pathJso);
     setSpinButton({ loading: true, index: index });
     // if (!img_logo) {
     //   ToastAndroid.show("No se encontró el logo", ToastAndroid.LONG);

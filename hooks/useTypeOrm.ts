@@ -6,7 +6,6 @@ export function useDataBaseInitialize() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    console.log("se ejecuta useDataBaseInitialize", connection.isInitialized);
     async function initializeDataBase() {
       if (!connection || !connection.isInitialized) {
         connection.initialize()
@@ -14,7 +13,6 @@ export function useDataBaseInitialize() {
             setReady(true);
           })
           .catch((error) => {
-            console.log(error)
             setReady(true);
             ToastAndroid.show(
               "Error al inicializar la base de datos",

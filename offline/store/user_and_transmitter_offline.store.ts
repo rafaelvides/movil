@@ -15,10 +15,8 @@ export const useUserAndTransmitterOfflineStore = create<IUserAndTransmitterOffli
     async OnGetTransmitter() {
       await get_user()
         .then(async (data) => {
-          console.log(data, "user")
           await getUserLocaL(data?.userName!)
             .then(async (data) => {
-              console.log(data, "userLocal")
               await getEmisorLocal(data?.transmitterId!)
                 .then((data) => {
                   set({ transmitter: data });
