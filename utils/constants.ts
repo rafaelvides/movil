@@ -1,4 +1,4 @@
-export const API_URL = "http://192.168.0.12:8000/api";
+export const API_URL = "http://192.168.0.22:8080/api";
 export const SOCKET = "http://192.168.0.12:8000/socket";
 // export const API_URL = "https://seedcode-api.erpseedcodeone.online/api";
 // export const SOCKET = "https://seedcode-api.erpseedcodeone.online/socket";
@@ -10,8 +10,7 @@ export const API_FIRMADOR =
 export const MH_DTE = "https://apitest.dtes.mh.gob.sv/fesv/recepciondtes";
 export const MH_URL = "https://apitest.dtes.mh.gob.sv/fesv/";
 export const AUTH_MH = "https://apitest.dtes.mh.gob.sv/seguridad/auth";
-export const CHECK_URL =
-  "https://apitest.dtes.mh.gob.sv/fesv/recepcion/consultadte/";
+export const CHECK_URL ="https://apitest.dtes.mh.gob.sv/fesv/recepcion/consultadte/";
 export const CRPAPP = "YzJhxGPKCwc7dxyhsgsts";
 export const API_KEY = "AIzaSyAg89nVToHZGu64OETyO6evbvu9vm6mp-s";
 export const SPACES_BUCKET = 'facturacion-seed-code';

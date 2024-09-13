@@ -9,11 +9,7 @@ import { ThemeContext } from "@/hooks/useTheme";
 import { useFocusEffect, useRouter } from "expo-router";
 import CoinCards from "@/components/box/coinCard";
 import BoxAccounting from "@/components/box/boxAccounting";
-import Button from "@/components/Global/components_app/Button";
 import { StatusBar } from "expo-status-bar";
-import Card from "@/components/Global/components_app/Card";
-import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 interface Props {
   idBox?: number | undefined;
   closeModal: () => void;
@@ -151,29 +147,35 @@ const Box_close = (props: Props) => {
       <StatusBar style="inverted" />
       {!boxPreview ? (
         <ScrollView>
-        <View
-          style={{
-            backgroundColor: "white",
-            width: "100%",
-            // height: "auto",
-            height:"100%"
-          }}
-        >
-          {props.validation && (
-            <Text
-              style={{
-                fontSize: 14,
-                margin: 10,
-              }}
-            >
-              Para continuar necesitas cerrar la caja con fecha:{" "}
-              <Text style={{ fontSize: 16, fontWeight: "bold", color: "red" }}>
-                {box?.date.toString()}
+          <View
+            style={{
+              backgroundColor: "white",
+              width: "100%",
+              // height: "auto",
+              height: "100%",
+            }}
+          >
+            {props.validation && (
+              <Text
+                style={{
+                  fontSize: 14,
+                  margin: 10,
+                }}
+              >
+                Para continuar necesitas cerrar la caja con fecha:{" "}
+                <Text
+                  style={{ fontSize: 16, fontWeight: "bold", color: "red" }}
+                >
+                  {box?.date.toString()}
+                </Text>
               </Text>
-            </Text>
-          )}
-            <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} preview_box={() => preview_box()} />
-        </View>
+            )}
+            <CoinCards
+              boxValues={boxValues}
+              setBoxValues={setBoxValues}
+              preview_box={() => preview_box()}
+            />
+          </View>
         </ScrollView>
       ) : (
         <>
@@ -200,16 +202,17 @@ const Box_close = (props: Props) => {
                 </Text>
               </Text>
             )}
-
+            <View style={{
+              bottom: props.isModal ? -30 : -10,
+              height: props.isModal ? "92%" : "100%"
+            }}>
             <BoxAccounting boxPreview={boxPreview} />
+            </View>
             <View
               style={{
                 backgroundColor: "white",
                 width: "100%",
-                // height: props.isModal ? 540 : 500,
-                height: props.isModal ? "70%":"65%" ,
-                // borderBottomLeftRadius: 30,
-                // borderBottomRightRadius: 30,
+                height: props.isModal ? "66%" : "68%",
                 borderTopStartRadius: 30,
                 borderTopEndRadius: 30,
                 position: "absolute",
@@ -221,16 +224,19 @@ const Box_close = (props: Props) => {
                   marginTop: 10,
                 }}
               >
-                <CoinCards boxValues={boxValues} setBoxValues={setBoxValues} preview_box={() => preview_box()} complete={()=> completeBox()}/>
+                <CoinCards
+                  boxValues={boxValues}
+                  setBoxValues={setBoxValues}
+                  preview_box={() => preview_box()}
+                  complete={() => completeBox()}
+                />
                 <View
                   style={{
                     // right: 6,
                     top: 6,
                     alignItems: "center",
                   }}
-                >
-                 
-                </View>
+                ></View>
               </ScrollView>
             </View>
           </View>

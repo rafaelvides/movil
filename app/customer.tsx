@@ -334,6 +334,7 @@ const customer = () => {
                     />
                   )}
                 </ScrollView>
+                {/* <Text></Text> */}
               </>
             )}
           </SafeAreaView>

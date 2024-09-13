@@ -15,7 +15,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Dropdown } from "react-native-element-dropdown";
 import { AntDesign } from "@expo/vector-icons";
 import { useEmployeeStore } from "@/store/employee.store";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { IEmployee } from "@/types/employee/employee.types";
 import { useAuthStore } from "@/store/auth.store";
 import { ThemeContext } from "@/hooks/useTheme";
@@ -24,6 +24,7 @@ import Button from "../Global/components_app/Button";
 import stylesGlobals from "../Global/styles/StylesAppComponents";
 
 const AddBox = ({ closeModal }: { closeModal: () => void }) => {
+  const router = useRouter()
   const [refreshing, setRefreshing] = useState(false);
   const { theme } = useContext(ThemeContext);
   const validationSchema = yup.object().shape({
@@ -42,6 +43,7 @@ const AddBox = ({ closeModal }: { closeModal: () => void }) => {
       } else {
         ToastAndroid.show("Error en credenciales de ventas", ToastAndroid.LONG);
       }
+      router.navigate("/home")
       closeModal();
     });
   };
