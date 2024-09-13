@@ -1,10 +1,12 @@
-export const API_URL = "http://192.168.1.9:8080/api";
+export const API_URL = "http://192.168.0.19:8080/api";
+// export const API_URL = "http://192.168.0.20:8080/api";
+// export const API_URL = "http://192.168.0.12:8000/api";
 export const SOCKET = "http://192.168.1.9:8080/socket";
 // export const API_URL = "https://seedcode-api.erpseedcodeone.online/api";
 // export const SOCKET = "https://seedcode-api.erpseedcodeone.online/socket";
 export const MH_QUERY = "https://admin.factura.gob.sv/consultaPublicas";
 export const ambiente = "00";
-export const version = 2;
+export const version = 2
 export const API_FIRMADOR =
   "https://firmador.erpseedcodeone.online/firmardocumento/";
 export const MH_DTE = "https://apitest.dtes.mh.gob.sv/fesv/recepciondtes";

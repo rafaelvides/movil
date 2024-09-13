@@ -207,7 +207,7 @@ const Box_close = (props: Props) => {
                 backgroundColor: "white",
                 width: "100%",
                 // height: props.isModal ? 540 : 500,
-                height: props.isModal ? "70%" : "71%",
+                height: props.isModal ? "70%":"65%" ,
                 // borderBottomLeftRadius: 30,
                 // borderBottomRightRadius: 30,
                 borderTopStartRadius: 30,
