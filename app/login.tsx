@@ -15,14 +15,11 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { useEffect, useState } from "react";
 import AuthenticationTouch from "../components/Global/AuthenticationTouch";
 import { return_switch_biometric } from "@/plugins/secure_store";
-import { return_token } from "@/plugins/async_storage";
-
-import { useIsConnected } from "react-native-offline";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import Button from "@/components/Global/components_app/Button";
-import { useFocusEffect } from "expo-router";
 import React from "react";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const login = () => {
   const {
@@ -36,7 +33,7 @@ const login = () => {
     password: yup.string().required("La contraseña es requerida"),
   });
   const [keyVisualizate, setKeyVisualizate] = useState(true);
-  const isConnected = useIsConnected();
+  const { isConnected } = useNetInfo();
 
   const onSubmit = async (payload: ILoginPayload) => {
     if (isConnected) {

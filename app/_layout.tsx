@@ -14,12 +14,16 @@ import { ToastProvider } from "react-native-toast-notifications";
 import { PaperProvider } from "react-native-paper";
 import { SheetProvider } from "react-native-actions-sheet";
 import "@/plugins/sheets";
-import { NetworkProvider, useIsConnected } from "react-native-offline";
 import { es, registerTranslation } from "react-native-paper-dates";
 import ThemeProvider, { ThemeContext } from "@/hooks/useTheme";
 import { useDataBaseInitialize } from "@/hooks/useTypeOrm";
 import { createSocket } from "@/hooks/useSocket";
 import { AlertNotificationRoot } from "react-native-alert-notification";
+import {
+  addEventListener,
+  fetch,
+  useNetInfo,
+} from "@react-native-community/netinfo";
 
 registerTranslation("es", es);
 SplashScreen.preventAutoHideAsync();
@@ -29,10 +33,12 @@ export default function RootLayout() {
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
   const { ready } = useDataBaseInitialize();
+  const unsubscribe = addEventListener((state) => {});
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
     }
+    unsubscribe();
   }, [loaded]);
 
   if (!loaded) {
@@ -42,28 +48,34 @@ export default function RootLayout() {
 
   return (
     <ToastProvider>
-      <NetworkProvider>
-        <StatusBar style="light" />
-        {ready ? (
-          <ValidationNetwork />
-        ) : (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text>Cargando...</Text>
-          </View>
-        )}
-      </NetworkProvider>
+      <StatusBar style="light" />
+      {ready ? (
+        <ValidationNetwork />
+      ) : (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Text>Cargando...</Text>
+        </View>
+      )}
     </ToastProvider>
   );
 }
 const ValidationNetwork = () => {
-  const isConnected = useIsConnected();
   const { theme } = useContext(ThemeContext);
+  fetch().then((state) => {
+    if (state.isConnected !== null && !state.isConnected) {
+      ToastAndroid.show(
+        `No se encontró conexión a internet`,
+        ToastAndroid.LONG
+      );
+    }
+  });
+  const { isConnected } = useNetInfo();
 
   return (
     <PaperProvider theme={theme}>
@@ -77,7 +89,7 @@ const ValidationNetwork = () => {
                 alignItems: "center",
               }}
             >
-              Esperando
+              Esperando conexión de red...
             </Text>
           ) : (
             <RootLayoutNav isConnected={isConnected} />
@@ -111,15 +123,6 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
   const { is_authenticated, OnSetInfo, is_authenticated_offline } =
     useAuthStore();
   const router = useRouter();
-
-  useEffect(() => {
-    if (isConnected !== null && !isConnected) {
-      ToastAndroid.show(
-        "No se encontró conexión a internet",
-        ToastAndroid.LONG
-      );
-    }
-  }, [isConnected]);
 
   useEffect(() => {
     OnSetInfo().then(() => {
@@ -159,13 +162,12 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
     return () => backHandler.remove();
   }, [loading, isConnected, backPressCount]);
 
-
-  const {personalization} = useAuthStore()
+  const { personalization } = useAuthStore();
 
   return (
     <>
       <StatusBar style="light" />
-      <AlertNotificationRoot theme="light" dialogConfig={{autoClose: 10}}>
+      <AlertNotificationRoot theme="light" dialogConfig={{ autoClose: 10 }}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           {isConnected === true ? (
             <>
@@ -189,12 +191,12 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
                       },
                     }}
                     initialRouteName={is_authenticated ? "home" : "login"}
-                    drawerContent={(props) =>(
-                       <CustomDrawer 
-                       {...props}
-                      personalization={personalization}
-                       />
-                      )}
+                    drawerContent={(props) => (
+                      <CustomDrawer
+                        {...props}
+                        personalization={personalization}
+                      />
+                    )}
                   >
                     <Drawer.Screen
                       name="home"
@@ -231,7 +233,7 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
                         title: "Reporte de ventas",
                       }}
                     />
-                     <Drawer.Screen
+                    <Drawer.Screen
                       name="(contingence)"
                       options={{
                         drawerLabel: "Ventas en contingencia",
