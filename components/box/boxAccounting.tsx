@@ -2,7 +2,6 @@ import { IGetBoxDetail } from "@/types/box/box.types";
 import { useContext, useEffect } from "react";
 import { ScrollView, View, Text } from "react-native";
 import Card from "../Global/components_app/Card";
-import stylesGlobals from "../Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
 
 const BoxAccounting = ({

@@ -192,6 +192,7 @@ const Box_close = (props: Props) => {
                   fontSize: 14,
                   margin: 10,
                   color: "white",
+                  
                 }}
               >
                 Para continuar necesitas cerrar la caja con fecha:{" "}
@@ -203,7 +204,7 @@ const Box_close = (props: Props) => {
               </Text>
             )}
             <View style={{
-              bottom: props.isModal ? -30 : -10,
+              bottom: props.isModal ? 19 : -10,
               height: props.isModal ? "92%" : "100%"
             }}>
             <BoxAccounting boxPreview={boxPreview} />
@@ -232,7 +233,6 @@ const Box_close = (props: Props) => {
                 />
                 <View
                   style={{
-                    // right: 6,
                     top: 6,
                     alignItems: "center",
                   }}

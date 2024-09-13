@@ -3,7 +3,6 @@ import { IBoxPayload } from "@/types/box/box.types";
 import * as yup from "yup";
 import { Formik } from "formik";
 import {
-  SafeAreaView,
   Text,
   ToastAndroid,
   View,
@@ -12,9 +11,6 @@ import {
 import { get_point_sale_Id, save_employee_id } from "@/plugins/async_storage";
 import React, { useContext, useEffect, useState } from "react";
 
-import { Dropdown } from "react-native-element-dropdown";
-import { AntDesign } from "@expo/vector-icons";
-import { useEmployeeStore } from "@/store/employee.store";
 import { useFocusEffect, useRouter } from "expo-router";
 import { IEmployee } from "@/types/employee/employee.types";
 import { useAuthStore } from "@/store/auth.store";

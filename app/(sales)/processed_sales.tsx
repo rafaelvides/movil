@@ -583,7 +583,12 @@ const processed_sales = () => {
                     setSalesProgress={setSalesProgress}
                   />
                 ) : (
-                  <SaleContingenceCCF setShowModalDTE={setShowModalDTE} />
+                  <SaleContingenceCCF
+                    resetSaleForJson={resetSaleForJson}
+                    jsonSaleCCF={jsonSaleCCF!}
+                    setMessage={setMessage}
+                    setSalesProgress={setSalesProgress}
+                  />
                 )}
               </>
             )}
