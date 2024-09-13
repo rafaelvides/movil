@@ -265,6 +265,13 @@ const ElectronicInvoice = ({
             setErrorMessage(new_data.body.mensaje);
             setModalError(true);
             setLoadingSale(false);
+            await save_logs({
+              title: new_data.body.codigo ?? "Error al procesar venta",
+              message: new_data.body.mensaje
+                ? new_data.body.mensaje
+                : "Error al firmar el documento",
+              generationCode: generate.dteJson.identificacion.codigoGeneracion,
+            });
             return;
           }
           if (firma.data.body) {
@@ -338,7 +345,7 @@ const ElectronicInvoice = ({
           setModalError(true);
         }, 25000);
       }),
-    ]).catch((error: AxiosError<SendMHFailed>) => {
+    ]).catch(async (error: AxiosError<SendMHFailed>) => {
       clearTimeout(timeout);
       if (axios.isCancel(error)) {
         setTitle("Tiempo de espera agotado");
@@ -359,6 +366,16 @@ const ElectronicInvoice = ({
         );
         setModalError(true);
         setLoadingSale(false);
+        await save_logs({
+          title:
+            error.response.data.descripcionMsg ?? "Error al procesar venta",
+          message:
+            error.response.data.observaciones &&
+            error.response.data.observaciones.length > 0
+              ? error.response?.data.observaciones.join("\n\n")
+              : "No se obtuvo respuesta del Ministerio de Hacienda",
+          generationCode: json.dteJson.identificacion.codigoGeneracion,
+        });
       } else {
         setTitle("No se obtuvo respuesta de hacienda");
         setErrorMessage(
@@ -382,7 +399,7 @@ const ElectronicInvoice = ({
       respuestaMH: respuestaMH,
       firma: firma,
     };
-
+    setResponseMH({ respuestaMH, firma });
     const JSON_uri =
       FileSystem.documentDirectory +
       json.dteJson.identificacion.numeroControl +

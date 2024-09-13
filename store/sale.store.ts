@@ -143,10 +143,9 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
   },
   UpdateSaleDetails: (data) => set({ json_sale: data }),
   OnImgPDF: async (extLogo) => {
+    console.log("12");
     const image_invalidation = require("../assets/images/logo/DTE_NO_VALIDO.png");
-    const image_logo = extLogo
-      ? extLogo
-      : require("../assets/images/logo/seedcode.png");
+    const image_logo = extLogo;
     try {
       // Carga el asset utilizando expo-asset
       const [asset_invalidation, asset_logo] = await Promise.all([
@@ -184,17 +183,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
       ToastAndroid.show("Error al cargar la imagen", ToastAndroid.LONG);
     }
   },
-  async OnPressAllSalesConting(
-    transmitter,
-    box_id,
-    saleDTE,
-    pathJso,
-    token_mh,
-    idEmployee,
-    img_logo,
-    img_invalidation,
-    customer_id
-  ) {
+  async OnPressAllSalesConting(transmitter, saleDTE, pathJso, token_mh) {
     if (saleDTE === "01") {
       const url = await getSignedUrl(
         s3Client,
@@ -208,19 +197,9 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
           responseType: "json",
         })
         .then(async ({ data }) => {
-          return save_electronic_invoice(
-            transmitter,
-            token_mh,
-            box_id,
-            idEmployee,
-            img_logo,
-            customer_id,
-            img_invalidation,
-            data
-          );
+          return save_electronic_invoice(transmitter, token_mh, data);
         })
         .catch((error) => {
-          console.log('store:',error);
           ToastAndroid.show("No se encontró el documento", ToastAndroid.LONG);
           return {
             ok: false,
@@ -245,11 +224,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
           return save_electronic_tax_credit(
             transmitter,
             token_mh,
-            box_id,
-            idEmployee,
-            img_logo,
-            customer_id,
-            img_invalidation,
+
             data
           );
         })

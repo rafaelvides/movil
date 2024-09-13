@@ -161,7 +161,6 @@ function RootLayoutNav({ isConnected }: { isConnected: boolean }) {
 
 
   const {personalization} = useAuthStore()
-  console
 
   return (
     <>

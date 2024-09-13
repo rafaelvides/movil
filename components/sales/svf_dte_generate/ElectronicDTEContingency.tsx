@@ -31,10 +31,9 @@ import {
 } from "@/utils/date";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { return_token_mh } from "@/plugins/secure_store";
-import { get_configuration, get_user } from "@/plugins/async_storage";
+import { get_user } from "@/plugins/async_storage";
 import { get_find_by_correlative } from "@/services/point_of_sale.service";
 import { ContingencySalesGenerator } from "@/plugins/DTE/ContingencySalesGenerator";
-import { generate_uuid } from "@/plugins/random/random";
 import { useTransmitterStore } from "@/store/transmitter.store";
 import {
   firmarDocumentoContingencia,
@@ -52,16 +51,8 @@ import Button from "@/components/Global/components_app/Button";
 import { ThemeContext } from "@/hooks/useTheme";
 
 const ElectronicDTEContingency = ({
-  // infoContingency,
   setModalContingency,
 }: {
-  // infoContingency: {
-  //   saleDTE: string;
-  //   pathJson: string;
-  //   box_id: number;
-  //   customer_id: number;
-  //   employee: number;
-  // };
   setModalContingency: Dispatch<SetStateAction<boolean>>;
 }) => {
   const [isFocus, setIsFocus] = useState(false);
@@ -122,7 +113,6 @@ const ElectronicDTEContingency = ({
   }, []);
 
   const handleContingencySubtraction = async () => {
-    let currentOperation = Promise.resolve<boolean | void>(false);
     const token_mh = await return_token_mh();
     const user = await get_user();
     if (!user) {
@@ -189,14 +179,9 @@ const ElectronicDTEContingency = ({
                 const promises = contingence_sales.map((sale, index) =>
                   OnPressAllSalesConting(
                     transmitter,
-                    sale.boxId,
                     sale.tipoDte,
                     sale.pathJson,
-                    String(token_mh),
-                    sale.employeeId,
-                    img_logo,
-                    img_invalidation,
-                    sale.customerId
+                    String(token_mh)
                   ).then(async (response) => {
                     if (response?.isErrorMh) {
                       await showAlertAndWait(response.title, response.message);
@@ -213,10 +198,8 @@ const ElectronicDTEContingency = ({
                     }
                   })
                 );
-
-                currentOperation.then(() => {
+                await Promise.all(promises).then(() => {
                   setsCreenChange(false);
-
                   ToastAndroid.show(
                     "Procesamiento finalizado",
                     ToastAndroid.SHORT

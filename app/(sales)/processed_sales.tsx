@@ -10,7 +10,13 @@ import {
   ToastAndroid,
   View,
 } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { SheetManager } from "react-native-actions-sheet";
 import { formatDate, verifyApplyAnulation } from "@/utils/date";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -40,6 +46,8 @@ import Card from "@/components/Global/components_app/Card";
 import { formatCurrency } from "@/utils/dte";
 import SpinnerButton from "@/components/Global/SpinnerButton";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
+import { useAuthStore } from "@/store/auth.store";
+
 const processed_sales = () => {
   const [startDate, setStartDate] = useState(formatDate());
   const [endDate, setEndDate] = useState(formatDate());
@@ -65,18 +73,26 @@ const processed_sales = () => {
   const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
   const { theme } = useContext(ThemeContext);
   const { OnGetCustomersList } = useCustomerStore();
+  const { personalization } = useAuthStore();
+  // useEffect(() => {
+  //   (async () => {
+  //     await OnImgPDF(personalization !== undefined ? personalization.logo : "N/A");
+  //   })();
+  // }, []);
+  const get_logo = async () => {
+    if(personalization) {
+      await OnImgPDF(personalization.logo);
+    } else {
+      const logo = require('../../assets/images/logo/react-logo.png');
+      await OnImgPDF(logo);
+    }
+  }
 
-  useEffect(() => {
-    (async () => {
-      await get_configuration().then((data) => {
-        OnImgPDF(String(data?.logo));
-      });
-    })();
-  }, [refreshing]);
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
       setRefreshing(true);
+      get_logo()
       setTimeout(() => {
         setLoading(false);
       }, 1000);
@@ -111,11 +127,11 @@ const processed_sales = () => {
     index: string
   ) => {
     setSpinButton({ loading: true, index: index });
-    // if (!img_logo) {
-    //   ToastAndroid.show("No se encontró el logo", ToastAndroid.LONG);
-    //   setSpinButton({ loading: false, index: index });
-    //   return;
-    // }
+    if (!img_logo) {
+      ToastAndroid.show("No se encontró el logo", ToastAndroid.LONG);
+      setSpinButton({ loading: false, index: index });
+      return;
+    }
     await generate_json(
       pathJso,
       SaleDte,

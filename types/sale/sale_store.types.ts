@@ -30,14 +30,9 @@ export interface SaleStore {
   OnImgPDF: (extLogo: string) => void;
   OnPressAllSalesConting: (
     transmitter: ITransmitter,
-    box_id: number,
     saleDTE: string,
     pathJso: string,
     token_mh: string,
-    idEmployee: number,
-    img_logo: string | null,
-    img_invalidation: string | null,
-    customer_id: number
   ) => Promise<IProcessSalesResponse | undefined>;
   onGetSalesContingence: (id: number) => void;
 }

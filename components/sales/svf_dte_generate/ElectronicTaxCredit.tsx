@@ -42,8 +42,6 @@ import {
   SendMHFailed,
 } from "@/types/svf_dte/responseMH/responseMH.types";
 import { ICheckResponse } from "@/types/dte/Check.types";
-import jsPDF from "jspdf";
-import { QR_URL } from "@/plugins/DTE/make_generator/qr_generate";
 import { save_logs } from "@/services/logs.service";
 import { PayloadMH } from "@/types/dte/DTE.types";
 import { validateCustomerFiscal, validationTransmitter } from "@/utils/filters";
@@ -289,6 +287,13 @@ const ElectronicTaxCredit = (props: Props) => {
             setErrorMessage(new_data.body.mensaje);
             setModalError(true);
             setLoadingSale(false);
+            await save_logs({
+              title: new_data.body.codigo ?? "Error al procesar venta",
+              message: new_data.body.mensaje
+                ? new_data.body.mensaje
+                : "Error al firmar el documento",
+              generationCode: generate.dteJson.identificacion.codigoGeneracion,
+            });
             return;
           }
           if (firma.data.body) {
@@ -359,7 +364,7 @@ const ElectronicTaxCredit = (props: Props) => {
           setModalError(true);
         }, 25000);
       }),
-    ]).catch((error: AxiosError<SendMHFailed>) => {
+    ]).catch(async (error: AxiosError<SendMHFailed>) => {
       clearTimeout(timeout);
       if (axios.isCancel(error)) {
         setTitle("Tiempo de espera agotado");
@@ -379,7 +384,16 @@ const ElectronicTaxCredit = (props: Props) => {
           error.response.data.descripcionMsg ?? "Error al procesar venta"
         );
         setModalError(true);
-        setLoadingSale(false);
+        await save_logs({
+          title:
+            error.response.data.descripcionMsg ?? "Error al procesar venta",
+          message:
+            error.response.data.observaciones &&
+            error.response.data.observaciones.length > 0
+              ? error.response?.data.observaciones.join("\n\n")
+              : "No se obtuvo respuesta del Ministerio de Hacienda",
+          generationCode: json.dteJson.identificacion.codigoGeneracion,
+        });
       } else {
         setTitle("No se obtuvo respuesta de hacienda");
         setErrorMessage(
@@ -403,7 +417,7 @@ const ElectronicTaxCredit = (props: Props) => {
       respuestaMH: respuestaMH,
       firma: firma,
     };
-
+    setResponseMH({ respuestaMH, firma });
     const JSON_uri =
       FileSystem.documentDirectory +
       json.dteJson.identificacion.numeroControl +
