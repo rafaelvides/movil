@@ -4,10 +4,9 @@ import { box_data } from "@/plugins/async_storage";
 import { useBoxStore } from "@/store/box.store";
 import { IBox } from "@/types/box/box.types";
 import { useContext, useState } from "react";
-import { View, Text, ToastAndroid, Modal } from "react-native";
-import { useTheme } from "react-native-paper";
+import { View, Text, Modal } from "react-native";
 import Button from "../Global/components_app/Button";
-import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
 
 const OptionsCloseBox = ({
   box,
@@ -21,20 +20,28 @@ const OptionsCloseBox = ({
   const { OnCloseBox, OnRemoveBox } = useBoxStore();
   const { theme } = useContext(ThemeContext);
 const [isModal, setIsModal] = useState(false)
+const router = useRouter()
+
   const handleCloseBoxId = () => {
     OnCloseBox(Number(box?.id));
     OnRemoveBox();
     closeModal();
+    router.navigate("/home")
   };
+
+
 
   const handleActivate = () => {
     box_data(box!);
     closeModal();
+    router.navigate("/home")
+    
   };
 
   const handleCloseAddBox = () => {
     closeModal();
     closeModal();
+    router.navigate("/home")
   };
 
   return (

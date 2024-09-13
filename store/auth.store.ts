@@ -81,6 +81,7 @@ export const useAuthStore = create<IAuthStore>((set, get) => ({
           await save_branch_id(String(data.user.branchId));
           console.log("auth 11");
         }
+        router.navigate("/validationBox")
         return true;
       })
       .catch(() => {
