@@ -4,14 +4,13 @@ export const SOCKET = "http://192.168.0.21:8000/socket";
 // export const SOCKET = "https://seedcode-api.erpseedcodeone.online/socket";
 export const MH_QUERY = "https://admin.factura.gob.sv/consultaPublicas";
 export const ambiente = "00";
-export const version = 2;
+export const version = 2
 export const API_FIRMADOR =
   "https://firmador.erpseedcodeone.online/firmardocumento/";
 export const MH_DTE = "https://apitest.dtes.mh.gob.sv/fesv/recepciondte";
 export const MH_URL = "https://apitest.dtes.mh.gob.sv/fesv/";
 export const AUTH_MH = "https://apitest.dtes.mh.gob.sv/seguridad/auth";
-export const CHECK_URL =
-  "https://apitest.dtes.mh.gob.sv/fesv/recepcion/consultadte/";
+export const CHECK_URL ="https://apitest.dtes.mh.gob.sv/fesv/recepcion/consultadte/";
 export const CRPAPP = "YzJhxGPKCwc7dxyhsgsts";
 export const API_KEY = "AIzaSyAg89nVToHZGu64OETyO6evbvu9vm6mp-s";
 export const SPACES_BUCKET = 'facturacion-seed-code';

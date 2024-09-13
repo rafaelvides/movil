@@ -47,6 +47,8 @@ import { formatCurrency } from "@/utils/dte";
 import SpinnerButton from "@/components/Global/SpinnerButton";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 import { useAuthStore } from "@/store/auth.store";
+import { IPayloadCustomer } from "@/types/customer/customer.types";
+import { useEmployeeStore } from "@/store/employee.store";
 
 const processed_sales = () => {
   const [startDate, setStartDate] = useState(formatDate());
@@ -79,6 +81,12 @@ const processed_sales = () => {
   //     await OnImgPDF(personalization !== undefined ? personalization.logo : "N/A");
   //   })();
   // }, []);
+  const { OnGetEmployeesList } = useEmployeeStore();
+
+  useEffect(() => {
+    OnGetEmployeesList();
+  }, []);
+
   const get_logo = async () => {
     if(personalization) {
       await OnImgPDF(personalization.logo);
@@ -583,7 +591,12 @@ const processed_sales = () => {
                     setSalesProgress={setSalesProgress}
                   />
                 ) : (
-                  <SaleContingenceCCF setShowModalDTE={setShowModalDTE} />
+                  <SaleContingenceCCF
+                    resetSaleForJson={resetSaleForJson}
+                    jsonSaleCCF={jsonSaleCCF!}
+                    setMessage={setMessage}
+                    setSalesProgress={setSalesProgress}
+                  />
                 )}
               </>
             )}

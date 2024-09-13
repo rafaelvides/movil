@@ -8,10 +8,16 @@ import {
   ToastAndroid,
   Alert,
 } from "react-native";
-import React, { Dispatch, SetStateAction, useContext, useMemo } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { SVFE_FC } from "@/types/svf_dte/fc.types";
 import { StatusBar } from "expo-status-bar";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialCommunityIcons } from "@expo/vector-icons";
 import { formatCurrency } from "@/utils/dte";
 import * as FileSystem from "expo-file-system";
 import { generateURL } from "@/utils/utils";
@@ -26,6 +32,9 @@ import Button from "@/components/Global/components_app/Button";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
 import Card from "@/components/Global/components_app/Card";
+import { IEmployee } from "@/types/employee/employee.types";
+import { useEmployeeStore } from "@/store/employee.store";
+import { Dropdown } from "react-native-element-dropdown";
 
 const SaleContingenceF = ({
   jsonSaleF,
@@ -40,6 +49,10 @@ const SaleContingenceF = ({
 }) => {
   const { customer_list } = useCustomerStore();
   const { theme } = useContext(ThemeContext);
+  const { employee_list } = useEmployeeStore();
+  const [employeId, setEmployeId] = useState(0);
+  const [employee] = useState<IEmployee | undefined>();
+  const [isFocusEmp, setIsFocusEmp] = useState(false);
 
   const customer = useMemo(() => {
     if (jsonSaleF) {
@@ -64,8 +77,9 @@ const SaleContingenceF = ({
       return;
     }
     const codeEmployee = await get_employee_id();
+    console.log("codigoooooo", codeEmployee);
 
-    if (!codeEmployee) {
+    if (!employeId) {
       ToastAndroid.show("No se encontró el empleado", ToastAndroid.SHORT);
       return;
     }
@@ -119,7 +133,7 @@ const SaleContingenceF = ({
               pdf: "pdf_url",
               dte: json_url,
               cajaId: box.id,
-              codigoEmpleado: codeEmployee,
+              codigoEmpleado: employeId,
               sello: true,
               clienteId: customer?.id,
             };
@@ -171,6 +185,51 @@ const SaleContingenceF = ({
       >
         Venta a generar
       </Text>
+      <View style={{ width: "100%", marginTop: 20 }}>
+        <Text style={stylesGlobals.textInput}>Selecciona un empleado</Text>
+        <SafeAreaView
+          style={{
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "#D1D5DB",
+            padding: 12,
+            borderRadius: 15,
+          }}
+        >
+          <Dropdown
+            style={[isFocusEmp && { borderColor: "blue" }]}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            inputSearchStyle={styles.inputSearchStyle}
+            iconStyle={styles.iconStyle}
+            data={employee_list}
+            itemTextStyle={{
+              fontSize: 16,
+            }}
+            search
+            maxHeight={250}
+            labelField="fullName"
+            valueField="id"
+            placeholder={!isFocusEmp ? "Selecciona un item " : "..."}
+            searchPlaceholder="Escribe para buscar..."
+            value={employee}
+            onFocus={() => setIsFocusEmp(true)}
+            onBlur={() => setIsFocusEmp(false)}
+            onChange={(item) => {
+              setEmployeId(item.id);
+              setIsFocusEmp(false);
+            }}
+            renderLeftIcon={() => (
+              <AntDesign
+                style={styles.icon}
+                color={isFocusEmp ? "blue" : "black"}
+                name="Safety"
+                size={20}
+              />
+            )}
+          />
+        </SafeAreaView>
+      </View>
       <View
         style={{
           marginHorizontal: "5%",
@@ -369,7 +428,7 @@ const SaleContingenceF = ({
         </View>
         <ScrollView
           style={{
-            height: "50%",
+            height: "20%",
           }}
         >
           <View style={stylesGlobals.viewScroll}>
@@ -551,6 +610,20 @@ const styles = StyleSheet.create({
     left: "20%",
     top: "30%",
     transform: [{ translateY: -15 }],
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
   },
   iconClock: {
     position: "absolute",

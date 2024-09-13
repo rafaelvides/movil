@@ -31,7 +31,6 @@ import { SheetManager } from "react-native-actions-sheet";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
-import LottieView from "lottie-react-native";
 import Not_data from "@/components/Global/Global_Animation/Not_data";
 
 const customer = () => {
