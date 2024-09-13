@@ -4,7 +4,7 @@ import { verify_box } from "@/services/box.service";
 import { IBox } from "@/types/box/box.types";
 import { formatDate } from "@/utils/date";
 import { useEffect, useState } from "react";
-import { Modal, View ,StyleSheet, ToastAndroid} from "react-native";
+import { Modal, View, StyleSheet, ToastAndroid } from "react-native";
 import Box_close from "./Box_close";
 import Card from "@/components/Global/components_app/Card";
 import OptionsCloseBox from "@/components/box/OptionsCloseBox";
@@ -85,25 +85,36 @@ const validation = () => {
       ) : (
         <Modal visible={showModalClose} animationType="slide">
           <View style={styles.centeredView}>
-            <Card
-              style={{
-                width: stylesGlobals.styleCard.width,
-                height: 340,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              {isVisible ? (
+            {isVisible ? (
+              <Card
+                style={{
+                  width: stylesGlobals.styleCard.width,
+                  height: 340,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 20,
+                }}
+              >
                 <OptionsCloseBox
                   box={box ?? undefined}
                   closeModal={() => {
                     setIsShowModalClose(false);
                   }}
                 />
-              ) : (
+              </Card>
+            ) : (
+              <Card
+                style={{
+                  width:"90%",
+                  height: 240,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 20,
+                }}
+              >
                 <AddBox closeModal={() => setIsShowModalClose(false)} />
-              )}
-            </Card>
+              </Card>
+            )}
           </View>
         </Modal>
       )}
@@ -112,13 +123,12 @@ const validation = () => {
 };
 export default validation;
 
-
 const styles = StyleSheet.create({
-    centeredView: {
-      flex: 1,
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 20,
-      backgroundColor: "rgba(80, 80, 80, 0.8)",
-    },
-  });
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 20,
+    backgroundColor: "rgba(80, 80, 80, 0.8)",
+  },
+});

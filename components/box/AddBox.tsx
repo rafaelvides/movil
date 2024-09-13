@@ -6,13 +6,11 @@ import {
   Text,
   ToastAndroid,
   View,
-  StyleSheet,
 } from "react-native";
-import { get_point_sale_Id, save_employee_id } from "@/plugins/async_storage";
+import { get_point_sale_Id } from "@/plugins/async_storage";
 import React, { useContext, useEffect, useState } from "react";
 
 import { useFocusEffect, useRouter } from "expo-router";
-import { IEmployee } from "@/types/employee/employee.types";
 import { useAuthStore } from "@/store/auth.store";
 import { ThemeContext } from "@/hooks/useTheme";
 import Input from "../Global/components_app/Input";
@@ -55,8 +53,8 @@ const AddBox = ({ closeModal }: { closeModal: () => void }) => {
 
   return (
     <>
-      <Text style={{ fontSize: 18, marginBottom: 5, textAlign: "center" }}>
-        Abrir una caja
+      <Text style={{ fontSize: 16, marginBottom: 5, textAlign: "center" }}>
+        Abrir caja
       </Text>
       <Formik
         initialValues={{
@@ -138,22 +136,3 @@ const AddBox = ({ closeModal }: { closeModal: () => void }) => {
 
 export default AddBox;
 
-const styles = StyleSheet.create({
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 16,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-  icon: {
-    marginRight: 5,
-  },
-});
