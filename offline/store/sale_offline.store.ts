@@ -51,6 +51,7 @@ export const useSalesOfflineStore = create<ISalesOfflineStore>((set, get) => ({
   ) {
     if (sale) {
       if (sale.tipoDte === "01") {
+        console.log("sale");
         return save_electronic_invoice(
           sale,
           codigoGeneracion,

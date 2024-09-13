@@ -49,23 +49,23 @@ export const generate_factura = (
       resumen: {
         totalNoSuj: 0,
         totalExenta: 0,
-        totalGravada: Number(totalUnformatted.toFixed(2)),
-        subTotalVentas: Number(totalUnformatted.toFixed(2)),
+        totalGravada: Number(total(products_carts).toFixed(2)),
+        subTotalVentas: Number(total(products_carts).toFixed(2)),
         descuNoSuj: 0,
         descuExenta: 0,
         descuGravada: 0,
         porcentajeDescuento: 0,
         totalDescu: 0,
         tributos: null,
-        subTotal: Number(totalUnformatted.toFixed(2)),
+        subTotal: Number(total(products_carts).toFixed(2)),
         ivaRete1: Number(onePercentRetention.toFixed(2)),
         reteRenta: 0,
-        totalIva: Number(total_iva(totalUnformatted).toFixed(2)),
-        montoTotalOperacion: Number(totalUnformatted),
+        totalIva: Number(total_iva(products_carts).toFixed(2)),
+        montoTotalOperacion: Number(total(products_carts).toFixed(2)),
         totalNoGravado: 0,
-        totalPagar: Number((totalUnformatted - onePercentRetention).toFixed(2)),
+        totalPagar: Number((totalUnformatted).toFixed(2)),
         totalLetras: convertCurrencyFormat(
-          (totalUnformatted - onePercentRetention).toFixed(2)
+          (totalUnformatted).toFixed(2)
         ),
         saldoFavor: 0,
         condicionOperacion: conditionPayment,
@@ -77,10 +77,24 @@ export const generate_factura = (
     },
   };
 };
-const total_iva = (totalUnformatted: number) => {
-  const iva = totalUnformatted / 1.13;
+const total = (productsCarts: ICartProductOffline[]) => {
+  const total = productsCarts
+    .map((cp) => Number(cp.quantity) * Number(cp.price))
+    .reduce((a, b) => a + b, 0);
 
-  return totalUnformatted - iva;
+  return total;
+};
+
+const total_iva = (productsCarts: ICartProductOffline[]) => {
+  return productsCarts
+    .map((cp) => {
+      const total = Number(cp.price) * Number(cp.quantity);
+
+      const iva = total / 1.13;
+
+      return total - iva;
+    })
+    .reduce((a, b) => a + b, 0);
 };
 
 export const generate_emisor = (

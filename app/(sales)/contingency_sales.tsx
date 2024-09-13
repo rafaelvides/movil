@@ -1,4 +1,5 @@
 import {
+  Alert,
   Modal,
   Pressable,
   RefreshControl,
@@ -6,6 +7,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  ToastAndroid,
   View,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
@@ -27,6 +29,12 @@ import { formatCurrency } from "@/utils/dte";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
 import SpinnerButton from "@/components/Global/SpinnerButton";
 import { generate_json } from "@/plugins/DTE/GeneratePDFGeneral";
+import { SVFE_FC_SEND } from "@/types/svf_dte/fc.types";
+import { useTransmitterStore } from "@/store/transmitter.store";
+import { return_token_mh } from "@/plugins/secure_store";
+import { check_dte } from "@/services/ministry_of_finance.service";
+import { AxiosError } from "axios";
+import { ICheckResponse } from "@/types/dte/Check.types";
 
 const processed_sales = () => {
   const [startDate, setStartDate] = useState(formatDate());
@@ -47,6 +55,7 @@ const processed_sales = () => {
 
   const { GetPaginatedSales, is_loading, sales, img_invalidation, img_logo } =
     useSaleStore();
+    const { OnGetTransmitter, transmitter } = useTransmitterStore();
 
   useFocusEffect(
     React.useCallback(() => {
@@ -65,6 +74,7 @@ const processed_sales = () => {
         }
       });
     })();
+    OnGetTransmitter()
     setRefreshing(false);
   }, [refreshing]);
 
@@ -96,6 +106,179 @@ const processed_sales = () => {
       .catch(() => {
         setSpinButton({ loading: false, index: index });
       });
+  };
+  const handleVerify = async (
+    // DTE: SVFE_FC_SEND,
+    // box: number,
+    // empleado: string
+  ) => {
+    console.log("first")
+    // if (!DTE) {
+    //   ToastAndroid.show("No se obtuvo la venta", ToastAndroid.SHORT);
+    //   setLoadingSale(false);
+    //   false;
+    //   return;
+    // }
+
+    // setLoadingRevision(true);
+
+    // if (DTE?.dteJson.identificacion && transmitter) {
+      const payload = {
+        nitEmisor: transmitter.nit,
+        tdte: "01",
+        codigoGeneracion: "ED6ACA1A-5C1E-4719-9189-F1B8FC34E0A5",
+      };
+      console.log("s")
+      await return_token_mh()
+        .then((token_mh) => {
+          check_dte(payload, String(token_mh))
+            .then(async (response) => {
+              console.log(response.data)
+              if (response.data.selloRecibido) {
+                ToastAndroid.show("Se encontro la enta", ToastAndroid.LONG)
+                // setLoadingRevision(false);
+                // setLoadingSale(false);
+                // true;
+                // const DTE_FORMED = {
+                //   ...DTE.dteJson,
+                //   ...responseMH,
+                // };
+
+                // if (DTE_FORMED) {
+                //   const JSON_uri =
+                //     FileSystem.documentDirectory +
+                //     DTE.dteJson.identificacion.numeroControl +
+                //     ".json";
+
+                //   FileSystem.writeAsStringAsync(
+                //     JSON_uri,
+                //     JSON.stringify({
+                //       ...DTE_FORMED,
+                //     }),
+                //     {
+                //       encoding: FileSystem.EncodingType.UTF8,
+                //     }
+                //   ).then(async () => {
+                //     const json_url = `CLIENTES/${
+                //       transmitter.nombre
+                //     }/${new Date().getFullYear()}/VENTAS/FACTURAS/${formatDate()}/${
+                //       DTE.dteJson.identificacion.codigoGeneracion
+                //     }/${DTE.dteJson.identificacion.numeroControl}.json`;
+
+                //     const blobJSON = await fetch(JSON_uri)
+                //       .then((res) => res.blob())
+                //       .catch(() => {
+                //         ToastAndroid.show(
+                //           "Error al generar la url del documento",
+                //           ToastAndroid.LONG
+                //         );
+                //         setLoadingSale(false);
+                //         false;
+                //         return null;
+                //       });
+                //     if (!blobJSON) {
+                //       setLoadingSale(false);
+                //       false;
+                //       return;
+                //     }
+
+                //     const jsonUploadParams = {
+                //       Bucket: SPACES_BUCKET,
+                //       Key: json_url,
+                //       Body: blobJSON!,
+                //     };
+                //     if (jsonUploadParams) {
+                //       s3Client
+                //         .send(new PutObjectCommand(jsonUploadParams))
+                //         .then((response) => {
+                //           if (response.$metadata) {
+                //             const payload = {
+                //               pdf: "pdf_url",
+                //               dte: json_url,
+                //               cajaId: box,
+                //               codigoEmpleado: empleado,
+                //               sello: true,
+                //               clienteId: customer?.id,
+                //             };
+                //             return_token()
+                //               .then((token) => {
+                //                 axios
+                //                   .post(
+                //                     API_URL + "/sales/factura-sale",
+                //                     payload,
+                //                     {
+                //                       headers: {
+                //                         Authorization: `Bearer ${token}`,
+                //                       },
+                //                     }
+                //                   )
+                //                   .then(() => {
+                //                     Toast.show({
+                //                       type: ALERT_TYPE.SUCCESS,
+                //                       title: "Éxito",
+                //                       textBody:
+                //                         "Se completaron todos los procesos",
+                //                     });
+                //                     setLoadingSale(false);
+                //                     false;
+                //                     setShowModalSale(false);
+                //                     clearAllData();
+                //                   })
+                //                   .catch(() => {
+                //                     ToastAndroid.show(
+                //                       "Error al guarda la venta",
+                //                       ToastAndroid.LONG
+                //                     );
+                //                   });
+                //               })
+                //               .catch(() => {
+                //                 ToastAndroid.show(
+                //                   "No tienes el acceso necesario",
+                //                   ToastAndroid.LONG
+                //                 );
+                //               });
+                //           } else {
+                //             ToastAndroid.show(
+                //               "Error inesperado, contacte al equipo de soporte",
+                //               ToastAndroid.LONG
+                //             );
+                //           }
+                //         })
+                //         .catch(() => {
+                //           ToastAndroid.show(
+                //             "Ocurrió un error al subir el Json",
+                //             ToastAndroid.LONG
+                //           );
+                //         });
+                //     } else {
+                //       ToastAndroid.show(
+                //         "No tienes los documentos",
+                //         ToastAndroid.LONG
+                //       );
+                //     }
+                //   });
+                // }
+              }
+            })
+            .catch((error: AxiosError<ICheckResponse>) => {
+              console.log(error)
+              if (error.status === 500) {
+                Alert.alert("No encontrado", "DTE no encontrado en hacienda");
+                return;
+              }
+              Alert.alert(
+                "Error",
+                `${
+                  error.response?.data.descripcionMsg ??
+                  "DTE no encontrado en hacienda"
+                }`
+              );
+            });
+        })
+        .catch(() => {
+          ToastAndroid.show("No tienes el acceso necesario", ToastAndroid.LONG);
+        });
+    // }
   };
   return (
     <>
@@ -341,6 +524,13 @@ const processed_sales = () => {
                               )}
                               <ButtonForCard
                                 onPress={() => {
+                                  handleVerify()
+                                }}
+                                color={theme.colors.warning}
+                                icon={"database-plus"}
+                              />
+                              <ButtonForCard
+                                onPress={() => {
                                   setModalContingency(true);
                                   setInfoContingecy({
                                     saleDTE: sale.tipoDte,
@@ -364,7 +554,7 @@ const processed_sales = () => {
           </SafeAreaView>
           <Modal visible={modalContingency} animationType="fade">
             <ElectronicDTEContingency
-              infoContingency={infoContingency}
+              // infoContingency={infoContingency}
               setModalContingency={setModalContingency}
             />
           </Modal>

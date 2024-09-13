@@ -79,9 +79,9 @@ export const generate_credito_fiscal_offline = (
           },
         ],
         subTotal: Number(total(products_carts).toFixed(2)),
-        ivaRete1: 0,
+        ivaRete1: Number(onePercentRetention.toFixed(2)),
         reteRenta: 0,
-        ivaPerci1: Number(onePercentRetention.toFixed(2)),
+        ivaPerci1: 0,
         montoTotalOperacion: Number(total(products_carts).toFixed(2)),
         totalNoGravado: 0,
         totalPagar: Number(

@@ -43,6 +43,7 @@ export const save_electronic_invoice = async (
   correlative: IPointOfSales,
   token: string
 ): Promise<IProcessSalesResponse> => {
+  console.log("enter")
   const details = await get_details_sales(sale.id).then((respond) => {
     return respond;
   });
@@ -138,8 +139,10 @@ export const save_electronic_invoice = async (
       apendice: null,
     },
   };
+  console.log(DTE)
   return await firmarDocumentoFactura(DTE)
     .then(async (firmador) => {
+      console.log("se firmo el documento", firmador.data.body);
       if (firmador.data.body) {
         const data_send: PayloadMH = {
           ambiente: ambiente,
@@ -152,7 +155,7 @@ export const save_electronic_invoice = async (
           const source = axios.CancelToken.source();
           const timeout = setTimeout(() => {
             source.cancel("El tiempo de espera ha expirado");
-          }, 60000);
+          }, 25000);
           const result = await Promise.race([
             send_to_mh(data_send, token_mh!, source).then(async ({ data }) => {
               clearTimeout(timeout);
@@ -211,7 +214,7 @@ export const save_electronic_invoice = async (
                         });
                       if (jsonUploadParams && resultJSON) {
                         const payload = {
-                          pdf: "pdf_url",
+                          pdf: "N/A",
                           dte: json_url,
                           cajaId: sale.idBox,
                           codigoEmpleado: idEmployee,

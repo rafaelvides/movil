@@ -251,7 +251,7 @@ const offline_make_sales = () => {
               />
             </View>
             {cart_products && cart_products.length > 0 ? (
-              <CartProductsList handleReset={handleReset} />
+              <CartProductsList />
             ) : (
               <View
                 style={{

@@ -37,13 +37,13 @@ export const save_local_sale_tax_credit = async (
       where: { nit: dte_json.dteJson.emisor.nit },
     });
     if (!customer) {
-      ToastAndroid.show("No se encontro el cliente", ToastAndroid.LONG);
+      ToastAndroid.show("No se encontró el cliente", ToastAndroid.LONG);
       return;
     }
     const sale = new Sale();
     sale.tipoDte = dte_json.dteJson.identificacion.tipoDte;
-    sale.fecEmi = dte_json.dteJson.identificacion.fecEmi as unknown as Date;
-    sale.horEmi = dte_json.dteJson.identificacion.horEmi as unknown as Date;
+    sale.fecEmi = dte_json.dteJson.identificacion.fecEmi;
+    sale.horEmi = dte_json.dteJson.identificacion.horEmi;
     sale.totalNoSuj = dte_json.dteJson.resumen.totalNoSuj;
     sale.totalExenta = dte_json.dteJson.resumen.totalExenta;
     sale.totalGravada = dte_json.dteJson.resumen.totalGravada;
@@ -78,7 +78,7 @@ export const save_local_sale_tax_credit = async (
             tribute.monto = tributo.valor;
             tribute.sale = sl;
             tribute.saleId = sl.id;
-            const tribute_save = await tributesRepository.save(tribute);
+            await tributesRepository.save(tribute);
           }
 
           for (const pays of dte_json.dteJson.resumen.pagos!) {
@@ -187,8 +187,8 @@ export const save_local_sale_invoice = async (
     }
     const sale = new Sale();
     sale.tipoDte = dte_json.dteJson.identificacion.tipoDte;
-    sale.fecEmi = dte_json.dteJson.identificacion.fecEmi as unknown as Date;
-    sale.horEmi = dte_json.dteJson.identificacion.horEmi as unknown as Date;
+    sale.fecEmi = dte_json.dteJson.identificacion.fecEmi;
+    sale.horEmi = dte_json.dteJson.identificacion.horEmi ;
     sale.totalNoSuj = dte_json.dteJson.resumen.totalNoSuj;
     sale.totalExenta = dte_json.dteJson.resumen.totalExenta;
     sale.totalGravada = dte_json.dteJson.resumen.totalGravada;
@@ -304,7 +304,7 @@ export const get_sales_by_box = async (
     where: {
       idBox: box_id,
       tipoDte: tipoDte ? tipoDte : In(["01", "03"]),
-      fecEmi: fecEmi as unknown as Date,
+      fecEmi: fecEmi ? Like(`%${fecEmi}%`) : undefined,
       totalPagar: totalPagar ? Like(`%${totalPagar}%`) : undefined,
     },
     take: limit,
@@ -313,6 +313,9 @@ export const get_sales_by_box = async (
       customer: true,
       transmitter: true,
     },
+    // order: {
+    //   id: "DESC",
+    // }
   });
 
   if (existingSales.length === 0) {

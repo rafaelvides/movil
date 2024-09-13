@@ -16,7 +16,7 @@ import { useBranchProductOfflineStore } from "../../../store/branch_product_offl
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import Card from "@/components/Global/components_app/Card";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
-const CartsProductBranch = ({ handleReset }: { handleReset: () => void }) => {
+const CartsProductBranch = () => {
   const { theme } = useContext(ThemeContext);
 
   const {
@@ -176,7 +176,6 @@ const CartsProductBranch = ({ handleReset }: { handleReset: () => void }) => {
                   <ButtonForCard
                     onPress={() => {
                       OnRemoveProduct(product.id);
-                      handleReset();
                     }}
                     color={theme.colors.danger}
                     icon={"delete"}

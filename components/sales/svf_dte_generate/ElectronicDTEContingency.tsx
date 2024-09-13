@@ -149,7 +149,7 @@ const ElectronicDTEContingency = ({
       employee
     );
     firmarDocumentoContingencia(generateContingency)
-      .then((result) => {
+      .then(async(result) => {
         const send = {
           nit: transmitter.nit,
           documento: result.data.body,
@@ -157,10 +157,10 @@ const ElectronicDTEContingency = ({
         const source = axios.CancelToken.source();
         const timeout = setTimeout(() => {
           source.cancel("El tiempo de espera ha expirado");
-        }, 60000);
+        }, 25000);
 
         Promise.race([
-          send_to_mh_contingencia(send, token_mh ?? "", source).then(
+          await send_to_mh_contingencia(send, token_mh ?? "", source).then(
             async (resspon) => {
               clearTimeout(timeout);
               if (resspon.data.estado === "RECHAZADO") {
@@ -175,7 +175,9 @@ const ElectronicDTEContingency = ({
                 );
                 setsCreenChange(false);
               }
+              console.log(resspon.data)
               if (resspon.data.estado === "RECIBIDO") {
+                console.log("paso la solicitud")
                 const promises = contingence_sales.map((sale, index) =>
                   OnPressAllSalesConting(
                     transmitter,
@@ -218,7 +220,7 @@ const ElectronicDTEContingency = ({
             setTimeout(() => {
               reject(new Error("El tiempo de espera ha expirado"));
               setsCreenChange(false);
-            }, 60000);
+            }, 25000);
           }),
         ]).catch((error: AxiosError<SendMHFailed>) => {
           clearTimeout(timeout);
@@ -228,6 +230,7 @@ const ElectronicDTEContingency = ({
               "No tienes los accesos necesarios",
               ToastAndroid.SHORT
             );
+            setsCreenChange(false);
             return;
           } else {
             if (error.response?.data) {
@@ -240,22 +243,26 @@ const ElectronicDTEContingency = ({
                   ? error.response?.data.observaciones.join("\n\n")
                   : ""
               );
+              setsCreenChange(false);
               return;
             } else {
               ToastAndroid.show(
                 "No tienes los accesos necesarios",
                 ToastAndroid.SHORT
               );
+              setsCreenChange(false);
               return;
             }
           }
         });
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error)
         ToastAndroid.show(
           "Error al firmar el documento de contingencia",
           ToastAndroid.SHORT
         );
+        setsCreenChange(false);
       });
   };
   return (

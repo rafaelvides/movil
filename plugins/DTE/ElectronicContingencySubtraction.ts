@@ -60,7 +60,7 @@ export const save_electronic_invoice = async (
           const result = await Promise.race([
             send_to_mh(data_send, token_mh, source).then(async ({ data }) => {
               clearTimeout(timeout);
-
+console.log(data)
               if (data.selloRecibido) {
                 const DTE_FORMED = {
                   ...DTE.dteJson,
