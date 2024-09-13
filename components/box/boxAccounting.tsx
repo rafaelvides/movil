@@ -6,10 +6,8 @@ import stylesGlobals from "../Global/styles/StylesAppComponents";
 import { ThemeContext } from "@/hooks/useTheme";
 
 const BoxAccounting = ({
-  idBox,
   boxPreview,
 }: {
-  idBox?: number;
   boxPreview?: IGetBoxDetail | undefined;
 }) => {
   useEffect(() => {}, [boxPreview]);
@@ -33,13 +31,13 @@ const BoxAccounting = ({
               flexDirection: "row",
               flexWrap: "wrap",
               gap: 20,
-              justifyContent:"center"
+              justifyContent: "center",
             }}
           >
             <View
               style={{
                 width: 140,
-                height: 60
+                height: 60,
               }}
             >
               <Text
@@ -59,7 +57,7 @@ const BoxAccounting = ({
             <View
               style={{
                 width: 140,
-                height: 60
+                height: 60,
               }}
             >
               <Text
@@ -79,7 +77,7 @@ const BoxAccounting = ({
             <View
               style={{
                 width: 140,
-                height: 60
+                height: 60,
               }}
             >
               <Text
@@ -99,12 +97,12 @@ const BoxAccounting = ({
             <View
               style={{
                 width: 140,
-                height: 60
+                height: 60,
               }}
             >
               <Text
                 style={{
-                  fontWeight:"bold",
+                  fontWeight: "bold",
                   fontSize: 16,
                   color:
                     boxPreview && boxPreview?.cost < 0
@@ -131,8 +129,7 @@ const BoxAccounting = ({
             <View
               style={{
                 width: 140,
-                height: 60
-         
+                height: 60,
               }}
             >
               <Text
@@ -152,7 +149,7 @@ const BoxAccounting = ({
             <View
               style={{
                 width: 140,
-                height: 60
+                height: 60,
               }}
             >
               <Text
@@ -171,8 +168,6 @@ const BoxAccounting = ({
           </View>
         </ScrollView>
       </Card>
-
-      
     </>
   );
 };

@@ -4,6 +4,7 @@ import {
   get_paginated_sales,
   get_recent_sales,
   get_details_sales,
+  get_sales_in_contingence,
 } from "../services/sale.service";
 import { ToastAndroid } from "react-native";
 import { IPagination } from "@/types/GlobalTypes/Global.types";
@@ -31,6 +32,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
   is_loading_details: false,
   img_invalidation: null,
   img_logo: null,
+  contingence_sales: [],
 
   async GetJsonSale(path) {
     const url = await getSignedUrl(
@@ -58,6 +60,19 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
           json_sale: undefined,
         });
         ToastAndroid.show("Error al obtener el json", ToastAndroid.LONG);
+      });
+  },
+  onGetSalesContingence(id) {
+    get_sales_in_contingence(id)
+      .then((res) => {
+        set({
+          contingence_sales: res.data.sales,
+        });
+      })
+      .catch(() => {
+        set({
+          contingence_sales: [],
+        });
       });
   },
   GetPaginatedSales: (id, page, limit, startDate, endDate, status) => {
@@ -128,10 +143,9 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
   },
   UpdateSaleDetails: (data) => set({ json_sale: data }),
   OnImgPDF: async (extLogo) => {
+    console.log("12");
     const image_invalidation = require("../assets/images/logo/DTE_NO_VALIDO.png");
-    const image_logo = extLogo
-      ? extLogo
-      : require("../assets/images/logo/seedcode.png");
+    const image_logo = extLogo;
     try {
       // Carga el asset utilizando expo-asset
       const [asset_invalidation, asset_logo] = await Promise.all([
@@ -169,17 +183,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
       ToastAndroid.show("Error al cargar la imagen", ToastAndroid.LONG);
     }
   },
-  async OnPressAllSalesConting(
-    transmitter,
-    box_id,
-    saleDTE,
-    pathJso,
-    token_mh,
-    idEmployee,
-    img_logo,
-    img_invalidation,
-    customer_id
-  ) {
+  async OnPressAllSalesConting(transmitter, saleDTE, pathJso, token_mh) {
     if (saleDTE === "01") {
       const url = await getSignedUrl(
         s3Client,
@@ -193,16 +197,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
           responseType: "json",
         })
         .then(async ({ data }) => {
-          return save_electronic_invoice(
-            transmitter,
-            token_mh,
-            box_id,
-            idEmployee,
-            img_logo,
-            customer_id,
-            img_invalidation,
-            data
-          );
+          return save_electronic_invoice(transmitter, token_mh, data);
         })
         .catch((error) => {
           ToastAndroid.show("No se encontró el documento", ToastAndroid.LONG);
@@ -229,11 +224,7 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
           return save_electronic_tax_credit(
             transmitter,
             token_mh,
-            box_id,
-            idEmployee,
-            img_logo,
-            customer_id,
-            img_invalidation,
+
             data
           );
         })

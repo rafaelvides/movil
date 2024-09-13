@@ -12,15 +12,15 @@ import {
   StyleSheet,
   Image,
 } from "react-native";
-import { Href, Link, useFocusEffect } from "expo-router";
+import { Href, Link } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useAuthStore } from "../store/auth.store";
 import { ThemeContext } from "@/hooks/useTheme";
 import { StatusBar } from "expo-status-bar";
 import { useLocation } from "@/hooks/useLocation";
-import { useIsConnected } from "react-native-offline";
 import { Divider } from "react-native-paper";
 import { IConfiguration } from "@/types/configuration/configuration.types";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 
 interface CustomDrawerContentComponentProps extends DrawerContentComponentProps {
@@ -33,8 +33,8 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
   const [index, setIndex] = useState(0);
   const { OnMakeLogout } = useAuthStore();
   const { stopAllProcess } = useLocation();
-  const isConnected = useIsConnected();
   const { theme } = useContext(ThemeContext);
+  const { isConnected } = useNetInfo();
 
   const handleLogout = async () => {
     Alert.alert(
@@ -57,7 +57,6 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
     );
   };
 
-// const { personalization } = useAuthStore()
   return (
     <>
       <StatusBar style="light" />
@@ -462,6 +461,54 @@ const CustomDrawer: React.FC<CustomDrawerContentComponentProps> = (props) => {
                           }}
                         >
                           Reporte de ventas
+                        </Text>
+                      </Pressable>
+                    </Link>
+                    <Link
+                      href={"/(contingence)/contingenceFE_CCFE" as Href}
+                      style={{ width: "100%" }}
+                      asChild
+                    >
+                      <Pressable
+                        style={{
+                          backgroundColor: currentRoute.name.includes(
+                            "contingence"
+                          )
+                            ? theme.colors.dark
+                            : "#fff",
+                          ...styles.drawer_item,
+                        }}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: "rgb(249 250 251)",
+                            padding: 10,
+                            borderRadius: 300,
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="database-sync"
+                            size={25}
+                            color={
+                              currentRoute.name.includes("contingence")
+                                ? theme.colors.dark
+                                : "#94a3b8"
+                            }
+                          />
+                        </View>
+                        <Text
+                          style={{
+                            fontWeight: currentRoute.name.includes(
+                              "contingence"
+                            )
+                              ? "bold"
+                              : "normal",
+                            color: currentRoute.name.includes("contingence")
+                              ? "white"
+                              : "rgb(17,24,39)",
+                          }}
+                        >
+                          Contingencia
                         </Text>
                       </Pressable>
                     </Link>

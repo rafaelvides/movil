@@ -18,16 +18,16 @@ export const generateFacturaComercial = (
 ) => {
   let finalYFirtsPage = 0;
 
-  // doc.addImage(
-  //   `data:image/png;base64,${img_logo}`,
-  //   "PNG",
-  //   10,
-  //   20,
-  //   20,
-  //   17,
-  //   "NONE",
-  //   "NONE"
-  // );
+  doc.addImage(
+    `data:image/png;base64,${img_logo}`,
+    "PNG",
+    10,
+    20,
+    20,
+    17,
+    "NONE",
+    "NONE"
+  );
   doc.setFontSize(7);
   const name = doc.splitTextToSize(`${dte.emisor.nombre}`, 90);
   const nameH = getHeightText(doc, name);
@@ -581,16 +581,16 @@ export const headerDoc = (
   JSONDTE: SVFC_FC_Firmado,
   img_logo: string | null
 ) => {
-  // doc.addImage(
-  //   `data:image/png;base64,${img_logo}`,
-  //   "PNG",
-  //   10,
-  //   20,
-  //   20,
-  //   17,
-  //   "FAST",
-  //   "FAST"
-  // );
+  doc.addImage(
+    `data:image/png;base64,${img_logo}`,
+    "PNG",
+    10,
+    20,
+    20,
+    17,
+    "FAST",
+    "FAST"
+  );
   doc.setFontSize(7);
   const name = doc.splitTextToSize(`${JSONDTE.emisor.nombre}`, 90);
   const nameH = getHeightText(doc, name);

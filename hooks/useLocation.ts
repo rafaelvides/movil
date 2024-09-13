@@ -7,10 +7,10 @@ import * as Location from "expo-location";
 import * as TaskManager from "expo-task-manager";
 import { useEffect, useState } from "react";
 import { ToastAndroid } from "react-native";
-import { useIsConnected } from "react-native-offline";
 import { createSocket } from "./useSocket";
 import axios, { AxiosError } from "axios";
 import { API_URL } from "@/utils/constants";
+import { useNetInfo } from "@react-native-community/netinfo";
 
 const LOCATION_TASK_NAME = "LOCATION_TASK_BACKGROUND";
 const socket = createSocket();
@@ -59,7 +59,7 @@ TaskManager.defineTask<IGetLocationsResponse>(
 
 export const useLocation = () => {
   const [isAvailable, setIsAvailable] = useState(false);
-  const isConnected = useIsConnected();
+  const { isConnected } = useNetInfo();
   const { OnSetInfo, is_authenticated } = useAuthStore();
   const { has_enabled, OnGetLocationDisponible } = useLocationStore();
 

@@ -20,7 +20,7 @@ export interface ISale {
   codigoGeneracion: string;
   tipoDte: string;
   fecEmi: string;
-  horEmi: Date;
+  horEmi: string;
   selloRecibido: string;
   selloInvalidacion: string;
   sello: boolean;
@@ -42,6 +42,10 @@ export interface ISale {
   pathPdf: string;
   pathJson: string;
   isActivated: boolean;
+}
+export interface IGetSalesContingence {
+  ok: boolean;
+  sales: ISale[];
 }
 export interface IGetSalePagination {
   ok: boolean;

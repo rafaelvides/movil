@@ -21,7 +21,6 @@ const CoinCards = ({
   const { theme } = useContext(ThemeContext);
   const handleInputChange = (field: keyof ICloseBox) => (text: string) => {
     const validNumber = text.replace(/[^0-9]/g, "");
-
     const numericValue = validNumber === "" ? 0 : parseInt(validNumber, 10);
 
     setBoxValues((prevBoxValues) => ({
