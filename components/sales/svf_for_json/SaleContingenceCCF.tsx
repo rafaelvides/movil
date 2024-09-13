@@ -1,8 +1,27 @@
-import { Alert, SafeAreaView, ScrollView, StyleSheet, Text, ToastAndroid, View } from "react-native";
-import React, { Dispatch, SetStateAction, useContext, useMemo } from "react";
+import {
+  Alert,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  ToastAndroid,
+  View,
+} from "react-native";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useCustomerStore } from "@/store/customer.store";
 import { ThemeContext } from "@/hooks/useTheme";
-import { get_box_data, get_employee_id, return_token } from "@/plugins/async_storage";
+import {
+  get_box_data,
+  get_employee_id,
+  return_token,
+} from "@/plugins/async_storage";
 import { generateURL } from "@/utils/utils";
 import * as FileSystem from "expo-file-system";
 import { API_URL, SPACES_BUCKET } from "@/utils/constants";
@@ -16,6 +35,10 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { StatusBar } from "expo-status-bar";
 import Button from "@/components/Global/components_app/Button";
 import { SVFE_CF } from "@/types/svf_dte/cf.types";
+import { useEmployeeStore } from "@/store/employee.store";
+import { Dropdown } from "react-native-element-dropdown";
+import { IEmployee } from "@/types/employee/employee.types";
+import { AntDesign } from "@expo/vector-icons";
 
 const SaleContingenceCCF = ({
   jsonSaleCCF,
@@ -30,6 +53,10 @@ const SaleContingenceCCF = ({
 }) => {
   const { customer_list } = useCustomerStore();
   const { theme } = useContext(ThemeContext);
+  const { employee_list } = useEmployeeStore();
+  const [employeId, setEmployeId] = useState(0);
+  const [ employee ] = useState<IEmployee | undefined>()
+  const [isFocusEmp, setIsFocusEmp] = useState(false);
 
   const customer = useMemo(() => {
     if (jsonSaleCCF) {
@@ -44,19 +71,20 @@ const SaleContingenceCCF = ({
         }
       });
     }
-    console.log("Datos", jsonSaleCCF)
   }, [jsonSaleCCF, customer_list]);
 
   const handleProgressJson = async () => {
     const box = await get_box_data();
 
+    console.log(JSON.stringify(jsonSaleCCF, null, 2));
+
     if (box?.id === 0 || !box) {
       ToastAndroid.show("No se encontró la caja", ToastAndroid.SHORT);
       return;
     }
-    const codeEmployee = await get_employee_id();
+    // const codeEmployee = await get_employee_id();
 
-    if (!codeEmployee) {
+    if (!employeId) {
       ToastAndroid.show("No se encontró el empleado", ToastAndroid.SHORT);
       return;
     }
@@ -106,18 +134,19 @@ const SaleContingenceCCF = ({
         if (jsonUploadParams) {
           s3Client.send(new PutObjectCommand(jsonUploadParams)).then(() => {
             setMessage("Estamos guardando tus documentos...");
+            const customer_found = customer;
             const payload = {
-              pdf: 'N/A',
+              pdf: "N/A",
               dte: json_url,
               cajaId: box.id,
-              codigoEmpleado: codeEmployee,
+              codigoEmpleado: employeId,
               sello: true,
-              clienteId: customer?.id,
+              clienteId:  customer_found?.id ?? 0,
             };
             return_token()
               .then((token) => {
                 axios
-                  .post(API_URL + '/sales/sale-fiscal-transaction', payload, {
+                  .post(API_URL + "/sales/sale-fiscal-transaction", payload, {
                     headers: {
                       Authorization: `Bearer ${token}`,
                     },
@@ -162,6 +191,51 @@ const SaleContingenceCCF = ({
       >
         Venta a generar
       </Text>
+      <View style={{ width: "100%", marginTop: 20 }}>
+        <Text style={stylesGlobals.textInput}>Selecciona un empleado</Text>
+        <SafeAreaView
+          style={{
+            width: "100%",
+            borderWidth: 1,
+            borderColor: "#D1D5DB",
+            padding: 12,
+            borderRadius: 15,
+          }}
+        >
+          <Dropdown
+            style={[isFocusEmp && { borderColor: "blue" }]}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            inputSearchStyle={styles.inputSearchStyle}
+            iconStyle={styles.iconStyle}
+            data={employee_list}
+            itemTextStyle={{
+              fontSize: 16,
+            }}
+            search
+            maxHeight={250}
+            labelField="fullName"
+            valueField="id"
+            placeholder={!isFocusEmp ? "Selecciona un item " : "..."}
+            searchPlaceholder="Escribe para buscar..."
+            value={employee}
+            onFocus={() => setIsFocusEmp(true)}
+            onBlur={() => setIsFocusEmp(false)}
+            onChange={(item) => {
+              setEmployeId(item.id);
+              setIsFocusEmp(false);
+            }}
+            renderLeftIcon={() => (
+              <AntDesign
+                style={styles.icon}
+                color={isFocusEmp ? "blue" : "black"}
+                name="Safety"
+                size={20}
+              />
+            )}
+          />
+        </SafeAreaView>
+      </View>
       <View
         style={{
           marginHorizontal: "5%",
@@ -360,7 +434,7 @@ const SaleContingenceCCF = ({
         </View>
         <ScrollView
           style={{
-            height: "50%",
+            height: "30%",
           }}
         >
           <View style={stylesGlobals.viewScroll}>
@@ -374,7 +448,7 @@ const SaleContingenceCCF = ({
                     width: "100%",
                   }}
                 >
-                  <Text>Index: #{index+1}</Text>
+                  <Text>Index: #{index + 1}</Text>
                 </View>
                 <View
                   style={{
@@ -542,6 +616,20 @@ const styles = StyleSheet.create({
     left: "20%",
     top: "30%",
     transform: [{ translateY: -15 }],
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
   },
   iconClock: {
     position: "absolute",
