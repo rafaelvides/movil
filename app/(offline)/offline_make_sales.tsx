@@ -117,7 +117,7 @@ const offline_make_sales = () => {
   const iva = totalAPagar * 0.13;
   const totalPagar = totalAPagar - onePercentRetention;
   const totalPagarIva = totalAPagar + iva - onePercentRetention;
-
+console.log(onePercentRetention)
   const handleReset = () => {
     setCustomer(undefined);
     setTypeDocument({

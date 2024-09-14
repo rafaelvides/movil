@@ -67,6 +67,9 @@ export class Sale {
   @Column({ default: "N/A", type: "varchar" })
   totalLetras!: string;
 
+  @Column({ type: "decimal", precision: 10, scale: 2, default: 0.0 })
+  ivaRete1!: number;
+
   @Column({ type: "int" })
   userId!: number;
 

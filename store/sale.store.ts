@@ -143,7 +143,6 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
   },
   UpdateSaleDetails: (data) => set({ json_sale: data }),
   OnImgPDF: async (extLogo) => {
-    console.log("12");
     const image_invalidation = require("../assets/images/logo/DTE_NO_VALIDO.png");
     const image_logo = extLogo;
     try {

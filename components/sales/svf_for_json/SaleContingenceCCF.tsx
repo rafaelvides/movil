@@ -76,8 +76,6 @@ const SaleContingenceCCF = ({
   const handleProgressJson = async () => {
     const box = await get_box_data();
 
-    console.log(JSON.stringify(jsonSaleCCF, null, 2));
-
     if (box?.id === 0 || !box) {
       ToastAndroid.show("No se encontró la caja", ToastAndroid.SHORT);
       return;

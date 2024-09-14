@@ -10,7 +10,6 @@ import {
   save_electronic_tax_credit,
 } from "../service/realization_of_offline_sales.service";
 import { IProcessSalesResponse } from "@/types/svf_dte/responseMH/responseMH.types";
-import { usePointOfSaleStore } from "@/store/point_of_sale.store";
 
 export const useSalesOfflineStore = create<ISalesOfflineStore>((set, get) => ({
   sales_offline_pag: [],
@@ -51,7 +50,6 @@ export const useSalesOfflineStore = create<ISalesOfflineStore>((set, get) => ({
   ) {
     if (sale) {
       if (sale.tipoDte === "01") {
-        console.log("sale");
         return save_electronic_invoice(
           sale,
           codigoGeneracion,

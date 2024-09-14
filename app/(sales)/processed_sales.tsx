@@ -88,19 +88,19 @@ const processed_sales = () => {
   }, []);
 
   const get_logo = async () => {
-    if(personalization) {
+    if (personalization) {
       await OnImgPDF(personalization.logo);
     } else {
-      const logo = require('../../assets/images/logo/react-logo.png');
+      const logo = require("../../assets/images/logo/react-logo.png");
       await OnImgPDF(logo);
     }
-  }
+  };
 
   useFocusEffect(
     React.useCallback(() => {
       setLoading(true);
       setRefreshing(true);
-      get_logo()
+      get_logo();
       setTimeout(() => {
         setLoading(false);
       }, 1000);
@@ -205,14 +205,14 @@ const processed_sales = () => {
   }, [json]);
 
   const resetSaleForJson = () => {
-    setJson("");
-    setTypeDte("");
-    setMessage("Esperando");
-    setJsonSaleF(undefined);
-    setJsonSaleCCF(undefined);
     setSalesProgress(false);
     setLoadingJson(false);
     setShowModalDTE(false);
+    setTypeDte("");
+    setJson("");
+    setMessage("Esperando");
+    setJsonSaleF(undefined);
+    setJsonSaleCCF(undefined);
   };
 
   return (

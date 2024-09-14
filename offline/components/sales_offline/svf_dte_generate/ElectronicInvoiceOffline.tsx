@@ -141,6 +141,7 @@ const ElectronicInvoice = (props: Props) => {
         totalUnformatted,
         onePercentRetention
       );
+      console.log(JSON.stringify(generate, null, 2))
       save_local_sale_invoice(generate, box.id, user?.id!).then(() => {
         clearAllData();
       });

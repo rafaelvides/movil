@@ -175,9 +175,7 @@ const ElectronicDTEContingency = ({
                 );
                 setsCreenChange(false);
               }
-              console.log(resspon.data)
               if (resspon.data.estado === "RECIBIDO") {
-                console.log("paso la solicitud")
                 const promises = contingence_sales.map((sale, index) =>
                   OnPressAllSalesConting(
                     transmitter,
@@ -256,8 +254,7 @@ const ElectronicDTEContingency = ({
           }
         });
       })
-      .catch((error) => {
-        console.log(error)
+      .catch(() => {
         ToastAndroid.show(
           "Error al firmar el documento de contingencia",
           ToastAndroid.SHORT

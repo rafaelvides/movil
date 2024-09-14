@@ -43,7 +43,6 @@ export const save_electronic_invoice = async (
   correlative: IPointOfSales,
   token: string
 ): Promise<IProcessSalesResponse> => {
-  console.log("enter")
   const details = await get_details_sales(sale.id).then((respond) => {
     return respond;
   });
@@ -123,7 +122,7 @@ export const save_electronic_invoice = async (
         totalDescu: sale.totalDescu,
         tributos: null,
         subTotal: sale.subTotal,
-        ivaRete1: 0,
+        ivaRete1: sale.ivaRete1,
         reteRenta: 0,
         totalIva: sale.totalIva,
         montoTotalOperacion: sale.montoTotalOperacion,
@@ -139,10 +138,9 @@ export const save_electronic_invoice = async (
       apendice: null,
     },
   };
-  console.log(DTE)
+  console.log(JSON.stringify(DTE, null, 2));
   return await firmarDocumentoFactura(DTE)
     .then(async (firmador) => {
-      console.log("se firmo el documento", firmador.data.body);
       if (firmador.data.body) {
         const data_send: PayloadMH = {
           ambiente: ambiente,
@@ -464,7 +462,7 @@ export const save_electronic_tax_credit = async (
         tributos: tributes,
         subTotal: sale.subTotal,
         ivaPerci1: 0,
-        ivaRete1: 0,
+        ivaRete1: sale.ivaRete1,
         reteRenta: 0,
         montoTotalOperacion: sale.montoTotalOperacion,
         totalNoGravado: 0,

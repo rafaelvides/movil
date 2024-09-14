@@ -112,7 +112,6 @@ const processed_sales = () => {
     // box: number,
     // empleado: string
   ) => {
-    console.log("first")
     // if (!DTE) {
     //   ToastAndroid.show("No se obtuvo la venta", ToastAndroid.SHORT);
     //   setLoadingSale(false);
@@ -128,12 +127,10 @@ const processed_sales = () => {
         tdte: "01",
         codigoGeneracion: "ED6ACA1A-5C1E-4719-9189-F1B8FC34E0A5",
       };
-      console.log("s")
       await return_token_mh()
         .then((token_mh) => {
           check_dte(payload, String(token_mh))
             .then(async (response) => {
-              console.log(response.data)
               if (response.data.selloRecibido) {
                 ToastAndroid.show("Se encontro la enta", ToastAndroid.LONG)
                 // setLoadingRevision(false);
@@ -261,7 +258,6 @@ const processed_sales = () => {
               }
             })
             .catch((error: AxiosError<ICheckResponse>) => {
-              console.log(error)
               if (error.status === 500) {
                 Alert.alert("No encontrado", "DTE no encontrado en hacienda");
                 return;

@@ -89,7 +89,7 @@ const ComplementSale = ({
   const { OnGetCorrelativesByDte } = usePointOfSaleStore();
   const { employee_list } = useEmployeeStore();
   const { theme } = useContext(ThemeContext);
-  const { OnPressAllSalesConting, OnGetSalesOfflinePagination } =
+  const { OnPressAllSalesConting } =
     useSalesOfflineStore();
   const { cat_005_tipo_de_contingencia } = useBillingStore();
   const timeStart = useMemo(() => {
@@ -205,7 +205,6 @@ const ComplementSale = ({
                 clearTimeout(timeout);
               }
               if (respond.data.estado === "RECIBIDO") {
-                console.log("a venta");
                 clearTimeout(timeout);
                 const promises = processed_sales.map(async (sale, index) => {
                   if (sale.tipoDte) {

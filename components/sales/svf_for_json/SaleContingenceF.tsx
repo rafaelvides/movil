@@ -35,6 +35,7 @@ import Card from "@/components/Global/components_app/Card";
 import { IEmployee } from "@/types/employee/employee.types";
 import { useEmployeeStore } from "@/store/employee.store";
 import { Dropdown } from "react-native-element-dropdown";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
 const SaleContingenceF = ({
   jsonSaleF,
@@ -57,7 +58,6 @@ const SaleContingenceF = ({
   const customer = useMemo(() => {
     if (jsonSaleF) {
       const customer_credito = jsonSaleF.receptor;
-
       return customer_list.find((customer) => {
         if (
           customer.nombre === customer_credito.nombre &&
@@ -76,8 +76,6 @@ const SaleContingenceF = ({
       ToastAndroid.show("No se encontró la caja", ToastAndroid.SHORT);
       return;
     }
-    const codeEmployee = await get_employee_id();
-    console.log("codigoooooo", codeEmployee);
 
     if (!employeId) {
       ToastAndroid.show("No se encontró el empleado", ToastAndroid.SHORT);
@@ -130,7 +128,7 @@ const SaleContingenceF = ({
           s3Client.send(new PutObjectCommand(jsonUploadParams)).then(() => {
             setMessage("Estamos guardando tus documentos...");
             const payload = {
-              pdf: "pdf_url",
+              pdf: "N/A",
               dte: json_url,
               cajaId: box.id,
               codigoEmpleado: employeId,
@@ -147,11 +145,15 @@ const SaleContingenceF = ({
                   })
                   .then(() => {
                     setMessage("");
-                    Alert.alert("Éxito", "Se completaron todos los procesos");
+                    Toast.show({
+                      type: ALERT_TYPE.SUCCESS,
+                      title: "Éxito",
+                      textBody: "Se completaron todos los procesos",
+                    });
                     resetSaleForJson();
                   });
               })
-              .catch(() => {
+              .catch((error) => {
                 resetSaleForJson();
                 ToastAndroid.show(
                   "No tienes el acceso necesario",

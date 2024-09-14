@@ -57,6 +57,7 @@ export const save_local_sale_tax_credit = async (
     sale.totalIva = dte_json.dteJson.resumen.tributos![0].valor;
     sale.montoTotalOperacion = dte_json.dteJson.resumen.montoTotalOperacion;
     sale.condicionOperacion = dte_json.dteJson.resumen.condicionOperacion;
+    sale.ivaRete1 = dte_json.dteJson.resumen.ivaRete1;
     sale.totalPagar = String(dte_json.dteJson.resumen.totalPagar);
     sale.totalLetras = dte_json.dteJson.resumen.totalLetras;
     sale.userId = userId;
@@ -188,7 +189,7 @@ export const save_local_sale_invoice = async (
     const sale = new Sale();
     sale.tipoDte = dte_json.dteJson.identificacion.tipoDte;
     sale.fecEmi = dte_json.dteJson.identificacion.fecEmi;
-    sale.horEmi = dte_json.dteJson.identificacion.horEmi ;
+    sale.horEmi = dte_json.dteJson.identificacion.horEmi;
     sale.totalNoSuj = dte_json.dteJson.resumen.totalNoSuj;
     sale.totalExenta = dte_json.dteJson.resumen.totalExenta;
     sale.totalGravada = dte_json.dteJson.resumen.totalGravada;
@@ -200,6 +201,7 @@ export const save_local_sale_invoice = async (
     sale.totalDescu = dte_json.dteJson.resumen.totalDescu;
     sale.subTotal = dte_json.dteJson.resumen.subTotal;
     sale.totalIva = dte_json.dteJson.resumen.totalIva;
+    sale.ivaRete1 = dte_json.dteJson.resumen.ivaRete1;
     sale.montoTotalOperacion = dte_json.dteJson.resumen.montoTotalOperacion;
     sale.totalPagar = String(dte_json.dteJson.resumen.totalPagar);
     sale.condicionOperacion = dte_json.dteJson.resumen.condicionOperacion;
@@ -217,7 +219,6 @@ export const save_local_sale_invoice = async (
       saleRepository
         .save(sale)
         .then(async (sl) => {
-
           for (const pays of dte_json.dteJson.resumen.pagos!) {
             const pay = new PaymentSale();
             pay.codigo = pays.codigo;
