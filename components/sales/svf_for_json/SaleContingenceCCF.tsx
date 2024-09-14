@@ -11,17 +11,12 @@ import React, {
   Dispatch,
   SetStateAction,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from "react";
 import { useCustomerStore } from "@/store/customer.store";
 import { ThemeContext } from "@/hooks/useTheme";
-import {
-  get_box_data,
-  get_employee_id,
-  return_token,
-} from "@/plugins/async_storage";
+import { get_box_data, return_token } from "@/plugins/async_storage";
 import { generateURL } from "@/utils/utils";
 import * as FileSystem from "expo-file-system";
 import { API_URL, SPACES_BUCKET } from "@/utils/constants";
@@ -55,7 +50,7 @@ const SaleContingenceCCF = ({
   const { theme } = useContext(ThemeContext);
   const { employee_list } = useEmployeeStore();
   const [employeId, setEmployeId] = useState(0);
-  const [ employee ] = useState<IEmployee | undefined>()
+  const [employee] = useState<IEmployee | undefined>();
   const [isFocusEmp, setIsFocusEmp] = useState(false);
 
   const customer = useMemo(() => {
@@ -80,7 +75,6 @@ const SaleContingenceCCF = ({
       ToastAndroid.show("No se encontró la caja", ToastAndroid.SHORT);
       return;
     }
-    // const codeEmployee = await get_employee_id();
 
     if (!employeId) {
       ToastAndroid.show("No se encontró el empleado", ToastAndroid.SHORT);
@@ -139,7 +133,7 @@ const SaleContingenceCCF = ({
               cajaId: box.id,
               codigoEmpleado: employeId,
               sello: true,
-              clienteId:  customer_found?.id ?? 0,
+              clienteId: customer_found?.id ?? 0,
             };
             return_token()
               .then((token) => {
@@ -189,7 +183,7 @@ const SaleContingenceCCF = ({
       >
         Venta a generar
       </Text>
-      <View style={{ width: "100%", marginTop: 20 }}>
+      <View style={{ width: "100%", marginTop: 20, paddingHorizontal: 14 }}>
         <Text style={stylesGlobals.textInput}>Selecciona un empleado</Text>
         <SafeAreaView
           style={{
@@ -243,35 +237,22 @@ const SaleContingenceCCF = ({
         <View
           style={{
             width: "100%",
+            flexDirection: "row",
+            alignItems: "center",
           }}
         >
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: "2%",
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: "600",
-                color: "#4B5563",
-              }}
-            >
-              Código Generación
-            </Text>
-            <MaterialCommunityIcons
-              color={"#AFB0B1"}
-              name="card-text-outline"
-              size={30}
-              style={styles.icon}
-            />
-          </View>
+          <MaterialCommunityIcons
+            color={"#AFB0B1"}
+            name="card-text-outline"
+            size={30}
+            style={styles.icon}
+          />
           <Text
             style={{
               fontWeight: "600",
               color: "#4B5563",
               textAlign: "center",
+              flex: 1,
             }}
           >
             {jsonSaleCCF.identificacion.codigoGeneracion.slice(0, 50)}
@@ -280,48 +261,36 @@ const SaleContingenceCCF = ({
         <View
           style={{
             width: "100%",
-            marginTop: "8%",
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: "6%",
           }}
         >
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: "2%",
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: "600",
-                color: "#4B5563",
-              }}
-            >
-              Numero Control
-            </Text>
-            <MaterialCommunityIcons
-              color={"#AFB0B1"}
-              name="clipboard-minus-outline"
-              size={30}
-              style={styles.icon}
-            />
-          </View>
+          <MaterialCommunityIcons
+            color={"#AFB0B1"}
+            name="clipboard-minus-outline"
+            size={30}
+            style={styles.icon}
+          />
           <Text
             style={{
               fontWeight: "600",
               color: "#4B5563",
               textAlign: "center",
+              flex: 1,
             }}
           >
             {jsonSaleCCF.identificacion.numeroControl.slice(0, 50)}
           </Text>
         </View>
+
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "center",
             alignContent: "center",
             marginTop: "8%",
             gap: 100,
+            justifyContent: "space-between",
           }}
         >
           <View
@@ -370,21 +339,20 @@ const SaleContingenceCCF = ({
             </Text>
           </View>
         </View>
+
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "center",
             alignContent: "center",
+            justifyContent: "space-between",
             marginTop: "8%",
-            marginBottom: "5%",
+            gap: 100,
           }}
         >
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              width: "30%",
-              right: 20,
             }}
           >
             <MaterialCommunityIcons
@@ -408,20 +376,18 @@ const SaleContingenceCCF = ({
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              width: "50%",
-              left: "15%",
+              marginBottom: "5%",
             }}
           >
             <MaterialCommunityIcons
               color={"#AFB0B1"}
               name="currency-usd"
               size={30}
-              style={{
-                alignSelf: "center",
-              }}
+              style={styles.iconClock}
             />
             <Text
               style={{
+                marginLeft: 40,
                 fontWeight: "600",
                 color: "#4B5563",
               }}
@@ -432,7 +398,7 @@ const SaleContingenceCCF = ({
         </View>
         <ScrollView
           style={{
-            height: "30%",
+            height: "48%",
           }}
         >
           <View style={stylesGlobals.viewScroll}>
@@ -595,7 +561,6 @@ const SaleContingenceCCF = ({
         </ScrollView>
         <View style={stylesGlobals.viewBotton}>
           <Button
-            withB={390}
             onPress={handleProgressJson}
             Title="Filtrar"
             color={theme.colors.dark}
@@ -610,10 +575,7 @@ export default SaleContingenceCCF;
 
 const styles = StyleSheet.create({
   icon: {
-    position: "absolute",
-    left: "20%",
-    top: "30%",
-    transform: [{ translateY: -15 }],
+    marginRight: 5,
   },
   placeholderStyle: {
     fontSize: 16,
@@ -631,7 +593,7 @@ const styles = StyleSheet.create({
   },
   iconClock: {
     position: "absolute",
-    left: 7,
+    left: 0,
     top: "30%",
     transform: [{ translateY: -15 }],
   },
