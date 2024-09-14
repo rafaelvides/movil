@@ -520,6 +520,37 @@ const processed_sales = () => {
           </Modal>
           {note === "01" ? (
             <Modal visible={modalDebitNote} animationType="slide">
+              <View
+                style={{
+                  borderRadius: 25,
+                  width: "100%",
+                  top: -5,
+                  height: 130,
+                  backgroundColor: theme.colors.third,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Pressable
+                  style={{
+                    position: "absolute",
+                    right: 20,
+                    top: 20,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    color={"white"}
+                    name="close"
+                    size={30}
+                    onPress={() => {
+                      setModalDebitNote(false);
+                    }}
+                  />
+                </Pressable>
+                <Text style={{ fontSize: 20, top: 15, color: "white" }}>
+                  Nota de débito
+                </Text>
+              </View>
               <DebitNote
                 setModalDebitNote={setModalDebitNote}
                 saleId={saleId}

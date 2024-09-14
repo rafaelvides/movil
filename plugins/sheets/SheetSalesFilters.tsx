@@ -1,9 +1,13 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import ActionSheet, { SheetProps } from "react-native-actions-sheet";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { DatePickerModal } from "react-native-paper-dates";
 import { returnDate } from "@/utils/date";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Input from "@/components/Global/components_app/Input";
+import Button from "@/components/Global/components_app/Button";
+import { ThemeContext } from "@/hooks/useTheme";
 
 const SheetSalesFilters = ({
   sheetId,
@@ -17,6 +21,7 @@ const SheetSalesFilters = ({
         )
       : new Date()
   );
+  const { theme } = useContext(ThemeContext);
   const [endDate, setEndDate] = useState(
     payload?.startDate
       ? new Date(
@@ -46,43 +51,34 @@ const SheetSalesFilters = ({
             <Text style={{ fontSize: 20 }}>Filtros disponibles</Text>
           </View>
           <View style={{ marginTop: 15, width: "100%" }}>
-            <Text style={{ marginLeft: "3%", fontWeight: "500" }}>
-              Fechas de las ventas
-            </Text>
+            <Text style={stylesGlobals.textInput}>Fechas de las ventas</Text>
             <View style={styles.inputWrapper}>
-            
-              <MaterialCommunityIcons
-                color={"#1359"}
-                name="calendar-multiple"
-                size={27}
-                style={styles.icon}
+              <Input
+                icon={"calendar-multiple"}
+                values={`${startDate.toLocaleString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                })}  -  ${endDate.toLocaleString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                })}`}
                 onPress={() => setShowCalendarStart(true)}
               />
             </View>
           </View>
-          <Pressable
-            onPress={() =>
-              payload?.handleConfirm(returnDate(startDate), returnDate(endDate))
-            }
-            style={{
-              width: "100%",
-              padding: 12,
-              borderRadius: 4,
-              backgroundColor: "#1d4ed8",
-              justifyContent: "center",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <Text
-              style={{
-                color: "#fff",
-                fontWeight: "bold",
-              }}
-            >
-              Filtrar
-            </Text>
-          </Pressable>
+          <View style={stylesGlobals.viewBotton}>
+            <Button
+              withB={390}
+              onPress={() =>
+                payload?.handleConfirm(
+                  returnDate(startDate),
+                  returnDate(endDate)
+                )
+              }
+              Title="Filtrar"
+              color={theme.colors.dark}
+            />
+          </View>
         </View>
       </ActionSheet>
       <DatePickerModal

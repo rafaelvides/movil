@@ -236,7 +236,11 @@ const SheetRouteBranchClientFilters = ({
             <View style={styles.inputWrapper}>
               <Input
                 icon={"calendar-multiple"}
-                values={startDate.toLocaleDateString()}
+                values={startDate.toLocaleDateString("es-ES", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
                 onPress={() => setShowCalendarStart(true)}
               />
             </View>

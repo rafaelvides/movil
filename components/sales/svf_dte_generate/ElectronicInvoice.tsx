@@ -1,10 +1,8 @@
 import {
-  Text,
   ToastAndroid,
   Alert,
   View,
   StyleSheet,
-  ActivityIndicator,
   Animated,
 } from "react-native";
 import React, {
@@ -54,9 +52,8 @@ import Button from "@/components/Global/components_app/Button";
 import { ThemeContext } from "@/hooks/useTheme";
 import ErrorAlert from "@/components/Global/manners/ErrorAlert";
 import { IEmployee } from "@/types/employee/employee.types";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
-import { sending_steps } from "@/utils/dte";
+import LoadingSales from "@/components/Global/components_app/LoadingSales";
 
 const ElectronicInvoice = ({
   customer,
@@ -263,7 +260,6 @@ const ElectronicInvoice = ({
 
             setTitle("Error en el firmador " + new_data.body.codigo);
             setErrorMessage(new_data.body.mensaje);
-            setModalError(true);
             setLoadingSale(false);
             await save_logs({
               title: new_data.body.codigo ?? "Error al procesar venta",
@@ -293,7 +289,6 @@ const ElectronicInvoice = ({
             setTitle("Error en el firmador");
             setErrorMessage("Error al firmar el documento");
             setModalError(true);
-            setLoadingSale(false);
             return;
           }
         })
@@ -302,7 +297,6 @@ const ElectronicInvoice = ({
             "Error al firmar el documento",
             "Intenta firmar el documento mas tarde o contacta al equipo de soporte"
           );
-          setModalError(true);
           setLoadingSale(false);
         });
     } catch (error) {
@@ -447,7 +441,7 @@ const ElectronicInvoice = ({
             setStep(3);
             handleSave(
               json_url,
-              "pdf_url",
+              "N/A",
               box,
               codeEmployee,
               JSON_uri,
@@ -902,64 +896,7 @@ const ElectronicInvoice = ({
       {!focusButton && (
         <>
           {loadingSale ? (
-            <View style={styles.overlay}>
-              <ActivityIndicator
-                size="large"
-                color="#16a34a"
-                style={{ marginBottom: 30 }}
-              />
-              <Text style={styles.processingText}>Procesando solicitud...</Text>
-
-              <View style={styles.stepsContainer}>
-                {sending_steps.map((ste, index) => (
-                  <View key={index} style={styles.stepRow}>
-                    <View style={styles.progressContainer}>
-                      <View key={index} style={styles.stepIndicator}>
-                        <Animated.View
-                          style={[
-                            styles.circle,
-                            {
-                              backgroundColor:
-                                index <= step ? "#16a34a" : "#e0e0e0",
-                              transform: [{ scale: index === step ? 1.2 : 1 }],
-                              shadowColor:
-                                index <= step ? "#16a34a" : "#757575",
-                              shadowOpacity: 0.3,
-                              shadowRadius: 4,
-                            },
-                          ]}
-                        >
-                          <Icon
-                            name={
-                              index < step ? "check-circle" : "check-circle"
-                            }
-                            size={24}
-                            color={index <= step ? "#fff" : "#757575"}
-                          />
-                        </Animated.View>
-                      </View>
-                    </View>
-                    <View style={styles.stepInfo}>
-                      <Text
-                        style={[
-                          styles.stepLabel,
-                          index <= step
-                            ? styles.activeStepLabel
-                            : styles.inactiveStepLabel,
-                        ]}
-                      >
-                        {ste.label}
-                      </Text>
-                      {ste.description && (
-                        <Text style={styles.stepDescription}>
-                          {ste.description}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
+            <LoadingSales step={step} />
           ) : (
             <>
               <ErrorAlert

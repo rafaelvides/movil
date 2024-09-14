@@ -21,7 +21,9 @@ import {
 import * as FileSystem from "expo-file-system";
 import { PayloadMH } from "@/types/dte/DTE.types";
 import { API_URL, ambiente } from "@/utils/constants";
-import { return_token, return_token_mh } from "@/plugins/secure_store";
+import { return_token_mh } from "@/plugins/secure_store";
+import { return_token } from "@/plugins/async_storage";
+
 import axios, { AxiosError } from "axios";
 import { s3Client } from "@/plugins/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";

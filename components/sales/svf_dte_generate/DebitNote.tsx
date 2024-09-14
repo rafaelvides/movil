@@ -1,7 +1,5 @@
 import {
-  ActivityIndicator,
   Alert,
-  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -9,7 +7,13 @@ import {
   ToastAndroid,
   View,
 } from "react-native";
-import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
+import React, {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { useSaleStore } from "@/store/sale.store";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useTransmitterStore } from "@/store/transmitter.store";
@@ -22,7 +26,8 @@ import {
 } from "@/services/ministry_of_finance.service";
 import { PayloadMH } from "@/types/dte/DTE.types";
 import { API_URL, SPACES_BUCKET, ambiente } from "@/utils/constants";
-import { return_token, return_token_mh } from "@/plugins/secure_store";
+import { return_token_mh } from "@/plugins/secure_store";
+import { return_token } from "@/plugins/async_storage";
 import axios, { AxiosError } from "axios";
 import { s3Client } from "@/plugins/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
@@ -42,14 +47,21 @@ import { QR_URL } from "@/plugins/DTE/make_generator/qr_generate";
 import { usePointOfSaleStore } from "@/store/point_of_sale.store";
 import { generateNoteURL } from "@/utils/utils";
 import * as Sharing from "expo-sharing";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Card from "@/components/Global/components_app/Card";
 import { formatCurrency } from "@/utils/dte";
+import { ThemeContext } from "@/hooks/useTheme";
+import Button from "@/components/Global/components_app/Button";
+import LoadingSales from "@/components/Global/components_app/LoadingSales";
+import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 
-interface Props {
-  setModalDebitNote: Dispatch<SetStateAction<boolean>>;
+const DebitNote = ({
+  saleId,
+  setModalDebitNote,
+}: {
   saleId: number;
-}
-const DebitNote = (props: Props) => {
-  const { setModalDebitNote, saleId } = props;
+  setModalDebitNote: Dispatch<SetStateAction<boolean>>;
+}) => {
   const { GetSaleDetails, json_sale, is_loading_details, UpdateSaleDetails } =
     useSaleStore();
   const [currentDTE, setCurrentDTE] = useState<SVFE_ND_SEND>();
@@ -58,8 +70,10 @@ const DebitNote = (props: Props) => {
   const [message, setMessage] = useState("Esperando");
   const [loadingRevision, setLoadingRevision] = useState(false);
   const [title, setTitle] = useState<string>("");
+  const [step, setStep] = useState(0);
   const [errorMessage, setErrorMessage] = useState("");
   const [errorQuantity, setErrorQuantity] = useState({ index: "", error: "" });
+  const { theme } = useContext(ThemeContext);
   const [responseMH, setResponseMH] = useState<{
     respuestaMH: ResponseMHSuccess;
     firma: string;
@@ -115,7 +129,7 @@ const DebitNote = (props: Props) => {
         const item = items.find((i) => i.numItem === noItem);
         if (item) {
           const total = (item.precioUni - item.montoDescu) * item.cantidad;
-          item.precioUni = (price- item.montoDescu);
+          item.precioUni = price - item.montoDescu;
           item.ventaGravada = total;
 
           if (!json_sale.indexEdited.includes(noItem)) {
@@ -153,7 +167,7 @@ const DebitNote = (props: Props) => {
         const item = items.find((i) => i.numItem === noItem);
         if (item) {
           const total = (item.precioUni - item.montoDescu) * quantity;
-          item.montoDescu = (item.montoDescu * item.cantidad)
+          item.montoDescu = item.montoDescu * item.cantidad;
           item.cantidad = quantity;
           item.ventaGravada = total;
           json_sale.indexEdited = [...json_sale.indexEdited, noItem];
@@ -252,7 +266,6 @@ const DebitNote = (props: Props) => {
           );
           return;
         }
-        setsCreenChange(true);
         const debit_note = generateNotaDebito(
           transmitter,
           json_sale.receptor,
@@ -260,15 +273,23 @@ const DebitNote = (props: Props) => {
           editedItems,
           json_sale.identificacion
         );
-        setMessage("Estamos firmando tu DTE...");
+        setsCreenChange(true);
         setCurrentDTE(debit_note);
         firmarDocumentoNotaDebito(debit_note)
-          .then((firma) => {
+          .then(async (firma) => {
             if (firma.data.status === "ERROR") {
               const new_data = firma.data as unknown as ErrorFirma;
               setTitle("Error en el firmador " + new_data.body.codigo);
               setErrorMessage(new_data.body.mensaje);
               setsCreenChange(false);
+              await save_logs({
+                title: new_data.body.codigo ?? "Error al procesar venta",
+                message: new_data.body.mensaje
+                  ? new_data.body.mensaje
+                  : "Error al firmar el documento",
+                generationCode:
+                  debit_note.dteJson.identificacion.codigoGeneracion,
+              });
               return;
             }
             if (firma.data.body) {
@@ -280,330 +301,12 @@ const DebitNote = (props: Props) => {
                 documento: firma.data.body,
               };
               handleSendToMh(data_send, debit_note, firma.data.body);
-              setMessage("Se ah enviado a hacienda, esperando respuesta...");
             } else {
               setTitle("Error en el firmador");
               setErrorMessage("Error al firmar el documento");
               setsCreenChange(false);
               return;
             }
-            // const data_send: PayloadMH = {
-            //   ambiente: ambiente,
-            //   idEnvio: 1,
-            //   version: 3,
-            //   tipoDte: "06",
-            //   documento: firma.data.body,
-            // };
-            // return_token_mh()
-            //   .then((token_mh) => {
-            //     if (token_mh) {
-            //       setMessage(
-            //         "Se ah enviado a hacienda, esperando respuesta..."
-            //       );
-            //       const source = axios.CancelToken.source();
-            //       const timeout = setTimeout(() => {
-            //         source.cancel("El tiempo de espera ha expirado");
-            //         setsCreenChange(false);
-            //       }, 60000);
-            //       Promise.race([
-            //         send_to_mh(data_send, token_mh).then(async (ressponse) => {
-            //           clearTimeout(timeout);
-            //           if (ressponse.data.selloRecibido) {
-            //             setMessage("El DTE ah sido validado por hacienda...");
-            //             clearTimeout(timeout);
-            //             const DTE_FORMED = {
-            //               ...debit_note.dteJson,
-            //               respuestaMH: ressponse.data,
-            //               firma: firmador.data.body,
-            //             };
-            //             const DTE_FORMED_VERIFY = {
-            //               respuestaMH: ressponse.data,
-            //               firma: firmador.data.body,
-            //             };
-            //             setResponseMH(DTE_FORMED_VERIFY);
-            //             const doc = new jsPDF();
-            //             const QR = QR_URL(
-            //               DTE_FORMED.identificacion.codigoGeneracion,
-            //               DTE_FORMED.identificacion.fecEmi
-            //             );
-            //             const blobQR = await axios.get<ArrayBuffer>(QR, {
-            //               responseType: "arraybuffer",
-            //             });
-
-            //             const document_gen = makeNotaDebitoPDF(
-            //               doc,
-            //               DTE_FORMED,
-            //               new Uint8Array(blobQR.data),
-            //               img_invalidation,
-            //               img_logo,
-            //               false
-            //             );
-
-            //             if (document_gen) {
-            //               const JSON_uri =
-            //                 FileSystem.documentDirectory +
-            //                 debit_note.dteJson.identificacion.numeroControl +
-            //                 ".json";
-
-            //               FileSystem.writeAsStringAsync(
-            //                 JSON_uri,
-            //                 JSON.stringify({
-            //                   ...DTE_FORMED,
-            //                 }),
-            //                 {
-            //                   encoding: FileSystem.EncodingType.UTF8,
-            //                 }
-            //               )
-            //                 .then(async () => {
-            //                   const json_url = `CLIENTES/${
-            //                     transmitter.nombre
-            //                   }/${new Date().getFullYear()}/VENTAS/NOTAS_DE_DEBITO/${formatDate()}/${
-            //                     debit_note.dteJson.identificacion
-            //                       .codigoGeneracion
-            //                   }/${
-            //                     debit_note.dteJson.identificacion.numeroControl
-            //                   }.json`;
-            //                   const pdf_url = `CLIENTES/${
-            //                     transmitter.nombre
-            //                   }/${new Date().getFullYear()}/VENTAS/NOTAS_DE_DEBITO/${formatDate()}/${
-            //                     debit_note.dteJson.identificacion
-            //                       .codigoGeneracion
-            //                   }/${
-            //                     debit_note.dteJson.identificacion.numeroControl
-            //                   }.pdf`;
-
-            //                   setMessage("Estamos generando los documentos");
-            //                   const filePath = `${FileSystem.documentDirectory}example.pdf`;
-            //                   await FileSystem.writeAsStringAsync(
-            //                     filePath,
-            //                     document_gen.replace(
-            //                       /^data:application\/pdf;filename=generated\.pdf;base64,/,
-            //                       ""
-            //                     ),
-            //                     {
-            //                       encoding: FileSystem.EncodingType.Base64,
-            //                     }
-            //                   );
-            //                   const response = await fetch(filePath);
-
-            //                   if (!response) {
-            //                     setsCreenChange(false);
-            //                     return;
-            //                   }
-            //                   const blob = await response.blob();
-            //                   const pdfUploadParams = {
-            //                     Bucket: "facturacion-seedcode",
-            //                     Key: pdf_url,
-            //                     Body: blob,
-            //                   };
-            //                   const blobJSON = await fetch(JSON_uri)
-            //                     .then((res) => res.blob())
-            //                     .catch(() => {
-            //                       ToastAndroid.showWithGravityAndOffset(
-            //                         "Error al generar la url del documento",
-            //                         ToastAndroid.LONG,
-            //                         ToastAndroid.BOTTOM,
-            //                         25,
-            //                         50
-            //                       );
-            //                       return null;
-            //                     });
-            //                   if (!blobJSON) {
-            //                     setsCreenChange(false);
-            //                     return;
-            //                   }
-            //                   const jsonUploadParams = {
-            //                     Bucket: "facturacion-seedcode",
-            //                     Key: json_url,
-            //                     Body: blobJSON!,
-            //                   };
-            //                   setMessage("Estamos guardando tus documentos");
-            //                   s3Client
-            //                     .send(new PutObjectCommand(pdfUploadParams))
-            //                     .then((response) => {
-            //                       if (response.$metadata) {
-            //                         s3Client
-            //                           .send(
-            //                             new PutObjectCommand(jsonUploadParams)
-            //                           )
-            //                           .then((response) => {
-            //                             if (response.$metadata) {
-            //                               const payload = {
-            //                                 dte: json_url,
-            //                                 sello: true,
-            //                                 pdf: pdf_url,
-            //                               };
-            //                               return_token()
-            //                                 .then((token) => {
-            //                                   axios
-            //                                     .post(
-            //                                       `${API_URL}/nota-de-debitos`,
-            //                                       payload,
-            //                                       {
-            //                                         headers: {
-            //                                           Authorization: `Bearer ${token}`,
-            //                                         },
-            //                                       }
-            //                                     )
-            //                                     .then(() => {
-            //                                       Alert.alert(
-            //                                         "Éxito",
-            //                                         "Se completaron todos los procesos"
-            //                                       );
-            //                                       setModalDebitNote(false);
-            //                                       setsCreenChange(false);
-            //                                     })
-            //                                     .catch(() => {
-            //                                       ToastAndroid.show(
-            //                                         "Error al guarda la venta",
-            //                                         ToastAndroid.LONG
-            //                                       );
-            //                                       setMessage(
-            //                                         "Se produjo un error al guardar la venta en nuestra base de datos"
-            //                                       );
-            //                                       setsCreenChange(false);
-            //                                     });
-            //                                 })
-            //                                 .catch(() => {
-            //                                   ToastAndroid.show(
-            //                                     "No tienes el acceso necesario",
-            //                                     ToastAndroid.LONG
-            //                                   );
-            //                                 });
-            //                             } else {
-            //                               setsCreenChange(false);
-            //                               ToastAndroid.show(
-            //                                 "Error inesperado, contacte al equipo de soporte",
-            //                                 ToastAndroid.LONG
-            //                               );
-            //                             }
-            //                           })
-            //                           .catch(() => {
-            //                             setsCreenChange(false);
-            //                             ToastAndroid.show(
-            //                               "Ocurrió un error en el Json",
-            //                               ToastAndroid.LONG
-            //                             );
-            //                           });
-            //                       } else {
-            //                         setsCreenChange(false);
-            //                         ToastAndroid.show(
-            //                           "Hubo un error al generar la información",
-            //                           ToastAndroid.LONG
-            //                         );
-            //                       }
-            //                     })
-            //                     .catch(() => {
-            //                       setsCreenChange(false);
-            //                       ToastAndroid.show(
-            //                         "Ocurrió un error al subir el PDF",
-            //                         ToastAndroid.LONG
-            //                       );
-            //                     });
-            //                 })
-            //                 .catch(() => {
-            //                   setsCreenChange(false);
-            //                   ToastAndroid.show(
-            //                     "Ocurrió un error en el Json",
-            //                     ToastAndroid.LONG
-            //                   );
-            //                 });
-            //             } else {
-            //               ToastAndroid.show(
-            //                 "Hubo un error al generar la información",
-            //                 ToastAndroid.LONG
-            //               );
-            //               setsCreenChange(false);
-            //             }
-            //           } else {
-            //             setsCreenChange(false);
-            //             ToastAndroid.show(
-            //               "Hacienda no respondió con el sello",
-            //               ToastAndroid.LONG
-            //             );
-            //           }
-            //         }),
-            //         new Promise((_, reject) => {
-            //           setTimeout(() => {
-            //             reject(new Error("El tiempo de espera ha expirado"));
-            //           }, 60000);
-            //         }),
-            //       ]).catch(async (error: AxiosError<SendMHFailed>) => {
-            //         clearTimeout(timeout);
-            //         if (error.response?.status === 401) {
-            //           ToastAndroid.show(
-            //             "No tienes los accesos necesarios",
-            //             ToastAndroid.LONG
-            //           );
-            //           setsCreenChange(false);
-            //           return;
-            //         } else {
-            //           if (error.response?.data) {
-            //             Alert.alert(
-            //               error.response?.data.descripcionMsg
-            //                 ? error.response?.data.descripcionMsg
-            //                 : "El Ministerio de Hacienda no pudo procesar la solicitud",
-            //               error.response.data.observaciones &&
-            //                 error.response.data.observaciones.length > 0
-            //                 ? error.response?.data.observaciones.join("\n\n")
-            //                 : error.response?.data.descripcionMsg
-            //                 ? ""
-            //                 : "El Ministerio de Hacienda no pudo responder a la solicitud. Por favor, inténtalo de nuevo más tarde.",
-            //               [
-            //                 {
-            //                   text: "Reintentar",
-            //                   onPress: () => handleDebitNote(),
-            //                 },
-            //                 {
-            //                   text: "Revisar",
-            //                   onPress: () => handleVerify(),
-            //                 },
-            //                 {
-            //                   text: "Enviar a contingencia",
-            //                   onPress: () => handleContingence(),
-            //                 },
-            //               ]
-            //             );
-            //             setsCreenChange(false);
-            //             return;
-            //           } else {
-            //             ToastAndroid.show(
-            //               "Ah ocurrido un error, consulte al equipo de soporte técnico",
-            //               ToastAndroid.LONG
-            //             );
-            //             setsCreenChange(false);
-            //           }
-            //         }
-            //         if (error.response?.data) {
-            //           await save_logs({
-            //             title:
-            //               error.response.data.descripcionMsg ??
-            //               "Error al procesar venta",
-            //             message:
-            //               error.response.data.observaciones &&
-            //               error.response.data.observaciones.length > 0
-            //                 ? error.response?.data.observaciones.join("\n\n")
-            //                 : "",
-            //             generationCode:
-            //               debit_note.dteJson.identificacion.codigoGeneracion,
-            //           });
-            //         }
-            //       });
-            //     } else {
-            //       ToastAndroid.show(
-            //         "No se ha podido obtener el token de hacienda",
-            //         ToastAndroid.LONG
-            //       );
-            //       setsCreenChange(false);
-            //     }
-            //   })
-            //   .catch(() => {
-            //     ToastAndroid.show(
-            //       "Ocurrió un error al obtener el token",
-            //       ToastAndroid.LONG
-            //     );
-            //     setsCreenChange(false);
-            //   });
           })
           .catch(() => {
             Alert.alert(
@@ -642,44 +345,62 @@ const DebitNote = (props: Props) => {
       );
       return;
     }
-    send_to_mh(data, token_mh!, source)
-      .then(({ data }) => {
-        setMessage("Estamos subiendo los archivos...");
-        handleUploadFile(json, firma, data);
-      })
-      .catch((error: AxiosError<SendMHFailed>) => {
+    setStep(1);
+    Promise.race([
+      send_to_mh(data, token_mh!, source).then(({ data }) => {
         clearTimeout(timeout);
-        if (axios.isCancel(error)) {
-          setTitle("Tiempo de espera agotado");
-          setErrorMessage("El tiempo limite de espera ha expirado");
+        handleUploadFile(json, firma, data);
+      }),
+      new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error("El tiempo de espera ha expirado"));
           setsCreenChange(false);
-        }
+        }, 25000);
+      }),
+    ]).catch(async (error: AxiosError<SendMHFailed>) => {
+      clearTimeout(timeout);
+      if (axios.isCancel(error)) {
+        setTitle("Tiempo de espera agotado");
+        setErrorMessage("El tiempo limite de espera ha expirado");
+        setsCreenChange(false);
+      }
 
-        if (error.response?.data) {
-          setErrorMessage(
+      if (error.response?.data) {
+        setErrorMessage(
+          error.response.data.observaciones &&
+            error.response.data.observaciones.length > 0
+            ? error.response?.data.observaciones.join("\n\n")
+            : "No se pudo obtener una respuesta de hacienda, inténtelo de nuevo mas tarde..."
+        );
+        setTitle(
+          error.response.data.descripcionMsg ?? "Error al procesar venta"
+        );
+        setsCreenChange(false);
+        await save_logs({
+          title:
+            error.response.data.descripcionMsg ?? "Error al procesar venta",
+          message:
             error.response.data.observaciones &&
-              error.response.data.observaciones.length > 0
+            error.response.data.observaciones.length > 0
               ? error.response?.data.observaciones.join("\n\n")
-              : ""
-          );
-          setTitle(
-            error.response.data.descripcionMsg ?? "Error al procesar venta"
-          );
-          setsCreenChange(false);
-        } else {
-          setTitle("No se obtuvo respuesta de hacienda");
-          setErrorMessage(
-            "Al enviar la venta, no se obtuvo respuesta de hacienda"
-          );
-          setsCreenChange(false);
-        }
-      });
+              : "No se obtuvo respuesta del Ministerio de Hacienda",
+          generationCode: json.dteJson.identificacion.codigoGeneracion,
+        });
+      } else {
+        setTitle("No se obtuvo respuesta de hacienda");
+        setErrorMessage(
+          "Al enviar la venta, no se obtuvo respuesta de hacienda"
+        );
+        setsCreenChange(false);
+      }
+    });
   };
   const handleUploadFile = async (
     json: SVFE_ND_SEND,
     firma: string,
     respuestaMH: ResponseMHSuccess
   ) => {
+    setStep(2);
     const DTE_FORMED = {
       ...json.dteJson,
       respuestaMH: respuestaMH,
@@ -731,10 +452,10 @@ const DebitNote = (props: Props) => {
         s3Client
           .send(new PutObjectCommand(jsonUploadParams))
           .then(() => {
-            setMessage("Estamos guardando tus documentos...");
+            setStep(3);
             handleSave(
               json_url,
-              "pdf_url",
+              "N/A",
               JSON_uri,
               JSON.stringify(DTE_FORMED, null, 2)
             );
@@ -802,6 +523,7 @@ const DebitNote = (props: Props) => {
       dte: json_url,
       sello: true,
     };
+    setStep(4);
     return_token()
       .then((token) => {
         axios
@@ -811,9 +533,12 @@ const DebitNote = (props: Props) => {
             },
           })
           .then(() => {
-            setMessage("");
+            Toast.show({
+              type: ALERT_TYPE.SUCCESS,
+              title: "Éxito",
+              textBody: "Se completaron todos los procesos",
+            });
             setModalDebitNote(false);
-            Alert.alert("Éxito", "Se completaron todos los procesos");
             setsCreenChange(false);
           })
           .catch((error) => {
@@ -1090,7 +815,7 @@ const DebitNote = (props: Props) => {
                       }
 
                       const jsonUploadParams = {
-                        Bucket: "facturacion-seedcode",
+                        Bucket: SPACES_BUCKET,
                         Key: json_url,
                         Body: blobJSON!,
                       };
@@ -1125,10 +850,12 @@ const DebitNote = (props: Props) => {
                                           )
                                           .then(() => {
                                             setMessage("");
-                                            Alert.alert(
-                                              "Éxito",
-                                              "Se completaron todos los procesos"
-                                            );
+                                            Toast.show({
+                                              type: ALERT_TYPE.SUCCESS,
+                                              title: "Éxito",
+                                              textBody:
+                                                "Se completaron todos los procesos",
+                                            });
                                             setModalDebitNote(false);
                                             setsCreenChange(false);
                                           })
@@ -1227,55 +954,11 @@ const DebitNote = (props: Props) => {
   };
   return (
     <>
-      <SafeAreaView
-        style={{
-          flex: 1,
-          width: "100%",
-          height: "100%",
-          backgroundColor: "#fff",
-          paddingHorizontal: 8,
-        }}
-      >
+      <SafeAreaView style={stylesGlobals.safeAreaViewStyle}>
         {screenChange ? (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <ActivityIndicator size={"large"} />
-            <Text
-              style={{
-                fontSize: 18,
-                marginTop: 12,
-              }}
-            >
-              {message}
-            </Text>
-          </View>
+          <LoadingSales step={step} />
         ) : (
           <>
-            <Pressable
-              style={{
-                position: "absolute",
-                right: 10,
-                top: 10,
-                marginBottom: 40,
-                zIndex: 5,
-              }}
-            >
-              <MaterialCommunityIcons
-                color={"#2C3377"}
-                name="close"
-                size={30}
-                onPress={() => {
-                  setModalDebitNote(false);
-                }}
-              />
-            </Pressable>
-            <Text style={styles.textTitle}>Nota de débito</Text>
-            <Text style={styles.textSubTitle}>Detalle</Text>
             <View
               style={{
                 flexDirection: "row",
@@ -1313,8 +996,27 @@ const DebitNote = (props: Props) => {
                   color: "#4B5563",
                 }}
               >
-                Num. Control:
+                N. Control:
                 {` ${json_sale?.identificacion.numeroControl.slice(0, 30)}...`}
+              </Text>
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginTop: 12,
+                width: "100%",
+              }}
+            >
+              <Text
+                style={{
+                  marginLeft: 10,
+                  fontWeight: "600",
+                  color: "#4B5563",
+                }}
+              >
+                Cliente:
+                {` ${json_sale?.receptor.nombre.slice(0, 30)}...`}
               </Text>
             </View>
             <View
@@ -1338,29 +1040,86 @@ const DebitNote = (props: Props) => {
             </View>
             <ScrollView
               style={{
-                flex: 1,
-                marginTop: 45,
-                marginBottom: 5,
+                marginTop: 15,
               }}
-              //   refreshControl={
-              //     // <RefreshControl
-              //     // //   refreshing={refreshing}
-              //     // //   onRefresh={() => setRefreshing(true)}
-              //     // />
-              //   }
             >
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginBottom: 100,
-                }}
-              >
+              <View style={{ ...stylesGlobals.viewScroll, marginBottom: 90 }}>
                 {json_sale !== undefined && (
                   <>
                     {!is_loading_details &&
-                      json_sale.cuerpoDocumento.map((document, index) => (
-                       <></>
+                      json_sale.cuerpoDocumento.map((dt, index) => (
+                        <Card key={index} style={stylesGlobals.styleCard}>
+                          <View
+                            style={{
+                              justifyContent: "center",
+                              alignItems: "center",
+                              width: "100%",
+                            }}
+                          >
+                            <Text>Index: #{index}</Text>
+                          </View>
+                          <View style={stylesGlobals.ViewCard}>
+                            <MaterialCommunityIcons
+                              color={theme.colors.secondary}
+                              name="inbox-full-outline"
+                              size={22}
+                              style={{
+                                position: "absolute",
+                                left: 20,
+                              }}
+                            />
+                            <Text
+                              style={{
+                                ...stylesGlobals.textCard,
+                                width: "80%",
+                              }}
+                            >
+                              {`Nombre:  ${dt.descripcion}`}
+                            </Text>
+                          </View>
+                          <View style={stylesGlobals.ViewCard}>
+                            <MaterialCommunityIcons
+                              color={theme.colors.secondary}
+                              name="barcode-scan"
+                              size={22}
+                              style={{
+                                position: "absolute",
+                                left: 20,
+                              }}
+                            />
+                            <Text style={stylesGlobals.textCard}>
+                              {`Codigo:  ${dt.codigo}`}
+                            </Text>
+                          </View>
+                          <View style={stylesGlobals.ViewCard}>
+                            <MaterialCommunityIcons
+                              color={theme.colors.secondary}
+                              name="tag-multiple-outline"
+                              size={22}
+                              style={{
+                                position: "absolute",
+                                left: 20,
+                              }}
+                            />
+                            <Text style={stylesGlobals.textCard}>
+                              {`Descuento:  ${dt.montoDescu}`}
+                            </Text>
+                          </View>
+                          <View style={stylesGlobals.ViewCard}>
+                            <MaterialCommunityIcons
+                              color={theme.colors.secondary}
+                              name="currency-usd"
+                              size={22}
+                              style={{
+                                position: "absolute",
+                                left: 20,
+                              }}
+                            />
+                            <Text style={stylesGlobals.textCard}>
+                              {`Precio:  ${formatCurrency(dt.precioUni)}`}
+                            </Text>
+                          </View>
+                        </Card>
                       ))}
                   </>
                 )}
@@ -1368,42 +1127,21 @@ const DebitNote = (props: Props) => {
             </ScrollView>
             <View
               style={{
-                flexDirection: "column",
-                padding: 10,
-                marginTop: 10,
                 position: "absolute",
-                height: 88,
-                backgroundColor: "#f5f5f5",
+                backgroundColor: "#fff",
                 bottom: 0,
-                minWidth: "100%",
-                width: "100%",
+                height: "12%",
                 borderTopWidth: 1,
                 borderColor: "#ddd",
               }}
             >
-              <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <Pressable
-                  onPress={() => handleDebitNote()}
-                  style={{
-                    width: "84%",
-                    padding: 16,
-                    borderRadius: 4,
-                    backgroundColor: "#1d4ed8",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginTop: 10,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontWeight: "bold",
-                    }}
-                  >
-                    Generar nota de débito
-                  </Text>
-                </Pressable>
+              <View style={stylesGlobals.viewBotton}>
+                <Button
+                  withB={390}
+                  onPress={handleDebitNote}
+                  Title="Procesar la nota"
+                  color={theme.colors.dark}
+                />
               </View>
             </View>
           </>
@@ -1415,49 +1153,4 @@ const DebitNote = (props: Props) => {
 
 export default DebitNote;
 
-const styles = StyleSheet.create({
-  card: {
-    height: "auto",
-    marginBottom: 25,
-    padding: 5,
-    width: "95%",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 5,
-    elevation: 10,
-  },
-  icon: {
-    position: "absolute",
-    left: 7,
-    top: "30%",
-    transform: [{ translateY: -15 }],
-  },
-  textTitle: {
-    fontSize: 20,
-    marginTop: 10,
-    marginLeft: 15,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  textSubTitle: {
-    fontSize: 20,
-    marginTop: 10,
-    marginLeft: 15,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
-    padding: 5,
-    borderRadius: 10,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "50%",
-    height: 40,
-    paddingLeft: 10,
-  },
-});
+const styles = StyleSheet.create({});

@@ -1,12 +1,4 @@
-import {
-  View,
-  ToastAndroid,
-  Alert,
-  Animated,
-  StyleSheet,
-  ActivityIndicator,
-  Text,
-} from "react-native";
+import { View, ToastAndroid, Alert, Animated, StyleSheet } from "react-native";
 import React, {
   Dispatch,
   SetStateAction,
@@ -56,8 +48,7 @@ import { IEmployee } from "@/types/employee/employee.types";
 import { useBranchProductStore } from "@/store/branch_product.store";
 import { ALERT_TYPE, Toast } from "react-native-alert-notification";
 import ErrorAlert from "@/components/Global/manners/ErrorAlert";
-import { sending_steps } from "@/utils/dte";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import LoadingSales from "@/components/Global/components_app/LoadingSales";
 
 interface Props {
   customer: ICustomer | undefined;
@@ -903,64 +894,7 @@ const ElectronicTaxCredit = (props: Props) => {
       {!focusButton && (
         <>
           {loadingSale ? (
-            <View style={styles.overlay}>
-              <ActivityIndicator
-                size="large"
-                color="#16a34a"
-                style={{ marginBottom: 30 }}
-              />
-              <Text style={styles.processingText}>Procesando solicitud...</Text>
-
-              <View style={styles.stepsContainer}>
-                {sending_steps.map((ste, index) => (
-                  <View key={index} style={styles.stepRow}>
-                    <View style={styles.progressContainer}>
-                      <View key={index} style={styles.stepIndicator}>
-                        <Animated.View
-                          style={[
-                            styles.circle,
-                            {
-                              backgroundColor:
-                                index <= step ? "#16a34a" : "#e0e0e0",
-                              transform: [{ scale: index === step ? 1.2 : 1 }],
-                              shadowColor:
-                                index <= step ? "#16a34a" : "#757575",
-                              shadowOpacity: 0.3,
-                              shadowRadius: 4,
-                            },
-                          ]}
-                        >
-                          <Icon
-                            name={
-                              index < step ? "check-circle" : "check-circle"
-                            }
-                            size={24}
-                            color={index <= step ? "#fff" : "#757575"}
-                          />
-                        </Animated.View>
-                      </View>
-                    </View>
-                    <View style={styles.stepInfo}>
-                      <Text
-                        style={[
-                          styles.stepLabel,
-                          index <= step
-                            ? styles.activeStepLabel
-                            : styles.inactiveStepLabel,
-                        ]}
-                      >
-                        {ste.label}
-                      </Text>
-                      {ste.description && (
-                        <Text style={styles.stepDescription}>
-                          {ste.description}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                ))}
-              </View>
-            </View>
+            <LoadingSales step={step} />
           ) : (
             <>
               <ErrorAlert

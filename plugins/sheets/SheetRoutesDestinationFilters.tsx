@@ -98,17 +98,14 @@ const SheetRoutesDestinationFilters = ({
           </SafeAreaView>
         </View>
         <View style={{ width: "100%", marginTop: 10 }}>
-          <Text style={{ fontWeight: "500", marginTop: 10 }}>
-            Cliente destino
-          </Text>
+          <Text style={stylesGlobals.textInput}>Cliente destino</Text>
           <SafeAreaView
             style={{
               width: "100%",
-              marginTop: 10,
               borderWidth: 1,
               borderColor: "#D1D5DB",
               padding: 12,
-              borderRadius: 5,
+              borderRadius: 15,
             }}
           >
             <Dropdown

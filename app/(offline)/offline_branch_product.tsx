@@ -133,7 +133,7 @@ const offline_branch_product = () => {
                                 size={22}
                                 style={styles.icon}
                               />
-                              <Text style={{ ...stylesGlobals.textCard }}>
+                              <Text style={stylesGlobals.textCard}>
                                 {brp.product.name.length > 20
                                   ? `${brp.product.name.substring(0, 18)}...`
                                   : brp.product.name}
