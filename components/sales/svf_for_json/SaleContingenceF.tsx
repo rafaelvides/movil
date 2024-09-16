@@ -187,7 +187,7 @@ const SaleContingenceF = ({
       >
         Venta a generar
       </Text>
-      <View style={{ width: "100%", marginTop: 20 }}>
+      <View style={{ width: "100%", marginTop: 20, paddingHorizontal: 14 }}>
         <Text style={stylesGlobals.textInput}>Selecciona un empleado</Text>
         <SafeAreaView
           style={{
@@ -241,35 +241,22 @@ const SaleContingenceF = ({
         <View
           style={{
             width: "100%",
+            flexDirection: "row",
+            alignItems: "center",
           }}
         >
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: "2%",
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: "600",
-                color: "#4B5563",
-              }}
-            >
-              Código Generación
-            </Text>
-            <MaterialCommunityIcons
-              color={"#AFB0B1"}
-              name="card-text-outline"
-              size={30}
-              style={styles.icon}
-            />
-          </View>
+          <MaterialCommunityIcons
+            color={"#AFB0B1"}
+            name="card-text-outline"
+            size={30}
+            style={styles.icon}
+          />
           <Text
             style={{
               fontWeight: "600",
               color: "#4B5563",
               textAlign: "center",
+              flex: 1,
             }}
           >
             {jsonSaleF.identificacion.codigoGeneracion.slice(0, 50)}
@@ -278,48 +265,36 @@ const SaleContingenceF = ({
         <View
           style={{
             width: "100%",
-            marginTop: "8%",
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: "6%",
           }}
         >
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              marginBottom: "2%",
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: "600",
-                color: "#4B5563",
-              }}
-            >
-              Numero Control
-            </Text>
-            <MaterialCommunityIcons
-              color={"#AFB0B1"}
-              name="clipboard-minus-outline"
-              size={30}
-              style={styles.icon}
-            />
-          </View>
+          <MaterialCommunityIcons
+            color={"#AFB0B1"}
+            name="clipboard-minus-outline"
+            size={30}
+            style={styles.icon}
+          />
           <Text
             style={{
               fontWeight: "600",
               color: "#4B5563",
               textAlign: "center",
+              flex: 1,
             }}
           >
             {jsonSaleF.identificacion.numeroControl.slice(0, 50)}
           </Text>
         </View>
+
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "center",
             alignContent: "center",
             marginTop: "8%",
             gap: 100,
+            justifyContent: "space-between",
           }}
         >
           <View
@@ -368,21 +343,20 @@ const SaleContingenceF = ({
             </Text>
           </View>
         </View>
+
         <View
           style={{
             flexDirection: "row",
-            justifyContent: "center",
             alignContent: "center",
+            justifyContent: "space-between",
             marginTop: "8%",
-            marginBottom: "5%",
+            gap: 100,
           }}
         >
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              width: "30%",
-              right: 20,
             }}
           >
             <MaterialCommunityIcons
@@ -406,20 +380,18 @@ const SaleContingenceF = ({
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              width: "50%",
-              left: "15%",
+              marginBottom: "5%",
             }}
           >
             <MaterialCommunityIcons
               color={"#AFB0B1"}
               name="currency-usd"
               size={30}
-              style={{
-                alignSelf: "center",
-              }}
+              style={styles.iconClock}
             />
             <Text
               style={{
+                marginLeft: 40,
                 fontWeight: "600",
                 color: "#4B5563",
               }}
@@ -430,7 +402,7 @@ const SaleContingenceF = ({
         </View>
         <ScrollView
           style={{
-            height: "20%",
+            height: "48%",
           }}
         >
           <View style={stylesGlobals.viewScroll}>
@@ -444,7 +416,7 @@ const SaleContingenceF = ({
                     width: "100%",
                   }}
                 >
-                  <Text>Index: #{index}</Text>
+                  <Text>Index: #{index + 1}</Text>
                 </View>
                 <View
                   style={{
@@ -593,7 +565,6 @@ const SaleContingenceF = ({
         </ScrollView>
         <View style={stylesGlobals.viewBotton}>
           <Button
-            withB={390}
             onPress={handleProgressJson}
             Title="Filtrar"
             color={theme.colors.dark}
@@ -608,10 +579,7 @@ export default SaleContingenceF;
 
 const styles = StyleSheet.create({
   icon: {
-    position: "absolute",
-    left: "20%",
-    top: "30%",
-    transform: [{ translateY: -15 }],
+    marginRight: 5,
   },
   placeholderStyle: {
     fontSize: 16,
@@ -629,7 +597,7 @@ const styles = StyleSheet.create({
   },
   iconClock: {
     position: "absolute",
-    left: 7,
+    left: 0,
     top: "30%",
     transform: [{ translateY: -15 }],
   },
