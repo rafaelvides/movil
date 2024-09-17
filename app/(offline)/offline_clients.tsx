@@ -111,9 +111,8 @@ const offline_clients = () => {
                     {!loading_paginated &&
                       client_list_pagination &&
                       client_list_pagination.map((client, index) => (
-                        <Card style={stylesGlobals.styleCard} key={index}>
-                          <View style={{ width: "130%" }}>
-                            <View style={stylesGlobals.ViewCard}>
+                        <Card style={{...stylesGlobals.styleCard,}} key={index}>
+                            <View style={{...stylesGlobals.ViewCard}}>
                               <MaterialCommunityIcons
                                 color={"#AFB0B1"}
                                 name="account"
@@ -165,6 +164,7 @@ const offline_clients = () => {
                                 justifyContent: "center",
                                 alignItems: "center",
                                 top: 20,
+                                marginLeft:40
                               }}
                             >
                               <ButtonForCard
@@ -176,8 +176,7 @@ const offline_clients = () => {
                                 icon={"eye-outline"}
                               />
                             </View>
-                          </View>
-                        </Card>
+                                                    </Card>
                       ))}
                   </View>
                 </ScrollView>

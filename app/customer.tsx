@@ -6,7 +6,6 @@ import SpinnerInitPage from "@/components/Global/SpinnerInitPage";
 import AddClientContributor from "@/components/customer/AddClientContributor";
 import AddClientsNormal from "@/components/customer/AddClientNormal";
 import ButtonDual from "@/components/customer/button_dual/ButtonDual";
-import { DetailsCustomerContributor } from "@/components/customer/details-customer/detailsCustomerContributor";
 import { DetailsCustomerNormal } from "@/components/customer/details-customer/detailsCustomerNormal";
 import { ThemeContext } from "@/hooks/useTheme";
 import { useCustomerStore } from "@/store/customer.store";
@@ -151,7 +150,7 @@ const customer = () => {
 
   return (
     <>
-      <StatusBar barStyle="dark-content"  />
+      <StatusBar barStyle="dark-content" />
 
       {loading ? (
         <>
@@ -322,7 +321,7 @@ const customer = () => {
                           ))}
                       </>
                     ) : (
-                      <Not_data/>
+                      <Not_data />
                     )}
                   </View>
                   {customers.length > 0 && (
@@ -408,33 +407,15 @@ const customer = () => {
           />
 
           <Modal visible={showDetailNormal} animationType="slide">
-            {typeClient === "contribuyente" ? (
-              <>
-             
-                <DetailsCustomerContributor
-                  closeModal={() => {
-                    clearClose();
-                    setShowDetailNormal(false);
-                  }}
-                  customer={selectedCustomer}
-                  customer_direction={selectedCustomerDirection}
-                  id={selectedId}
-                />
-              </>
-            ) : (
-              <>
-               
-                <DetailsCustomerNormal
-                  closeModal={() => {
-                    clearClose();
-                    setShowDetailNormal(false);
-                  }}
-                  customer={selectedCustomer}
-                  customer_direction={selectedCustomerDirection}
-                  id={selectedId}
-                />
-              </>
-            )}
+            <DetailsCustomerNormal
+              closeModal={() => {
+                clearClose();
+                setShowDetailNormal(false);
+              }}
+              customer={selectedCustomer}
+              customer_direction={selectedCustomerDirection}
+              id={selectedId}
+            />
           </Modal>
         </>
       )}

@@ -50,6 +50,7 @@ const AddClientsNormal = (props: Props) => {
 
   const initialValues = {
     nombre: props.customer?.nombre ?? "",
+    nombreComercial:props.customer?.nombreComercial ?? "",
     correo: props.customer?.correo ?? "",
     telefono: props.customer?.telefono ?? "",
     tipoDocumento: props.customer?.tipoDocumento ?? "",

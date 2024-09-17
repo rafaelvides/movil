@@ -2,7 +2,7 @@ import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import { useClientOfflineStore } from "@/offline/store/customer_offline.store";
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import {  useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { ScrollView, Text, View } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 const Of_normal_customer = ({
@@ -14,6 +14,13 @@ const Of_normal_customer = ({
 }) => {
   const { clientList, OnGetClientsList } = useClientOfflineStore();
 
+  const ArrayTypeDocument = [
+    { id: "36", name: "NIT" },
+    { id: "13", name: "DUI" },
+    { id: "37", name: "Otro" },
+    { id: "03", name: "Pasaporte" },
+    { id: "02", name: "Carnet de Residente" },
+  ];
 
   useEffect(() => {
     OnGetClientsList();
@@ -22,7 +29,13 @@ const Of_normal_customer = ({
     return clientList.find((item) => item.id === id);
   }, [clientList, id]);
 
-  console.log("dataaaaaaaaaaaaaaaaaaaaaa", customer_list, id);
+  const typeDocument = useMemo(() => {
+    return ArrayTypeDocument.find(
+      (item) => item.id === customer_list?.tipoDocumento
+    );
+  }, []);
+
+
   return (
     <>
       <StatusBar style="light" backgroundColor={"#AFB0B1"} />
@@ -58,7 +71,6 @@ const Of_normal_customer = ({
               marginBottom: 50,
             }}
           >
-            
             <View style={stylesGlobals.viewInMaterial}>
               <MaterialCommunityIcons
                 name="account"
@@ -70,8 +82,8 @@ const Of_normal_customer = ({
                 {customer_list?.nombre}
               </Text>
             </View>
-            {customer_list?.esContribuyente&&(
-                <View style={stylesGlobals.viewInMaterial}>
+            {customer_list?.esContribuyente && (
+              <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="card-account-details"
                   color={"#AFB0B1"}
@@ -115,7 +127,7 @@ const Of_normal_customer = ({
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer_list?.tipoDocumento}
+                {typeDocument?.name}
               </Text>
             </View>
             <View style={stylesGlobals.viewInMaterial}>
@@ -129,8 +141,8 @@ const Of_normal_customer = ({
                 {customer_list?.numDocumento}
               </Text>
             </View>
-            {customer_list?.esContribuyente&&(
-                <View style={stylesGlobals.viewInMaterial}>
+            {customer_list?.esContribuyente && (
+              <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="card-bulleted"
                   color={"#AFB0B1"}
@@ -138,12 +150,12 @@ const Of_normal_customer = ({
                   style={stylesGlobals.iconsStyles}
                 />
                 <Text style={stylesGlobals.textIconStyle}>
-                {`NRC: ${customer_list.nrc}`}
+                  {`NRC: ${customer_list.nrc}`}
                 </Text>
               </View>
             )}
-              {customer_list?.esContribuyente&&(
-                <View style={stylesGlobals.viewInMaterial}>
+            {customer_list?.esContribuyente && (
+              <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="book-open"
                   color={"#AFB0B1"}
@@ -151,12 +163,12 @@ const Of_normal_customer = ({
                   style={stylesGlobals.iconsStyles}
                 />
                 <Text style={stylesGlobals.textIconStyle}>
-                {customer_list?.descActividad}
+                  {customer_list?.descActividad}
                 </Text>
               </View>
             )}
-            {customer_list?.esContribuyente&&(
-                <View style={stylesGlobals.viewInMaterial}>
+            {customer_list?.esContribuyente && (
+              <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="checkbox-marked"
                   color={"#AFB0B1"}
@@ -164,7 +176,7 @@ const Of_normal_customer = ({
                   style={stylesGlobals.iconsStyles}
                 />
                 <Text style={stylesGlobals.textIconStyle}>
-                {customer_list?.tipoContribuyente}
+                  {customer_list?.tipoContribuyente}
                 </Text>
               </View>
             )}
