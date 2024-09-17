@@ -1,4 +1,5 @@
 import {
+  Modal,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -19,6 +20,7 @@ import { SheetManager } from "react-native-actions-sheet";
 import Card from "@/components/Global/components_app/Card";
 import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
 import ButtonForCard from "@/components/Global/components_app/ButtonForCard";
+import Of_normal_customer from "@/offline/components/customer_details/of_normal_customer";
 
 const offline_clients = () => {
   const [loading, setLoading] = useState(false);
@@ -26,6 +28,8 @@ const offline_clients = () => {
   const [isContributor, setIsContributor] = useState(false);
   const [numDoc, setNumDoc] = useState("");
   const [name, setName] = useState("");
+  const [id, setId] = useState(0)
+  const [modal, setModal] = useState(false)
   const { theme } = useContext(ThemeContext);
   const {
     OnGetClientsOfflinePagination,
@@ -164,7 +168,10 @@ const offline_clients = () => {
                               }}
                             >
                               <ButtonForCard
-                                onPress={() => {}}
+                                onPress={() => {
+                                  setId(client.id)
+                                  setModal(true)
+                                }}
                                 color={"#6E6E6E"}
                                 icon={"eye-outline"}
                               />
@@ -179,6 +186,9 @@ const offline_clients = () => {
           </SafeAreaView>
         </>
       )}
+      <Modal visible={modal} animationType="slide">
+        <Of_normal_customer id={id} closeModal={()=>setModal(false)}/>
+      </Modal>
     </>
   );
 };
