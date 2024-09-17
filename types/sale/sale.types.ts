@@ -47,16 +47,18 @@ export interface IGetSalesContingence {
   ok: boolean;
   sales: ISale[];
 }
+
 export interface IGetSalePagination {
-  ok: boolean;
-  total: number;
-  sales: ISale[];
-  totalPag: number;
-  currentPag: number;
-  nextPag: number;
-  prevPag: number;
-  status: number;
+  ok: boolean
+  total: number
+  sales: ISale[]
+  totalPag: number
+  currentPag: number
+  nextPag: number
+  prevPag: number
+  status: number
 }
+
 export interface IDetails {
   id: number;
   // sale: ISale;

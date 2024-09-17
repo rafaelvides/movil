@@ -10,7 +10,7 @@ import {
   ToastAndroid,
   View,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SheetManager } from "react-native-actions-sheet";
 import { formatDate, verifyApplyAnulation } from "@/utils/date";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -21,9 +21,15 @@ import { StatusBar } from "expo-status-bar";
 import { ISale } from "@/types/sale/sale.types";
 import Invalidations from "../../components/sales/svf_dte_generate/Invalidations";
 import SpinLoading from "@/components/Global/SpinLoading";
-import { get_configuration } from "@/plugins/async_storage";
+import { get_branch_id, get_configuration } from "@/plugins/async_storage";
 import { generate_json } from "@/plugins/DTE/GeneratePDFGeneral";
-import SpinnerButton from "@/components/Global/SpinnerButton";
+import stylesGlobals from "@/components/Global/styles/StylesAppComponents";
+import Card from "@/components/Global/components_app/Card";
+import { formatCurrency } from "@/utils/dte";
+import { Chip } from "react-native-paper";
+import AnimatedButton from "@/components/Global/AnimatedButtom";
+import { ThemeContext } from "@/hooks/useTheme";
+import Pagination from "@/components/Global/Pagination";
 
 const processed_sales = () => {
   const [startDate, setStartDate] = useState(formatDate());
@@ -36,8 +42,13 @@ const processed_sales = () => {
   const [spinButton, setSpinButton] = useState(false);
   const [message, setMessage] = useState("Esperando");
   const [sale, setSale] = useState<ISale>();
-  const { GetPaginatedSales, is_loading, sales } = useSaleStore();
+  const { GetPaginatedSales, is_loading, sales, pagination_sales } =
+    useSaleStore();
   const { OnImgPDF, img_invalidation, img_logo } = useSaleStore();
+  const { theme } = useContext(ThemeContext);
+  const [currentPage, setCurrentPage] = useState(1);
+  const totalPages = pagination_sales.totalPag ?? 1;
+
   useEffect(() => {
     (async () => {
       await get_configuration().then((data) => {
@@ -45,6 +56,10 @@ const processed_sales = () => {
       });
     })();
   }, []);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   useFocusEffect(
     React.useCallback(() => {
@@ -55,10 +70,24 @@ const processed_sales = () => {
       }, 1000);
     }, [])
   );
+
   useEffect(() => {
-    GetPaginatedSales(1, 1, 5, startDate, endDate, 1);
+    (async () => {
+      await get_branch_id().then(async (id) => {
+        if (id !== null && id !== undefined) {
+          await GetPaginatedSales(
+            Number(id),
+            currentPage,
+            5,
+            startDate,
+            endDate,
+            1
+          );
+        }
+      });
+    })();
     setRefreshing(false);
-  }, [refreshing]);
+  }, [refreshing, currentPage]);
 
   const handleVerifyIvalidation = (sale: ISale) => {
     const result = verifyApplyAnulation(
@@ -127,46 +156,34 @@ const processed_sales = () => {
           >
             <StatusBar style="dark" />
 
-            <Pressable
-              onPress={() =>
-                SheetManager.show("sales-filters-sheet", {
-                  payload: {
-                    setEndDate,
-                    startDate: startDate,
-                    setStartDate,
-                    endDate: endDate,
-                    handleConfirm(startDate, endDate) {
-                      setStartDate(startDate);
-                      setEndDate(endDate);
-                      setRefreshing(true);
-                      SheetManager.hide("sales-filters-sheet");
+            <View style={stylesGlobals.filter}>
+              <AnimatedButton
+                handleClick={() => {
+                  SheetManager.show("sales-filters-sheet", {
+                    payload: {
+                      setEndDate,
+                      startDate: startDate,
+                      setStartDate,
+                      endDate: endDate,
+                      handleConfirm(startDate, endDate) {
+                        setStartDate(startDate);
+                        setEndDate(endDate);
+                        setRefreshing(true);
+                        SheetManager.hide("sales-filters-sheet");
+                      },
                     },
-                  },
-                })
-              }
-              style={styles.filter}
-            >
-              <Text
-                style={{
-                  color: "#718096",
-                  fontSize: 16,
+                  });
                 }}
-              >
-                Filtros disponibles
-              </Text>
-              <Pressable
-                style={{
-                  position: "absolute",
-                  right: 20,
-                }}
-              >
-                <MaterialCommunityIcons
-                  name="filter"
-                  size={25}
-                  color="#607274"
-                />
-              </Pressable>
-            </Pressable>
+                iconName="filter"
+                buttonColor={theme.colors.third}
+                width={40}
+                height={40}
+                right={42}
+                left={10}
+                size={25}
+                top={0}
+              />
+            </View>
 
             <ScrollView
               style={{
@@ -203,20 +220,177 @@ const processed_sales = () => {
                   </View>
                 </View>
               ) : (
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 100,
-                  }}
-                >
-                  {!is_loading && sales &&
+                <View style={stylesGlobals.viewScroll}>
+                  {!is_loading &&
+                    sales &&
                     sales.map((sale, index) => (
-                      <></>
+                      <Card key={index} style={stylesGlobals.styleCard}>
+                        <View
+                          style={{
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Text style={{ fontWeight: "600", color: "#4B5563" }}>
+                            Ventas: #{sale.id}
+                          </Text>
+                        </View>
+                        <View style={{ width: "100%" }}>
+                          <View style={stylesGlobals.ViewCard}>
+                            <MaterialCommunityIcons
+                              color={"#AFB0B1"}
+                              name="card-text-outline"
+                              size={22}
+                              style={styles.icon}
+                            />
+                            <Text style={stylesGlobals.textCard}>
+                              {`${sale.codigoGeneracion.slice(0, 30)}...`}
+                            </Text>
+                          </View>
+                          <View style={stylesGlobals.ViewCard}>
+                            <MaterialCommunityIcons
+                              color={"#AFB0B1"}
+                              name="account"
+                              size={22}
+                              style={styles.icon}
+                            />
+                            <Text style={stylesGlobals.textCard}>
+                              {sale.numeroControl}
+                            </Text>
+                          </View>
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              marginRight: 5,
+                              marginTop: 15,
+                            }}
+                          >
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                              }}
+                            >
+                              <MaterialCommunityIcons
+                                color={"#AFB0B1"}
+                                name="calendar-month"
+                                size={22}
+                                style={styles.icon}
+                              />
+                              <Text
+                                style={{
+                                  marginLeft: 50,
+                                  fontWeight: "400",
+                                  color: "#4B5563",
+                                }}
+                              >
+                                {sale.fecEmi.toLocaleString()}
+                              </Text>
+                            </View>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginLeft: 65,
+                              }}
+                            >
+                              <MaterialCommunityIcons
+                                color={"#AFB0B1"}
+                                name="clipboard-clock-outline"
+                                size={22}
+                                style={styles.icon}
+                              />
+                              <Text
+                                style={{
+                                  marginLeft: 50,
+                                  fontWeight: "400",
+                                  color: "#4B5563",
+                                }}
+                              >
+                                {sale.horEmi.toLocaleString()}
+                              </Text>
+                            </View>
+                          </View>
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              marginLeft: 5,
+                              marginTop: 25,
+                            }}
+                          >
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                              }}
+                            >
+                              <MaterialCommunityIcons
+                                color={"#AFB0B1"}
+                                name="ticket-percent"
+                                size={22}
+                                style={styles.icon}
+                              />
+                              <Text
+                                style={{
+                                  width: 70,
+                                  marginLeft: 45,
+                                  fontWeight: "400",
+                                  color: "#4B5563",
+                                }}
+                              >
+                                {sale.totalDescu}
+                              </Text>
+                            </View>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                marginLeft: 73,
+                              }}
+                            >
+                              <MaterialCommunityIcons
+                                color={"#AFB0B1"}
+                                name="cash"
+                                size={22}
+                                style={{ position: "absolute", left: 6 }}
+                              />
+                              <Text
+                                style={{
+                                  width: 80,
+                                  marginLeft: 40,
+                                  fontWeight: "400",
+                                  color: "#4B5563",
+                                }}
+                              >
+                                {formatCurrency(Number(sale.totalPagar))}
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={styles.chip}>
+                            <Chip
+                              selectedColor="#fff"
+                              style={{ backgroundColor: "#e12642" }}
+                            >
+                              {sale.salesStatus.name}
+                            </Chip>
+                          </View>
+                        </View>
+                      </Card>
                     ))}
                 </View>
               )}
             </ScrollView>
+            <>
+              {sales.length > 0 && (
+                <>
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </>
+              )}
+            </>
           </SafeAreaView>
           <Modal visible={modalInvalidations} animationType="slide">
             {screenChange ? (
@@ -260,15 +434,12 @@ export default processed_sales;
 
 const styles = StyleSheet.create({
   filter: {
-    flexDirection: "row",
     justifyContent: "center",
     width: "100%",
     paddingLeft: 20,
-    marginTop: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#D1D5DB",
+    marginTop: 15,
+    borderBottomWidth: 0.5,
     height: 56,
-    backgroundColor: "#f9f9f9",
     alignItems: "center",
   },
   card: {
@@ -286,7 +457,16 @@ const styles = StyleSheet.create({
   icon: {
     position: "absolute",
     left: 7,
-    top: "30%",
-    transform: [{ translateY: -15 }],
+  },
+  closeButton: {
+    position: "absolute",
+    top: 15,
+    right: 15,
+    zIndex: 20,
+  },
+  chip: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 10,
   },
 });
