@@ -144,7 +144,7 @@ const Box_close = (props: Props) => {
   };
   return (
     <>
-      <StatusBar style="inverted" />
+      <StatusBar style="dark" />
       {!boxPreview ? (
         <ScrollView>
           <View
@@ -155,27 +155,13 @@ const Box_close = (props: Props) => {
               height: "100%",
             }}
           >
-            {props.validation && (
-              <Text
-                style={{
-                  fontSize: 14,
-                  margin: 10,
-                }}
-              >
-                Para continuar necesitas cerrar la caja con fecha:{" "}
-                <Text
-                  style={{ fontSize: 16, fontWeight: "bold", color: "red" }}
-                >
-                  {box?.date.toString()}
-                </Text>
-              </Text>
-            )}
+            
             <CoinCards
               boxValues={boxValues}
               setBoxValues={setBoxValues}
               preview_box={() => preview_box()}
             />
-          </View>
+            </View>
         </ScrollView>
       ) : (
         <>
@@ -195,7 +181,7 @@ const Box_close = (props: Props) => {
                   
                 }}
               >
-                Para continuar necesitas cerrar la caja con fecha:{" "}
+                Para continuar necesitas cerrar la caja con fecha:
                 <Text
                   style={{ fontSize: 16, fontWeight: "bold", color: "white" }}
                 >
@@ -205,7 +191,8 @@ const Box_close = (props: Props) => {
             )}
             <View style={{
               bottom: props.isModal ? 19 : -10,
-              height: props.isModal ? "92%" : "100%"
+              height: props.isModal ? "92%" : "100%",
+              top:props.validation ? 0:10
             }}>
             <BoxAccounting boxPreview={boxPreview} />
             </View>

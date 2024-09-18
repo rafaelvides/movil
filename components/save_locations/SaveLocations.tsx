@@ -16,6 +16,7 @@ import MapView, {
 } from "react-native-maps";
 import { StatusBar } from "expo-status-bar";
 import MaterialCommunityIcons from "@expo/vector-icons/build/MaterialCommunityIcons";
+import Button from "../Global/components_app/Button";
 
 const SaveLocations = ({
   setShowModal,
@@ -94,9 +95,14 @@ const SaveLocations = ({
                 bottom: 10,
               }}
             >
-           
+               <Button
+              Title="Guardar coordenada"
+              onPress={() => setShowModal(false)}
+              />
+            
             </View>
           )}
+         
         </View>
       </SafeAreaView>
     </>
