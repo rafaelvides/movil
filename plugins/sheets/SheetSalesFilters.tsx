@@ -68,7 +68,7 @@ const SheetSalesFilters = ({
           </View>
           <View style={stylesGlobals.viewBotton}>
             <Button
-              withB={390}
+              withB={360}
               onPress={() =>
                 payload?.handleConfirm(
                   returnDate(startDate),

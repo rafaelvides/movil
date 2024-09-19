@@ -17,10 +17,11 @@ import {
 import { PayloadMH } from "@/types/dte/DTE.types";
 import {
   ILoginMH,
+  IResponseInvalidationMH,
   ResponseMHSuccess,
 } from "@/types/svf_dte/responseMH/responseMH.types";
 import qs from "qs";
-import { IInvalidationToMH } from "@/types/svf_dte/invalidation.types";
+import { IInvalidationToMH, SVFE_Invalidacion_SEND } from "@/types/svf_dte/invalidation.types";
 import { SVFE_FSE_SEND } from "@/types/svf_dte/fse.types";
 import { SVFE_NC_SEND } from "@/types/svf_dte/nc.types";
 import {
@@ -40,16 +41,26 @@ export const send_to_mh = (
     cancelToken: cancelToken.token,
   });
 };
-export const send_to_mh_invalidation = (
-  payload: IInvalidationToMH,
-  token: string
-) => {
-  return axios.post<ResponseMHSuccess>(`${MH_URL}anulardte`, payload, {
+export const send_to_mh_invalidation = (payload: IInvalidationToMH, mh_token: string, cancelToken: CancelTokenSource) => {
+  return axios.post<IResponseInvalidationMH>(`${MH_URL}anulardte`, payload, {
     headers: {
-      Authorization: token,
+      Authorization: mh_token,
     },
+    cancelToken: cancelToken.token,
   });
 };
+// export const send_to_mh_invalidation = (
+//   payload: IInvalidationToMH,
+//   token: string,
+//   cancelToken?: CancelTokenSource
+// ) => {
+//   return axios.post<ResponseMHSuccess>(`${MH_URL}anulardte`, payload, {
+//     headers: {
+//       Authorization: token,
+//     },
+//     cancelToken: cancelToken?.token,
+//   });
+// };
 export const firmarDocumentoFactura = (payload: SVFE_FC_SEND) => {
   return axios.post<{ body: string; status: string }>(API_FIRMADOR, payload);
 };
@@ -59,7 +70,7 @@ export const firmarDocumentoFiscal = (payload: SVFE_CF_SEND) => {
 export const firmarDocumentoNotaDebito = (payload: SVFE_ND_SEND) => {
   return axios.post<{ body: string, status: string }>(API_FIRMADOR, payload);
 };
-export const firmarDocumentoInvalidacion = (payload: ISignInvalidationData) => {
+export const firmarDocumentoInvalidacion = (payload: SVFE_Invalidacion_SEND) => {
   return axios.post<{ body: string }>(API_FIRMADOR, payload);
 };
 export const firmarNotaDebito = (

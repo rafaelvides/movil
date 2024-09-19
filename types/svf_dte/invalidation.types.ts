@@ -27,8 +27,8 @@ export interface SVFE_Invalidacion_Documento {
   numeroControl: string;
   fecEmi: string;
   montoIva: number;
-  tipoDocumento: string;
-  numDocumento: string;
+  tipoDocumento: string | null;
+  numDocumento: string | null;
   nombre: string;
 }
 
