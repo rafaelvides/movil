@@ -17,7 +17,6 @@ interface Props {
   customer?: IPayloadCustomer;
   customer_direction?: CustomerDirection;
   id: number;
-  id_direction?: number;
 }
 
 export const DetailsCustomerNormal = (props: Props) => {
@@ -32,13 +31,11 @@ export const DetailsCustomerNormal = (props: Props) => {
   }, []);
 
   
-  const customer = useMemo(() => {
-    return customer_list.find((item) => item.id === props.id);
-  }, [customer_list, props.id]);
 
   const typeDocument = useMemo(()=>{
-    return cat_022_tipo_de_documento_de_ide.find((item)=> item.codigo === customer?.tipoDocumento)
-  },[])
+    return cat_022_tipo_de_documento_de_ide.find((item)=> item.codigo === props.customer?.tipoDocumento)
+  },[cat_022_tipo_de_documento_de_ide, props?.customer?.tipoDocumento])
+
 
 
   return (
@@ -67,7 +64,7 @@ export const DetailsCustomerNormal = (props: Props) => {
         >
           <Text style={stylesGlobals.titleDetailsCustomer}>
             {`Detalles cliente ${
-              customer?.esContribuyente ? "contribuyente" : "normal"
+              props.customer?.esContribuyente ? "contribuyente" : "normal"
             }`}
           </Text>
         </View>
@@ -85,11 +82,11 @@ export const DetailsCustomerNormal = (props: Props) => {
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer?.nombre}
+                {props.customer?.nombre}
               </Text>
             </View>
 
-            {customer?.esContribuyente && (
+            {props.customer?.esContribuyente === 1 && (
               <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="card-account-details"
@@ -98,7 +95,7 @@ export const DetailsCustomerNormal = (props: Props) => {
                   style={stylesGlobals.iconsStyles}
                 />
                 <Text style={stylesGlobals.textIconStyle}>
-                  {customer?.nombreComercial}
+                  {props.customer?.nombreComercial}
                 </Text>
               </View>
             )}
@@ -111,7 +108,7 @@ export const DetailsCustomerNormal = (props: Props) => {
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer?.correo}
+                {props.customer?.correo}
               </Text>
             </View>
 
@@ -123,7 +120,7 @@ export const DetailsCustomerNormal = (props: Props) => {
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer?.telefono}
+                {props.customer?.telefono}
               </Text>
             </View>
             <View style={stylesGlobals.viewInMaterial}>
@@ -146,11 +143,11 @@ export const DetailsCustomerNormal = (props: Props) => {
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer?.numDocumento}
+                {props.customer?.numDocumento}
               </Text>
             </View>
 
-            {customer?.esContribuyente && (
+            {props.customer?.esContribuyente === 1 && (
               <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="card-bulleted"
@@ -159,12 +156,12 @@ export const DetailsCustomerNormal = (props: Props) => {
                   style={stylesGlobals.iconsStyles}
                 />
                 <Text style={stylesGlobals.textIconStyle}>
-                  {`NRC: ${customer?.nrc}`}
+                  {`NRC: ${props.customer?.nrc}`}
                 </Text>
               </View>
             )}
 
-            {customer?.esContribuyente && (
+            {props.customer?.esContribuyente === 1 && (
               <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="book-open"
@@ -173,11 +170,11 @@ export const DetailsCustomerNormal = (props: Props) => {
                   style={stylesGlobals.iconsStyles}
                 />
                 <Text style={stylesGlobals.textIconStyle}>
-                  {customer?.descActividad}
+                  {props.customer?.descActividad}
                 </Text>
               </View>
             )}
-            {customer?.esContribuyente && (
+            {props.customer?.esContribuyente === 1 && (
               <View style={stylesGlobals.viewInMaterial}>
                 <MaterialCommunityIcons
                   name="checkbox-marked"
@@ -186,7 +183,7 @@ export const DetailsCustomerNormal = (props: Props) => {
                   style={stylesGlobals.iconsStyles}
                 />
                 <Text style={stylesGlobals.textIconStyle}>
-                  {customer?.tipoContribuyente}
+                  {props.customer?.tipoContribuyente}
                 </Text>
               </View>
             )}
@@ -199,7 +196,7 @@ export const DetailsCustomerNormal = (props: Props) => {
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer?.direccion.nombreDepartamento}
+                {props.customer_direction?.nombreDepartamento}
               </Text>
             </View>
             <View style={stylesGlobals.viewInMaterial}>
@@ -210,7 +207,7 @@ export const DetailsCustomerNormal = (props: Props) => {
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer?.direccion.nombreMunicipio}
+                {props.customer_direction?.nombreMunicipio}
               </Text>
             </View>
             <View style={{ ...stylesGlobals.viewInMaterial, marginBottom: 30 }}>
@@ -221,7 +218,7 @@ export const DetailsCustomerNormal = (props: Props) => {
                 style={stylesGlobals.iconsStyles}
               />
               <Text style={stylesGlobals.textIconStyle}>
-                {customer?.direccion.complemento}
+                {props.customer_direction?.complemento}
               </Text>
             </View>
           </ScrollView>

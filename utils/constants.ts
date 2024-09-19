@@ -17,7 +17,7 @@ export const SPACES_BUCKET = 'facturacion-seed-code';
 
 export const defaultTheme = {
   name: "theme1",
-  context: "dark",
+  context: "dark", 
   colors: {
     danger: "#e63946",
     primary: "#f1faee",

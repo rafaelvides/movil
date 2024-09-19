@@ -406,7 +406,7 @@ const customer = () => {
             title={`¿Estas seguro que deseas eliminar este registro? * [${nameCustomer}] *`}
           />
 
-          <Modal visible={showDetailNormal} animationType="slide">
+          <Modal visible={showDetailNormal} >
             <DetailsCustomerNormal
               closeModal={() => {
                 clearClose();
