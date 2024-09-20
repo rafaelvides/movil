@@ -4,10 +4,10 @@ export interface InvalidationType {
   valores: string;
 }
 export interface Invalidation {
-  nameResponsible: string
-  nameApplicant: string
-  docNumberResponsible: string
-  docNumberApplicant: string
-  typeDocResponsible: string
-  typeDocApplicant: string
+  nameResponsible: string;
+  nameApplicant: string;
+  docNumberResponsible: string;
+  docNumberApplicant: string;
+  typeDocResponsible: string;
+  typeDocApplicant: string;
 }

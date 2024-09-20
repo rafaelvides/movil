@@ -82,8 +82,6 @@ const Invalidations = (props: Props) => {
 
   const [valueTypeDocument, setValueTypeDocument] =
     useState<ICat022TipoDeDocumentoDeIde>();
-  const [valueTypeDocumentApplicant, setValueTypeDocumentApplicant] =
-    useState<ICat022TipoDeDocumentoDeIde>();
   const [generationCodeR, setGenerationCodeR] = useState("");
   const [valueReasonInvalidation, setValueReasonInvalidation] =
     useState<InvalidationType>();
@@ -193,7 +191,7 @@ const Invalidations = (props: Props) => {
           tipoDte: json_sale!.identificacion.tipoDte,
           codigoGeneracion: json_sale!.identificacion.codigoGeneracion,
           codigoGeneracionR: [1, 3].includes(selectedMotivo)
-            ? generationCodeR
+            ? generationCodeR || null
             : null,
           selloRecibido: json_sale!.respuestaMH.selloRecibido,
           numeroControl: json_sale!.identificacion.numeroControl,
@@ -210,8 +208,8 @@ const Invalidations = (props: Props) => {
           nombre: json_sale!.receptor.nombre,
         },
         motivo: {
-          tipoAnulacion: Number(motivo.codigo),
-          motivoAnulacion: motivo.valores,
+          tipoAnulacion: Number(valueReasonInvalidation?.codigo),
+          motivoAnulacion: valueReasonInvalidation?.valores ?? "",
           nombreResponsable: values.nameResponsible,
           tipDocResponsable: values.typeDocResponsible,
           numDocResponsable: values.docNumberApplicant,
@@ -223,6 +221,7 @@ const Invalidations = (props: Props) => {
     };
 
     firmarDocumentoInvalidacion(generate).then(async (firma) => {
+      console.log(JSON.stringify(generate, null, 2));
       const token_mh = await return_token_mh();
       console.log("Token mh", token_mh);
 
@@ -279,6 +278,9 @@ const Invalidations = (props: Props) => {
             clearTimeout(timeout); // Limpiar el timeout
             // setLoading(false);
             // setCurrentStep(0);
+
+            console.log("Detalles completos del error:", JSON.stringify(error.response.data, null, 2));
+
 
             if (axios.isAxiosError(error) && error.response) {
               const errorMessage =
