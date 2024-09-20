@@ -29,7 +29,7 @@ import {
   Invalidation,
   InvalidationType,
 } from "@/types/dte/sub_interface/invalidation-type.types";
-import { useSaleStore } from "../../../store/sale.store";
+import { useSaleStore } from "../../store/sale.store";
 import { ICat022TipoDeDocumentoDeIde } from "@/types/billing/cat-022-tipo-de-documento-de-ide.types";
 import {
   IInvalidationToMH,
@@ -644,12 +644,6 @@ const Invalidations = (props: Props) => {
                       icon={"account"}
                       placeholder="Juan Perez"
                     />
-                    {/* <TextInput
-                      style={styles.input}
-                      value={values.nameApplicant}
-                      onChange={handleChange("nameApplicant")}
-                      onBlur={handleBlur("nameApplicant")}
-                    /> */}
 
                     <Text style={styles.textInput}>
                       Tipo de documento de identificación

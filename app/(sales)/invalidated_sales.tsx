@@ -19,7 +19,7 @@ import { useFocusEffect } from "expo-router";
 import { useSaleStore } from "../../store/sale.store";
 import { StatusBar } from "expo-status-bar";
 import { ISale } from "@/types/sale/sale.types";
-import Invalidations from "../../components/sales/svf_dte_generate/Invalidations";
+import Invalidations from "../../components/Invalidations/Invalidations";
 import SpinLoading from "@/components/Global/SpinLoading";
 import { get_branch_id, get_configuration } from "@/plugins/async_storage";
 import { generate_json } from "@/plugins/DTE/GeneratePDFGeneral";
