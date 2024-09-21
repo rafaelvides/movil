@@ -58,3 +58,18 @@ export const sending_steps = [
     description: "El proceso esta casi listo",
   },
 ];
+
+export const sending_invalidation = [
+  {
+    label: 'Firmando el documento',
+    description: 'Espere mientras se firma el documento',
+  },
+  {
+    label: 'Validando en hacienda',
+    description: 'Hacienda esta validando el documento',
+  },
+  {
+    label: 'Guardando DTE',
+    description: 'Estamos guardando el documento',
+  },
+];

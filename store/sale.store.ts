@@ -31,36 +31,41 @@ export const useSaleStore = create<SaleStore>((set, get) => ({
   json_sale: undefined,
   is_loading_details: false,
   img_invalidation: null,
+  json_sale_copy: undefined,
   img_logo: null,
   contingence_sales: [],
 
   async GetJsonSale(path) {
-    const url = await getSignedUrl(
-      s3Client,
-      new GetObjectCommand({
-        Bucket: SPACES_BUCKET,
-        Key: path,
-      })
-    );
-    axios
-      .get<SVFC_CF_Firmado>(url, {
-        responseType: "json",
-      })
-      .then(({ data }) => {
-        set({
-          json_sale: {
-            ...data,
-            itemsCopy: data.cuerpoDocumento,
-            indexEdited: [],
-          },
+    set({ is_loading_details: true });
+    try {
+      const url = await getSignedUrl(
+        s3Client,
+        new GetObjectCommand({
+          Bucket: SPACES_BUCKET,
+          Key: path,
+        })
+      );
+      axios
+        .get<SVFC_CF_Firmado>(url, {
+          responseType: 'json',
+        })
+        .then(({ data }) => {
+          set({
+            json_sale: {
+              ...data,
+              itemsCopy: data.cuerpoDocumento,
+              indexEdited: [],
+            },
+            json_sale_copy: { ...data },
+            is_loading_details: false,
+          });
+        })
+        .catch(() => {
+          set({ json_sale: undefined });
         });
-      })
-      .catch(() => {
-        set({
-          json_sale: undefined,
-        });
-        ToastAndroid.show("Error al obtener el json", ToastAndroid.LONG);
-      });
+    } catch (error) {
+      set({ is_loading_details: false });
+    }
   },
   onGetSalesContingence(id) {
     get_sales_in_contingence(id)

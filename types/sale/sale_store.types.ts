@@ -1,5 +1,6 @@
 import { IConfiguration } from "../configuration/configuration.types";
 import { IPagination } from "../GlobalTypes/Global.types";
+import { SVFC_CF_Firmado } from "../svf_dte/cf.types";
 import { IProcessSalesResponse } from "../svf_dte/responseMH/responseMH.types";
 import { ITransmitter } from "../transmitter/transmiter.types";
 import { ISale, ISaleDetails, ISale_JSON_Debito } from "./sale.types";
@@ -13,6 +14,7 @@ export interface SaleStore {
   contingence_sales: ISale[];
   sale_details: ISaleDetails | undefined;
   json_sale: ISale_JSON_Debito | undefined;
+  json_sale_copy: SVFC_CF_Firmado | undefined;
   img_invalidation: string | null;
   img_logo: string | null;
   GetPaginatedSales: (

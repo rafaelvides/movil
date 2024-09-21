@@ -9,6 +9,8 @@ import {
   ToastAndroid,
   View,
   TextInput,
+  ActivityIndicator,
+  Animated,
 } from "react-native";
 import React, {
   Dispatch,
@@ -45,19 +47,15 @@ import {
 } from "@/services/ministry_of_finance.service";
 import { return_token_mh } from "@/plugins/secure_store";
 import axios, { AxiosError } from "axios";
-import { invalidation_of_sales } from "@/services/sale.service";
-import { SendMHFailed } from "@/types/svf_dte/responseMH/responseMH.types";
-import { save_logs } from "@/services/logs.service";
-import { get_find_by_correlative } from "@/services/point_of_sale.service";
 import { SeedcodeCatalogosMhService } from "seedcode-catalogos-mh";
 import { useEmployeeStore } from "@/store/employee.store";
-import { Employee } from "@/offline/entity/employee.entity";
 import { IEmployee } from "@/types/employee/employee.types";
 import Button from "@/components/Global/components_app/Button";
 import Input from "@/components/Global/components_app/Input";
 import { useAuthStore } from "@/store/auth.store";
 import { FC_Receptor } from "@/types/svf_dte/fc.types";
 import { useCorrelativesDteStore } from "@/store/correlatives_dte.store";
+import LoadingInvalidation from "../Global/LoadingInvalidation";
 
 interface Props {
   sale: ISale | undefined;
@@ -72,6 +70,8 @@ const Invalidations = (props: Props) => {
   const [isFocus1, setIsFocus1] = useState(false);
   const [isFocus3, setIsFocus3] = useState(false);
   const [isFocus4, setIsFocus4] = useState(false);
+  const [step, setStep] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const services = new SeedcodeCatalogosMhService();
   const { employee_list, OnGetEmployeesList } = useEmployeeStore();
@@ -94,8 +94,13 @@ const Invalidations = (props: Props) => {
     cat_024_tipos_de_invalidacion,
   } = useBillingStore();
   const { OnGetTransmitter, transmitter } = useTransmitterStore();
-  const { GetSaleDetails, recentSales, json_sale, GetRecentSales } =
-    useSaleStore();
+  const {
+    GetSaleDetails,
+    recentSales,
+    json_sale,
+    GetRecentSales,
+    is_loading_details,
+  } = useSaleStore();
 
   useEffect(() => {
     if (sale) {
@@ -129,6 +134,16 @@ const Invalidations = (props: Props) => {
     OnGetCat024TipoDeLaInvalidacion();
   }, []);
 
+  const progress = new Animated.Value(step);
+
+  useEffect(() => {
+    Animated.timing(progress, {
+      toValue: step,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  }, [step]);
+
   const handleAnnulation = async (values: Invalidation) => {
     console.log(values);
     if (selectedMotivo !== 2 && generationCodeR !== "") {
@@ -158,9 +173,7 @@ const Invalidations = (props: Props) => {
       });
 
     ToastAndroid.show(
-      "Se completó la anulación: " +
-        correlatives?.typeVoucher +
-        values.nameApplicant,
+      "Enviando anulación al ministerio de hacienda",
       ToastAndroid.LONG
     );
 
@@ -171,7 +184,7 @@ const Invalidations = (props: Props) => {
       passwordPri: transmitter.clavePrivada,
       dteJson: {
         identificacion: {
-          version: 2,
+          version: version,
           ambiente: ambiente,
           codigoGeneracion: generate_uuid().toUpperCase(),
           fecAnula: getElSalvadorDateTime().fecEmi,
@@ -219,9 +232,11 @@ const Invalidations = (props: Props) => {
         },
       },
     };
-
+    setLoading(true);
     firmarDocumentoInvalidacion(generate).then(async (firma) => {
+      setStep(1);
       console.log(JSON.stringify(generate, null, 2));
+
       const token_mh = await return_token_mh();
       console.log("Token mh", token_mh);
 
@@ -231,15 +246,10 @@ const Invalidations = (props: Props) => {
           source.cancel("El tiempo de espera ha expirado");
         }, 25000);
 
-        ToastAndroid.show(
-          "Enviando anulación al Ministerio de Hacienda...",
-          ToastAndroid.LONG
-        );
-
         send_to_mh_invalidation(
           {
             ambiente,
-            version: 2,
+            version: version,
             idEnvio: 1,
             documento: firma.data.body,
           },
@@ -247,11 +257,8 @@ const Invalidations = (props: Props) => {
           source
         )
           .then((res) => {
-            // Actualizar la nota de crédito en tu sistema
-            ToastAndroid.show(
-              "Actualizando nota de crédito...",
-              ToastAndroid.LONG
-            );
+            setStep(2);
+            clearTimeout(timeout);
 
             axios
               .patch(API_URL + `/sales/invalidate/${sale?.id}`, {
@@ -262,10 +269,9 @@ const Invalidations = (props: Props) => {
                   "Invalidado correctamente",
                   ToastAndroid.LONG
                 );
-                // Acciones adicionales después de la anulación
-                // setLoading(false);
-                // setCurrentStep(0);
-                // navigation.goBack();
+                setLoading(false);
+                setStep(0);
+                setModal(false);
               })
               .catch(() => {
                 ToastAndroid.show(
@@ -275,18 +281,22 @@ const Invalidations = (props: Props) => {
               });
           })
           .catch((error) => {
-            clearTimeout(timeout); // Limpiar el timeout
-            // setLoading(false);
-            // setCurrentStep(0);
+            clearTimeout(timeout);
+            setLoading(false);
+            setStep(0);
 
-            console.log("Detalles completos del error:", JSON.stringify(error.response.data, null, 2));
-
+            console.log(
+              "Detalles completos del error:",
+              JSON.stringify(error.response.data, null, 2)
+            );
 
             if (axios.isAxiosError(error) && error.response) {
               const errorMessage =
                 error.response.data.observaciones?.length > 0
                   ? error.response.data.observaciones.join("\n\n")
                   : "Error desconocido";
+              setLoading(false);
+              setStep(0);
 
               ToastAndroid.show(
                 error.response.data.descripcionMsg ??
@@ -294,6 +304,8 @@ const Invalidations = (props: Props) => {
                 ToastAndroid.LONG
               );
             } else {
+              setLoading(false);
+              setStep(0);
               ToastAndroid.show(
                 "Fallo al enviar la anulación al Ministerio de Hacienda",
                 ToastAndroid.LONG
@@ -308,141 +320,95 @@ const Invalidations = (props: Props) => {
     <>
       <StatusBar style="dark" />
       <KeyboardAvoidingView style={styles.container} behavior="height">
-        <>
-          <Pressable
-            style={{
-              position: "absolute",
-              right: 10,
-              top: 10,
-              marginBottom: 40,
-            }}
-          >
-            <MaterialCommunityIcons
-              name="close"
-              size={30}
-              onPress={() => {
-                setModal(false);
-              }}
-            />
-          </Pressable>
-
+        {is_loading_details && (
           <View
-            style={{
-              width: "100%",
-              display: "flex",
-              marginTop: 5,
-            }}
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
-            <Text style={styles.textInput}>
-              Fecha de emisión {json_sale?.identificacion.fecEmi}
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: "#EF4444",
-                  fontWeight: "bold",
-                }}
-              >
-                *
-              </Text>
-            </Text>
-
-            <Text style={styles.textInput}>
-              Hora emisión {json_sale?.identificacion.horEmi}
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: "#EF4444",
-                  fontWeight: "bold",
-                }}
-              >
-                *
-              </Text>
-            </Text>
-
-            <Text style={styles.textInput}>
-              Código de generación {json_sale?.identificacion.codigoGeneracion}
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: "#EF4444",
-                  fontWeight: "bold",
-                }}
-              >
-                *
-              </Text>
-            </Text>
-
-            <Text style={styles.textInput}>
-              Numero de control {json_sale?.identificacion.numeroControl}
-              <Text
-                style={{
-                  fontSize: 18,
-                  color: "#EF4444",
-                  fontWeight: "bold",
-                }}
-              >
-                *
-              </Text>
-            </Text>
+            <ActivityIndicator size="large" color="#16a34a" />
           </View>
+        )}
+        {loading && <LoadingInvalidation step={step} />}
 
-          <View
-            style={{
-              width: "100%",
-              display: "flex",
-              marginTop: 10,
-            }}
-          >
-            <Text style={styles.textInput}>Motivo de la invalidación</Text>
-            <SafeAreaView
+        {!is_loading_details && json_sale && !loading && (
+          <>
+            <Pressable
               style={{
-                width: "100%",
-                borderWidth: 1,
-                borderColor: "#D1D5DB",
-                borderRadius: 15,
-                padding: 12,
+                position: "absolute",
+                right: 10,
+                top: 10,
+                marginBottom: 40,
               }}
             >
-              <Dropdown
-                style={[isFocus3 && { borderColor: "blue" }]}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                inputSearchStyle={styles.inputSearchStyle}
-                iconStyle={styles.iconStyle}
-                data={cat_024_tipos_de_invalidacion}
-                search
-                maxHeight={220}
-                labelField="valores"
-                valueField="id"
-                placeholder={!isFocus3 ? "Selecciona un item " : "..."}
-                searchPlaceholder="Escribe para..."
-                value={valueReasonInvalidation}
-                onFocus={() => setIsFocus3(true)}
-                onBlur={() => setIsFocus3(false)}
-                onChange={(item) => {
-                  setIsFocus3(false);
-                  setValueReasonInvalidation(item);
-                  let event = {
-                    target: {
-                      name: "reasonInvalidation",
-                      value: item.id,
-                    },
-                  };
-                  // handleChange(event);
+              <MaterialCommunityIcons
+                name="close"
+                size={30}
+                onPress={() => {
+                  setModal(false);
                 }}
-                renderLeftIcon={() => (
-                  <AntDesign
-                    style={styles.icon}
-                    color={isFocus3 ? "blue" : "black"}
-                    name="Safety"
-                    size={20}
-                  />
-                )}
               />
-            </SafeAreaView>
-          </View>
+            </Pressable>
 
-          {valueReasonInvalidation?.codigo !== "2" && (
+            <View
+              style={{
+                width: "100%",
+                display: "flex",
+                marginTop: 5,
+              }}
+            >
+              <Text style={styles.textInput}>
+                Fecha de emisión {json_sale?.identificacion.fecEmi}
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "#EF4444",
+                    fontWeight: "bold",
+                  }}
+                >
+                  *
+                </Text>
+              </Text>
+
+              <Text style={styles.textInput}>
+                Hora emisión {json_sale?.identificacion.horEmi}
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "#EF4444",
+                    fontWeight: "bold",
+                  }}
+                >
+                  *
+                </Text>
+              </Text>
+
+              <Text style={styles.textInput}>
+                Código de generación{" "}
+                {json_sale?.identificacion.codigoGeneracion}
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "#EF4444",
+                    fontWeight: "bold",
+                  }}
+                >
+                  *
+                </Text>
+              </Text>
+
+              <Text style={styles.textInput}>
+                Numero de control {json_sale?.identificacion.numeroControl}
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: "#EF4444",
+                    fontWeight: "bold",
+                  }}
+                >
+                  *
+                </Text>
+              </Text>
+            </View>
+
             <View
               style={{
                 width: "100%",
@@ -450,7 +416,7 @@ const Invalidations = (props: Props) => {
                 marginTop: 10,
               }}
             >
-              <Text style={styles.textInput}>Ventas recientes</Text>
+              <Text style={styles.textInput}>Motivo de la invalidación</Text>
               <SafeAreaView
                 style={{
                   width: "100%",
@@ -461,24 +427,24 @@ const Invalidations = (props: Props) => {
                 }}
               >
                 <Dropdown
-                  style={[isFocus4 && { borderColor: "blue" }]}
+                  style={[isFocus3 && { borderColor: "blue" }]}
                   placeholderStyle={styles.placeholderStyle}
                   selectedTextStyle={styles.selectedTextStyle}
                   inputSearchStyle={styles.inputSearchStyle}
                   iconStyle={styles.iconStyle}
-                  data={recentSales}
+                  data={cat_024_tipos_de_invalidacion}
                   search
-                  maxHeight={200}
-                  labelField="numeroControl"
+                  maxHeight={220}
+                  labelField="valores"
                   valueField="id"
-                  placeholder={!isFocus4 ? "Selecciona un item " : "..."}
+                  placeholder={!isFocus3 ? "Selecciona un item " : "..."}
                   searchPlaceholder="Escribe para..."
-                  value={generationCodeR}
-                  onFocus={() => setIsFocus4(true)}
-                  onBlur={() => setIsFocus4(false)}
+                  value={valueReasonInvalidation}
+                  onFocus={() => setIsFocus3(true)}
+                  onBlur={() => setIsFocus3(false)}
                   onChange={(item) => {
-                    setIsFocus4(false);
-                    setGenerationCodeR(item.codigoGeneracion);
+                    setIsFocus3(false);
+                    setValueReasonInvalidation(item);
                     let event = {
                       target: {
                         name: "reasonInvalidation",
@@ -490,7 +456,7 @@ const Invalidations = (props: Props) => {
                   renderLeftIcon={() => (
                     <AntDesign
                       style={styles.icon}
-                      color={isFocus4 ? "blue" : "black"}
+                      color={isFocus3 ? "blue" : "black"}
                       name="Safety"
                       size={20}
                     />
@@ -498,227 +464,291 @@ const Invalidations = (props: Props) => {
                 />
               </SafeAreaView>
             </View>
-          )}
 
-          <Formik
-            onSubmit={handleAnnulation}
-            // validationSchema={validationsSchema}
-            initialValues={{
-              nameResponsible: "",
-              nameApplicant: "",
-              docNumberResponsible: "",
-              docNumberApplicant: "",
-              typeDocResponsible: "",
-              typeDocApplicant: "",
-            }}
-          >
-            {({
-              handleChange,
-              handleBlur,
-              handleSubmit,
-              values,
-              errors,
-              touched,
-            }) => (
-              <ScrollView style={{ width: "100%", flex: 1, marginTop: 10 }}>
-                <View
+            {valueReasonInvalidation?.codigo !== "2" && (
+              <View
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  marginTop: 10,
+                }}
+              >
+                <Text style={styles.textInput}>Ventas recientes</Text>
+                <SafeAreaView
                   style={{
                     width: "100%",
-                    display: "flex",
-                    marginTop: 5,
-                    marginBottom: 15,
+                    borderWidth: 1,
+                    borderColor: "#D1D5DB",
+                    borderRadius: 15,
+                    padding: 12,
                   }}
                 >
-                  <Text style={{ marginTop: 10, fontWeight: "bold" }}>
-                    Responsable
-                  </Text>
-
-                  <View
-                    style={{
-                      width: "100%",
-                      borderWidth: 1,
-                      borderColor: "#D1D5DB",
-                      borderRadius: 15,
-                      padding: 12,
+                  <Dropdown
+                    style={[isFocus4 && { borderColor: "blue" }]}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    inputSearchStyle={styles.inputSearchStyle}
+                    iconStyle={styles.iconStyle}
+                    data={recentSales}
+                    search
+                    maxHeight={200}
+                    labelField="numeroControl"
+                    valueField="id"
+                    placeholder={!isFocus4 ? "Selecciona un item " : "..."}
+                    searchPlaceholder="Escribe para..."
+                    value={generationCodeR}
+                    onFocus={() => setIsFocus4(true)}
+                    onBlur={() => setIsFocus4(false)}
+                    onChange={(item) => {
+                      setIsFocus4(false);
+                      setGenerationCodeR(item.codigoGeneracion);
+                      let event = {
+                        target: {
+                          name: "reasonInvalidation",
+                          value: item.id,
+                        },
+                      };
+                      // handleChange(event);
                     }}
-                  >
-                    <Text style={styles.textInput}>Nombre</Text>
-                    <SafeAreaView
-                      style={{
-                        width: "100%",
-                        borderWidth: 1,
-                        borderColor: "#D1D5DB",
-                        borderRadius: 15,
-                        padding: 12,
-                      }}
-                    >
-                      <Dropdown
-                        style={[isFocus1 && { borderColor: "blue" }]}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        inputSearchStyle={styles.inputSearchStyle}
-                        iconStyle={styles.iconStyle}
-                        data={employee_list}
-                        itemTextStyle={{
-                          fontSize: 16,
-                        }}
-                        search
-                        maxHeight={250}
-                        labelField="fullName"
-                        valueField="id"
-                        placeholder={!isFocus1 ? "Selecciona un item " : "..."}
-                        searchPlaceholder="Escribe para buscar..."
-                        value={employee}
-                        onFocus={() => setIsFocus1(true)}
-                        onBlur={() => setIsFocus1(false)}
-                        onChange={(item) => {
-                          if (!item) {
-                            setDocResponsible("");
-                            setTypeDocResponsible("");
-                          } else {
-                            setDocResponsible(item.numDocument);
-                            setTypeDocResponsible(item.typeDocument);
-                            handleChange("nameResponsible")(item.fullName);
-                            handleChange("docNumberResponsible")(
-                              item.numDocument
-                            );
-                            handleChange("typeDocResponsible")(
-                              item.typeDocument
-                            );
-                          }
-                        }}
-                        renderLeftIcon={() => (
-                          <AntDesign
-                            style={styles.icon}
-                            color={isFocus1 ? "blue" : "black"}
-                            name="Safety"
-                            size={20}
-                          />
-                        )}
+                    renderLeftIcon={() => (
+                      <AntDesign
+                        style={styles.icon}
+                        color={isFocus4 ? "blue" : "black"}
+                        name="Safety"
+                        size={20}
                       />
-                    </SafeAreaView>
-                    {errors.typeDocResponsible &&
-                      touched.typeDocResponsible && (
-                        <Text style={{ color: "red", marginTop: 5 }}>
-                          {errors.typeDocResponsible}
-                        </Text>
-                      )}
-
-                    <Text style={styles.textInput}>Tipo de documento</Text>
-                    <Input
-                      values={
-                        services
-                          .get022TipoDeDocumentoDeIde()
-                          .find((doc) => doc.codigo === typeDocResponsible)
-                          ?.valores
-                      }
-                      icon="card-account-details-outline"
-                    />
-
-                    <Text style={styles.textInput}>Numero de documento</Text>
-                    <Input
-                      placeholder=""
-                      values={docResponsible}
-                      icon="card-bulleted-outline"
-                    />
-                  </View>
-
-                  <Text style={{ marginTop: 10, fontWeight: "bold" }}>
-                    Solicitante
-                  </Text>
-
-                  <View
-                    style={{
-                      width: "100%",
-                      borderWidth: 1,
-                      borderColor: "#D1D5DB",
-                      borderRadius: 15,
-                      padding: 12,
-                    }}
-                  >
-                    <Text style={styles.textInput}>Nombre de solicitante</Text>
-                    <Input
-                      handleBlur={handleBlur("nameApplicant")}
-                      onChangeText={handleChange("nameApplicant")}
-                      values={values.nameApplicant}
-                      icon={"account"}
-                      placeholder="Juan Perez"
-                    />
-
-                    <Text style={styles.textInput}>
-                      Tipo de documento de identificación
-                    </Text>
-                    <SafeAreaView
-                      style={{
-                        width: "100%",
-                        borderWidth: 1,
-                        borderColor: "#D1D5DB",
-                        borderRadius: 15,
-                        padding: 12,
-                      }}
-                    >
-                      <Dropdown
-                        style={[isFocus1 && { borderColor: "blue" }]}
-                        placeholderStyle={styles.placeholderStyle}
-                        selectedTextStyle={styles.selectedTextStyle}
-                        inputSearchStyle={styles.inputSearchStyle}
-                        iconStyle={styles.iconStyle}
-                        data={cat_022_tipo_de_documento_de_ide}
-                        search
-                        maxHeight={200}
-                        labelField="valores"
-                        valueField="id"
-                        placeholder={!isFocus1 ? "Selecciona un item " : "..."}
-                        searchPlaceholder="Escribe para..."
-                        value={valueTypeDocument}
-                        onFocus={() => setIsFocus1(true)}
-                        onBlur={() => setIsFocus1(false)}
-                        onChange={(item) => {
-                          setIsFocus1(false);
-                          setValueTypeDocument(item);
-                          handleChange("typeDocApplicant");
-                          handleChange("typeDocApplicant")(item.codigo);
-                        }}
-                        renderLeftIcon={() => (
-                          <AntDesign
-                            style={styles.icon}
-                            color={isFocus1 ? "blue" : "black"}
-                            name="Safety"
-                            size={20}
-                          />
-                        )}
-                      />
-                    </SafeAreaView>
-
-                    <Text style={styles.textInput}>Numero de documento</Text>
-                    <Input
-                      handleBlur={handleBlur("docNumberApplicant")}
-                      onChangeText={handleChange("docNumberApplicant")}
-                      values={values.docNumberApplicant}
-                      icon={"account"}
-                      placeholder="0000000"
-                    />
-                  </View>
-                </View>
-
-                <View
-                  style={{
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 36,
-                  }}
-                >
-                  <Button
-                    withB={390}
-                    onPress={() => handleSubmit()}
-                    Title="Invalidar"
-                    // color={theme.colors.dark}
+                    )}
                   />
-                </View>
-              </ScrollView>
+                </SafeAreaView>
+              </View>
             )}
-          </Formik>
-        </>
+
+            <Formik
+              onSubmit={handleAnnulation}
+              // validationSchema={validationsSchema}
+              initialValues={{
+                nameResponsible: "",
+                nameApplicant: "",
+                docNumberResponsible: "",
+                docNumberApplicant: "",
+                typeDocResponsible: "",
+                typeDocApplicant: "",
+              }}
+            >
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                errors,
+                touched,
+              }) => (
+                <ScrollView style={{ width: "100%", flex: 1, marginTop: 10 }}>
+                  <View
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      marginTop: 5,
+                      marginBottom: 15,
+                    }}
+                  >
+                    <Text style={{ marginTop: 10, fontWeight: "bold" }}>
+                      Responsable
+                    </Text>
+
+                    <View
+                      style={{
+                        width: "100%",
+                        borderWidth: 1,
+                        borderColor: "#D1D5DB",
+                        borderRadius: 15,
+                        padding: 12,
+                      }}
+                    >
+                      <Text style={styles.textInput}>Nombre</Text>
+                      <SafeAreaView
+                        style={{
+                          width: "100%",
+                          borderWidth: 1,
+                          borderColor: "#D1D5DB",
+                          borderRadius: 15,
+                          padding: 12,
+                        }}
+                      >
+                        <Dropdown
+                          style={[isFocus1 && { borderColor: "blue" }]}
+                          placeholderStyle={styles.placeholderStyle}
+                          selectedTextStyle={styles.selectedTextStyle}
+                          inputSearchStyle={styles.inputSearchStyle}
+                          iconStyle={styles.iconStyle}
+                          data={employee_list}
+                          itemTextStyle={{
+                            fontSize: 16,
+                          }}
+                          search
+                          maxHeight={250}
+                          labelField="fullName"
+                          valueField="id"
+                          placeholder={
+                            !isFocus1 ? "Selecciona un item " : "..."
+                          }
+                          searchPlaceholder="Escribe para buscar..."
+                          value={employee}
+                          onFocus={() => setIsFocus1(true)}
+                          onBlur={() => setIsFocus1(false)}
+                          onChange={(item) => {
+                            if (!item) {
+                              setDocResponsible("");
+                              setTypeDocResponsible("");
+                            } else {
+                              setDocResponsible(item.numDocument);
+                              setTypeDocResponsible(item.typeDocument);
+                              handleChange("nameResponsible")(item.fullName);
+                              handleChange("docNumberResponsible")(
+                                item.numDocument
+                              );
+                              handleChange("typeDocResponsible")(
+                                item.typeDocument
+                              );
+                            }
+                          }}
+                          renderLeftIcon={() => (
+                            <AntDesign
+                              style={styles.icon}
+                              color={isFocus1 ? "blue" : "black"}
+                              name="Safety"
+                              size={20}
+                            />
+                          )}
+                        />
+                      </SafeAreaView>
+                      {errors.typeDocResponsible &&
+                        touched.typeDocResponsible && (
+                          <Text style={{ color: "red", marginTop: 5 }}>
+                            {errors.typeDocResponsible}
+                          </Text>
+                        )}
+
+                      <Text style={styles.textInput}>Tipo de documento</Text>
+                      <Input
+                        values={
+                          services
+                            .get022TipoDeDocumentoDeIde()
+                            .find((doc) => doc.codigo === typeDocResponsible)
+                            ?.valores
+                        }
+                        icon="card-account-details-outline"
+                      />
+
+                      <Text style={styles.textInput}>Numero de documento</Text>
+                      <Input
+                        placeholder=""
+                        values={docResponsible}
+                        icon="card-bulleted-outline"
+                      />
+                    </View>
+
+                    <Text style={{ marginTop: 10, fontWeight: "bold" }}>
+                      Solicitante
+                    </Text>
+
+                    <View
+                      style={{
+                        width: "100%",
+                        borderWidth: 1,
+                        borderColor: "#D1D5DB",
+                        borderRadius: 15,
+                        padding: 12,
+                      }}
+                    >
+                      <Text style={styles.textInput}>
+                        Nombre de solicitante
+                      </Text>
+                      <Input
+                        handleBlur={handleBlur("nameApplicant")}
+                        onChangeText={handleChange("nameApplicant")}
+                        values={values.nameApplicant}
+                        icon={"account"}
+                        placeholder="Juan Perez"
+                      />
+
+                      <Text style={styles.textInput}>
+                        Tipo de documento de identificación
+                      </Text>
+                      <SafeAreaView
+                        style={{
+                          width: "100%",
+                          borderWidth: 1,
+                          borderColor: "#D1D5DB",
+                          borderRadius: 15,
+                          padding: 12,
+                        }}
+                      >
+                        <Dropdown
+                          style={[isFocus1 && { borderColor: "blue" }]}
+                          placeholderStyle={styles.placeholderStyle}
+                          selectedTextStyle={styles.selectedTextStyle}
+                          inputSearchStyle={styles.inputSearchStyle}
+                          iconStyle={styles.iconStyle}
+                          data={cat_022_tipo_de_documento_de_ide}
+                          search
+                          maxHeight={200}
+                          labelField="valores"
+                          valueField="id"
+                          placeholder={
+                            !isFocus1 ? "Selecciona un item " : "..."
+                          }
+                          searchPlaceholder="Escribe para..."
+                          value={valueTypeDocument}
+                          onFocus={() => setIsFocus1(true)}
+                          onBlur={() => setIsFocus1(false)}
+                          onChange={(item) => {
+                            setIsFocus1(false);
+                            setValueTypeDocument(item);
+                            handleChange("typeDocApplicant");
+                            handleChange("typeDocApplicant")(item.codigo);
+                          }}
+                          renderLeftIcon={() => (
+                            <AntDesign
+                              style={styles.icon}
+                              color={isFocus1 ? "blue" : "black"}
+                              name="Safety"
+                              size={20}
+                            />
+                          )}
+                        />
+                      </SafeAreaView>
+
+                      <Text style={styles.textInput}>Numero de documento</Text>
+                      <Input
+                        handleBlur={handleBlur("docNumberApplicant")}
+                        onChangeText={handleChange("docNumberApplicant")}
+                        values={values.docNumberApplicant}
+                        icon={"account"}
+                        placeholder="0000000"
+                      />
+                    </View>
+                  </View>
+
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginBottom: 36,
+                    }}
+                  >
+                    <Button
+                      withB={390}
+                      onPress={() => handleSubmit()}
+                      Title="Invalidar"
+                      // color={theme.colors.dark}
+                    />
+                  </View>
+                </ScrollView>
+              )}
+            </Formik>
+          </>
+        )}
       </KeyboardAvoidingView>
     </>
   );
